@@ -1,0 +1,16 @@
+{
+  "name": "pyxis",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build:ws": "pnpm --filter 'ws' build",
+    "watch:ws": "pnpm --filter 'ws' build:w",
+    "build:client": "pnpm --filter 'client' build",
+    "start:client": "pnpm --filter 'client' dev",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
