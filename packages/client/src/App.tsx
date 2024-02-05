@@ -1,12 +1,12 @@
 import "./App.css";
-import { useCallback, useEffect, useState, useReducer } from "react";
-import { Loro } from "loro-crdt";
+import { useCallback, useEffect, useState, useReducer, ChangeEventHandler } from "react";
+import { Loro, LoroText } from "loro-crdt";
 import { getStepsForTransformation } from "string-differ";
 
 function App() {
-  const [socket, setSocket] = useState();
-  const [loroText, setLoroText] = useState();
-  const [loroDoc, setLoroDoc] = useState();
+  const [socket, setSocket] = useState<WebSocket>();
+  const [loroText, setLoroText] = useState<LoroText>();
+  const [loroDoc, setLoroDoc] = useState<Loro>();
   const [_, forceUpdate] = useReducer((x) => x + 1, 0);
   const [online, setOnline] = useState(true);
 
@@ -15,7 +15,7 @@ function App() {
     socket.binaryType = "arraybuffer";
     socket.addEventListener("message", async (event) => {
       const remoteDoc = new Uint8Array(event.data);
-      loroDoc.import(remoteDoc);
+      loroDoc?.import(remoteDoc);
       forceUpdate();
     });
 
@@ -39,7 +39,7 @@ function App() {
     setLoroText(loroText);
     setLoroDoc(doc);
 
-    return async () => {
+    return () => {
       // Sync before unmount
     };
   }, []);
@@ -47,27 +47,27 @@ function App() {
   useEffect(() => {
     if (online && loroDoc) {
       const snapshot = loroDoc.exportFrom();
-      socket.send(snapshot);
+      socket?.send(snapshot);
     }
   }, [online, loroDoc]);
 
-  const onEdit = useCallback(
+  const onEdit: ChangeEventHandler<HTMLTextAreaElement> = useCallback(
     (event) => {
       const diff = getStepsForTransformation("Range", {
-        s1: loroText.toString() ?? "",
+        s1: loroText?.toString() ?? "",
         s2: event.currentTarget.value,
       });
       let positionCounter = 0;
       diff.forEach((step) => {
         switch (step.type) {
           case "insert": {
-            loroText.insert(positionCounter, step.value);
+            loroText?.insert(positionCounter, step.value);
             positionCounter += 1;
             break;
           }
           case "delete": {
             const length = step.endIndex - step.startIndex + 1;
-            loroText.delete(positionCounter, length);
+            loroText?.delete(positionCounter, length);
             positionCounter += length;
             break;
           }
@@ -85,8 +85,8 @@ function App() {
       forceUpdate();
 
       if (online) {
-        const snapshot = loroDoc.exportFrom();
-        socket.send(snapshot);
+        const snapshot = loroDoc?.exportFrom() ?? new Uint8Array();
+        socket?.send(snapshot);
       }
     },
     [socket, loroDoc, loroText, online]
