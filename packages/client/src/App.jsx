@@ -7,12 +7,12 @@ function App() {
   const [socket, setSocket] = useState();
   const [loroText, setLoroText] = useState();
   const [loroDoc, setLoroDoc] = useState();
-  const [_, forceUpdate] = useReducer(x => x + 1, 0);
-  const [ online, setOnline ] = useState(true);
+  const [_, forceUpdate] = useReducer((x) => x + 1, 0);
+  const [online, setOnline] = useState(true);
 
   useEffect(() => {
     const socket = new WebSocket("ws://localhost:8080");
-    socket.binaryType = 'arraybuffer';
+    socket.binaryType = "arraybuffer";
     socket.addEventListener("message", async (event) => {
       const remoteDoc = new Uint8Array(event.data);
       loroDoc.import(remoteDoc);
@@ -95,10 +95,17 @@ function App() {
   return (
     <>
       <div>
-        <textarea rows={20} cols={150} onChange={onEdit} value={loroText?.toString() ?? ""} />
+        <textarea
+          rows={20}
+          cols={150}
+          onChange={onEdit}
+          value={loroText?.toString() ?? ""}
+        />
       </div>
       <div>
-        <button onClick={() => setOnline(online => !online)}>{online ? 'Go Offline' : 'Go Online'}</button>
+        <button onClick={() => setOnline((online) => !online)}>
+          {online ? "Go Offline" : "Go Online"}
+        </button>
       </div>
     </>
   );

@@ -8,7 +8,6 @@ import { WebSocket, WebSocketServer } from "ws";
   server.on("connection", (ws: WebSocket, req) => {
     console.log("New connection: ", req.socket.remoteAddress);
     ws.on("message", (message) => {
-
       // Broadcast to everyone but itself
       server.clients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN && client !== ws) {
@@ -17,7 +16,7 @@ import { WebSocket, WebSocketServer } from "ws";
       });
     });
 
-    ws.on('close', () => {
+    ws.on("close", () => {
       console.log("Connection closed");
     });
 
