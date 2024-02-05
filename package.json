@@ -6,8 +6,10 @@
   "scripts": {
     "build:ws": "pnpm --filter 'ws' build",
     "watch:ws": "pnpm --filter 'ws' build:w",
+    "start:ws": "pnpm --filter 'ws' start",
     "build:client": "pnpm --filter 'client' build",
-    "start:client": "pnpm --filter 'client' dev",
+    "watch:client": "pnpm --filter 'client' dev",
+    "watch:app": "pnpm --filter 'app' dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
