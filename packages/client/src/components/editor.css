@@ -1,0 +1,23 @@
+
+#editor {
+    height: 60vh;
+    width: 50vw;
+    background-color: rgb(190, 190, 190);
+    color: black;
+    border: 2px solid black;
+    border-radius: 20px;
+    text-align: left;
+    padding: 20px;
+    overflow: auto;
+  }
+  
+  #editor:focus {
+    outline: none;
+  }
+  
+  .hiddenEditor {
+    opacity: 0;
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
