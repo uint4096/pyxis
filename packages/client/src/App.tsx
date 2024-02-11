@@ -1,30 +1,31 @@
 import "./App.css";
-import { useCallback, useEffect, useState, useReducer, ChangeEventHandler } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+  useReducer,
+  ChangeEventHandler,
+} from "react";
 import { Loro, LoroText } from "loro-crdt";
 import { getStepsForTransformation } from "string-differ";
+import { useWebsockets } from "./hooks/useWebsockets";
 
 function App() {
-  const [socket, setSocket] = useState<WebSocket>();
   const [loroText, setLoroText] = useState<LoroText>();
   const [loroDoc, setLoroDoc] = useState<Loro>();
   const [_, forceUpdate] = useReducer((x) => x + 1, 0);
   const [online, setOnline] = useState(true);
 
-  useEffect(() => {
-    const socket = new WebSocket("ws://localhost:8080");
-    socket.binaryType = "arraybuffer";
-    socket.addEventListener("message", async (event) => {
-      const remoteDoc = new Uint8Array(event.data);
+  const onMessage = useCallback(
+    (message: ArrayBufferLike) => {
+      const remoteDoc = new Uint8Array(message);
       loroDoc?.import(remoteDoc);
       forceUpdate();
-    });
+    },
+    [loroDoc]
+  );
 
-    setSocket(socket);
-
-    return () => {
-      socket.close();
-    };
-  }, [loroDoc]);
+  const { sendMessage } = useWebsockets({ onMessage });
 
   useEffect(() => {
     if (loroDoc) {
@@ -47,7 +48,7 @@ function App() {
   useEffect(() => {
     if (online && loroDoc) {
       const snapshot = loroDoc.exportFrom();
-      socket?.send(snapshot);
+      sendMessage(snapshot);
     }
   }, [online, loroDoc]);
 
@@ -86,10 +87,10 @@ function App() {
 
       if (online) {
         const snapshot = loroDoc?.exportFrom() ?? new Uint8Array();
-        socket?.send(snapshot);
+        sendMessage(snapshot);
       }
     },
-    [socket, loroDoc, loroText, online]
+    [loroDoc, loroText, online]
   );
 
   return (
