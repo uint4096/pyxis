@@ -9,6 +9,7 @@ import {
 import { Loro, LoroText } from "loro-crdt";
 import { getStepsForTransformation } from "string-differ";
 import { useWebsockets } from "./hooks/useWebsockets";
+import Editor from "./components/editor/editor";
 
 function App() {
   const [loroText, setLoroText] = useState<LoroText>();
@@ -95,14 +96,7 @@ function App() {
 
   return (
     <>
-      <div>
-        <textarea
-          rows={20}
-          cols={150}
-          onChange={onEdit}
-          value={loroText?.toString() ?? ""}
-        />
-      </div>
+      <Editor />
       <div>
         <button onClick={() => setOnline((online) => !online)}>
           {online ? "Go Offline" : "Go Online"}
