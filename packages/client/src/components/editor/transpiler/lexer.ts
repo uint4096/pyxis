@@ -1,4 +1,14 @@
-export type Token = any;
+export type TokenType =
+  | "text"
+  | "bold&italic"
+  | "bold"
+  | "italic"
+  | "strikethrough";
+export type Token = {
+  type: TokenType;
+  value: string;
+  index: number;
+};
 
 export const lexer = (text: string) => {
   const syntaxTokens: Array<Token> = [];
@@ -60,3 +70,4 @@ export const lexer = (text: string) => {
 
   return tokens;
 };
+

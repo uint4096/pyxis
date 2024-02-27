@@ -1,20 +1,28 @@
-import { Token } from "./lexer";
+import { Token, TokenType } from "./lexer";
 
-export type Node = any;
+export type Node =
+  | {
+      type: Exclude<TokenType, "text">;
+      params: Array<Node>;
+    }
+  | {
+      type: Extract<TokenType, "text">;
+      value: string;
+    };
 export type AST = {
-  type: 'document';
+  type: "document";
   body: Array<Node>;
 };
 
 export const parser = (tokens: Array<Token>) => {
   let pointer = 0;
   const walk = (type?: string): Array<Node> => {
-    const body = [];
+    const body: Array<Node> = [];
     while (pointer < tokens.length) {
       const token = tokens[pointer];
       switch (token?.type) {
         case "text": {
-          body.push(token);
+          body.push({ type: "text", value: token.value });
           pointer++;
           break;
         }
@@ -39,7 +47,7 @@ export const parser = (tokens: Array<Token>) => {
 
   const ast = walk();
   return {
-    type: 'document',
-    body: ast
+    type: "document",
+    body: ast,
   };
 };
