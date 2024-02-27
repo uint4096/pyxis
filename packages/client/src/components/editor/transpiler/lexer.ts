@@ -1,5 +1,7 @@
-const lexer = (text: string) => {
-  const syntaxTokens: Array<any> = [];
+export type Token = any;
+
+export const lexer = (text: string) => {
+  const syntaxTokens: Array<Token> = [];
   let i = 0;
 
   while (i < text.length) {
@@ -58,5 +60,3 @@ const lexer = (text: string) => {
 
   return tokens;
 };
-
-export default lexer;
