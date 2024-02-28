@@ -4,6 +4,7 @@ export type TokenType =
   | "bold"
   | "italic"
   | "strikethrough";
+
 export type Token = {
   type: TokenType;
   value: string;
@@ -70,4 +71,3 @@ export const lexer = (text: string) => {
 
   return tokens;
 };
-

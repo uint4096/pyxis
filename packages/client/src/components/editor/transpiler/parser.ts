@@ -9,6 +9,7 @@ export type Node =
       type: Extract<TokenType, "text">;
       value: string;
     };
+
 export type AST = {
   type: "document";
   body: Array<Node>;
