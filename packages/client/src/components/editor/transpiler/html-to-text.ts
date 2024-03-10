@@ -1,9 +1,11 @@
 const NODE_TEXT_MAP = {
-  span: "",
-  "#text": "",
-  b: "**",
-  i: "*",
-  s: "~~",
+  span: { type: 'nowrap', value: "" },
+  "#text": { type: 'nowrap', value: "" },
+  b: { type: 'wrap', value: "**" },
+  i: { type: 'wrap', value: "*" },
+  s: { type: 'wrap', value: "~~" },
+  br: { type: 'nowrap', value: "\n" },
+  div: { type: 'nowrap', value: "\n" }
 };
 
 /*
@@ -18,10 +20,8 @@ export const toText = (html: string) => {
       const node = nodeList[idx];
       const content =
         node.nodeName === "#text" ? node.nodeValue : parseNode(node.childNodes);
-      const sign = `${
-        NODE_TEXT_MAP[<keyof typeof NODE_TEXT_MAP>node.nodeName.toLowerCase()]
-      }`;
-      text += `${sign}${content}${sign}`;
+      const sign = NODE_TEXT_MAP[<keyof typeof NODE_TEXT_MAP>node.nodeName.toLowerCase()];
+      text += sign.type === 'wrap' ? `${sign.value}${content}${sign.value}` : `${sign.value}${content}`;
       idx++;
     }
 

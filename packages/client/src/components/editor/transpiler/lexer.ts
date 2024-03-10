@@ -51,7 +51,7 @@ export const lexer = (text: string) => {
   }
 
   // Insert text nodes
-  const tokens = syntaxTokens.reduce(
+  const tokens = syntaxTokens.reduce<Array<Token>>(
     (tokens, syntaxToken, index) => {
       tokens.push(syntaxToken);
 
