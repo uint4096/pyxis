@@ -42,5 +42,6 @@ export const getCaretPosition = (
     return caretPosition;
   };
 
-  return parseNode(base.childNodes);
+  // @Todo: Needs fixing. Does not work for initial text nodes
+  return parseNode(base.childNodes) + 1;
 };
