@@ -46,9 +46,5 @@ export const parser = (tokens: Array<Token>) => {
     return body;
   };
 
-  const ast = walk();
-  return {
-    type: "document",
-    body: ast,
-  };
+  return walk();
 };
