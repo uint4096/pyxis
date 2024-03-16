@@ -33,12 +33,3 @@ export const getRelativeElementPosition = (
 
   return "";
 };
-
-export const getLastElementPosition = (base: Node): string => {
-  const lastElementIdx = base.childNodes.length - 1;
-  if (base.childNodes[lastElementIdx]) {
-    return `${lastElementIdx}.${getLastElementPosition(base.childNodes[lastElementIdx])}`;
-  }
-
-  return '';
-}

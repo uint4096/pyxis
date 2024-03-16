@@ -3,8 +3,8 @@ import { getDescendant } from ".";
 const NODE_TEXT_MAP = {
   span: { type: "nowrap", value: "" },
   "#text": { type: "nowrap", value: "" },
-  b: { type: "wrap", value: "**" },
-  i: { type: "wrap", value: "*" },
+  strong: { type: "wrap", value: "**" },
+  em: { type: "wrap", value: "*" },
   s: { type: "wrap", value: "~~" },
   br: { type: "nowrap", value: "" },
   div: { type: "nowrap", value: "\n" },

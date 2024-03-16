@@ -11,7 +11,6 @@ import "./editor.css";
 import {
   getCaretPosition,
   getDescendant,
-  getLastElementPosition,
   getRelativeElementPosition,
 } from "./dom";
 import { lexer, parser, toHtml, toText } from "./transpiler";
@@ -72,19 +71,7 @@ const Editor = () => {
         selection?.anchorNode
       );
 
-      if (position) {
-        return { node: position, offset: selection.anchorOffset };
-      } else {
-        const lastElementPosition = getLastElementPosition(editor).replace(
-          /\.*$/,
-          ""
-        );
-        return {
-          node: lastElementPosition,
-          offset:
-            getDescendant(editor, lastElementPosition).nodeValue?.length ?? 0,
-        };
-      }
+      return { node: position, offset: selection.anchorOffset };
     }
   };
 
@@ -139,7 +126,7 @@ const Editor = () => {
   useLayoutEffect(() => {
     const base = getEditor();
     const selection = currentSelection ?? getSelection();
-    if (selection && base) {
+    if (selection && base && selection.node) {
       const elem = getDescendant(base, selection.node);
       const windowSelection = window.getSelection();
       const range = new Range();

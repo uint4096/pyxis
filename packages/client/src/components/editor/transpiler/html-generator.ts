@@ -1,19 +1,19 @@
 import { TokenType } from "./lexer";
-import { AST, Node } from "./parser";
+import { Node } from "./parser";
 
 const generateHTML = (type: TokenType, content: string) => {
   switch (type) {
     case "text": {
-      return `<span>${content}</span>`;
+      return `${content}`;
     }
     case "bold": {
-      return `<b>${content}</b>`;
+      return `<strong>${content}</strong>`;
     }
     case "italic": {
-      return `<i>${content}</i>`;
+      return `<em>${content}</em>`;
     }
     case "bold&italic": {
-      return `<b><i>${content}</i></b>`;
+      return `<strong><em>${content}</strong></em>`;
     }
     case "strikethrough": {
       return `<s>${content}</s>`;
