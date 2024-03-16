@@ -6,8 +6,9 @@ const NODE_TEXT_MAP = {
   b: { type: "wrap", value: "**" },
   i: { type: "wrap", value: "*" },
   s: { type: "wrap", value: "~~" },
-  br: { type: "nowrap", value: "\n" },
+  br: { type: "nowrap", value: "" },
   div: { type: "nowrap", value: "\n" },
+  line: { type: "nowrap", value: "" },
 };
 
 export const getCaretPosition = (
@@ -30,7 +31,8 @@ export const getCaretPosition = (
       } else if (node.nodeName === "#text") {
         caretPosition += node.nodeValue?.length ?? 0;
       } else {
-        caretPosition += nodeText.value?.length + parseNode(node.childNodes);
+        caretPosition +=
+          parseNode(node.childNodes) + (foundNode ? 0 : nodeText.value?.length);
       }
 
       if (nodeText?.type === "wrap" && !foundNode) {
@@ -42,6 +44,5 @@ export const getCaretPosition = (
     return caretPosition;
   };
 
-  // @Todo: Needs fixing. Does not work for initial text nodes
-  return parseNode(base.childNodes) + 1;
+  return parseNode(base.childNodes);
 };
