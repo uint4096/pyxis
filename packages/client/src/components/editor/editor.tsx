@@ -15,13 +15,9 @@ import {
 } from "./dom";
 import { lexer, parser, toHtml, toText } from "./transpiler";
 
-{
-  /* <span>My name is </span><b><i><span>Abhishek Kumar</span></i></b><span> and I am a </span><b><i><span>Full-</span><s><span>stack</span></s><span> dev</span></i></b><span></span> */
-}
+const ZERO_WIDTH_SPACE = "&#8203";
 const Editor = () => {
-  const [rawText, setRawText] = useState<string>(
-    "My name is ***Abhishek Kumar*** and I am a ***Full-~~stack~~ dev***"
-  );
+  const [rawText, setRawText] = useState<string>('');
   const [html, setHtml] = useState<{
     content: string;
     caretPosition: number;
@@ -44,7 +40,13 @@ const Editor = () => {
 
         if (caretPosition >= lengthParsed && caretPosition <= parsedSize) {
           return {
-            htmlContent: `${html ? `${html}` : ""}<div>${line}</div>`,
+            /**
+             * Chrome folds a div that has no content. Hence the use of a zero-width space
+             * https://www.fileformat.info/info/unicode/char/200b/index.htm
+             */
+            htmlContent: `${html ? html : ""}<div>${
+              line ? line : ZERO_WIDTH_SPACE
+            }</div>`,
             lengthParsed: parsedSize,
           };
         } else {
@@ -100,7 +102,11 @@ const Editor = () => {
   );
 
   const onInput = useCallback((event: ChangeEvent<HTMLDivElement>) => {
-    const textContent = toText(event.target.innerHTML.replace(/\<br\>/g, ""));
+    const textContent = toText(
+      event.target.innerHTML
+        .replace(/\<br\>/g, "")
+        .replace(new RegExp(ZERO_WIDTH_SPACE, "g"), "")
+    );
     const selection = getSelection();
     if (selection) {
       setCurrentSelection(selection);
