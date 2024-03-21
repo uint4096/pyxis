@@ -5,26 +5,29 @@ import {
   useLayoutEffect,
   useEffect,
   SyntheticEvent,
+  KeyboardEvent,
+  KeyboardEventHandler,
 } from "react";
 import { useCallback } from "react";
 import "./editor.css";
 import {
-  getCaretPosition,
+  getCaretFromDomNodes,
   getDescendant,
   getRelativeElementPosition,
 } from "./dom";
 import { lexer, parser, toHtml, toText } from "./transpiler";
+
+type Selection = {
+  node: string;
+  offset: number;
+};
 
 const ZERO_WIDTH_SPACE = "&#8203";
 const Editor = () => {
   const [rawText, setRawText] = useState<string>('');
   const [html, setHtml] = useState<{
     content: string;
-    caretPosition: number;
-  }>();
-  const [currentSelection, setCurrentSelection] = useState<{
-    node: string;
-    offset: number;
+    selection: Selection;
   }>();
 
   const divRef = useRef<HTMLDivElement>(null);
@@ -40,7 +43,7 @@ const Editor = () => {
 
         if (caretPosition >= lengthParsed && caretPosition <= parsedSize) {
           return {
-            /**
+            /*
              * Chrome folds a div that has no content. Hence the use of a zero-width space
              * https://www.fileformat.info/info/unicode/char/200b/index.htm
              */
@@ -80,22 +83,21 @@ const Editor = () => {
   const onSelection = useCallback(
     (event: SyntheticEvent<HTMLDivElement, Event>) => {
       const eventType = event.nativeEvent.type;
-      if (eventType === "keydown" || eventType === "selectionchange") {
+      const eventsToSkip = [ 'keydown', 'keyup', 'selectionchange' ];
+      if (eventsToSkip.includes(eventType)) {
         return;
       }
 
       const editor = getEditor();
       const selection = getSelection();
       if (selection && editor) {
-        setCurrentSelection(selection);
-
-        const caretPosition = getCaretPosition(
+        const caretPosition = getCaretFromDomNodes(
           editor,
           selection.node,
           selection.offset
         );
         const htmlContent = getHTMLContent(caretPosition, rawText);
-        setHtml({ content: htmlContent, caretPosition });
+        setHtml({ content: htmlContent, selection });
       }
     },
     [rawText]
@@ -107,42 +109,50 @@ const Editor = () => {
         .replace(/\<br\>/g, "")
         .replace(new RegExp(ZERO_WIDTH_SPACE, "g"), "")
     );
-    const selection = getSelection();
-    if (selection) {
-      setCurrentSelection(selection);
-    }
 
     setRawText(textContent);
   }, []);
 
   useEffect(() => {
     const editor = getEditor();
-    const selection = currentSelection ?? getSelection();
+    const selection = getSelection();
     if (selection && editor) {
-      const caretPosition = getCaretPosition(
+      const caretPosition = getCaretFromDomNodes(
         editor,
         selection.node,
         selection.offset
       );
       const htmlContent = getHTMLContent(caretPosition, rawText);
-      setHtml({ content: htmlContent, caretPosition });
+      setHtml({ content: htmlContent, selection: { ...selection, offset: selection.offset + 1 } });
     }
   }, [rawText]);
 
   useLayoutEffect(() => {
     const base = getEditor();
-    const selection = currentSelection ?? getSelection();
-    if (selection && base && selection.node) {
-      const elem = getDescendant(base, selection.node);
-      const windowSelection = window.getSelection();
-      const range = new Range();
-      range.setStart(elem, selection?.offset);
-      range.collapse();
-      windowSelection?.removeAllRanges();
-      console.log("Updating cursor", `${selection.offset}`);
-      windowSelection?.addRange(range);
+    const selection = html?.selection?.node ? html.selection : getSelection();
+    if (!base || !selection || !selection.node) {
+      /*
+       * @Todo: Position caret at the end of content.
+       * Not sure if this is the best fallback. But this will have to
+       * do for now.
+       */
+      return;
     }
-  }, [html]);
+
+    const elem = getDescendant(base, selection.node);
+
+    if (!elem) {
+      //@Todo: Position caret at the end of content.
+      return;
+    }
+
+    const windowSelection = window.getSelection();
+    const range = new Range();
+    range.setStart(elem, selection?.offset);
+    range.collapse();
+    windowSelection?.removeAllRanges();
+    windowSelection?.addRange(range);
+  }, [html]); 
 
   return (
     <>
@@ -155,6 +165,7 @@ const Editor = () => {
         onInput={onInput}
         ref={divRef}
         onSelect={onSelection}
+        // onKeyDown={onKeyDown}
       />
     </>
   );

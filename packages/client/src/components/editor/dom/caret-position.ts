@@ -11,7 +11,7 @@ const NODE_TEXT_MAP = {
   line: { type: "nowrap", value: "" },
 };
 
-export const getCaretPosition = (
+export const getCaretFromDomNodes = (
   base: Node,
   position: string,
   offset: number
