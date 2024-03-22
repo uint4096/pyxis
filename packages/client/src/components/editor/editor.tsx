@@ -1,12 +1,10 @@
 import {
   useState,
   useRef,
-  ChangeEvent,
   useLayoutEffect,
   useEffect,
   SyntheticEvent,
   KeyboardEvent,
-  KeyboardEventHandler,
 } from "react";
 import { useCallback } from "react";
 import "./editor.css";
@@ -15,7 +13,8 @@ import {
   getDescendant,
   getRelativeElementPosition,
 } from "./dom";
-import { lexer, parser, toHtml, toText } from "./transpiler";
+import { lexer, parser, toHtml } from "./transpiler";
+import { actions } from "./keys/mapping";
 
 type Selection = {
   node: string;
@@ -24,7 +23,7 @@ type Selection = {
 
 const ZERO_WIDTH_SPACE = "&#8203";
 const Editor = () => {
-  const [rawText, setRawText] = useState<string>('');
+  const [rawText, setRawText] = useState<string>("");
   const [html, setHtml] = useState<{
     content: string;
     selection: Selection;
@@ -83,7 +82,7 @@ const Editor = () => {
   const onSelection = useCallback(
     (event: SyntheticEvent<HTMLDivElement, Event>) => {
       const eventType = event.nativeEvent.type;
-      const eventsToSkip = [ 'keydown', 'keyup', 'selectionchange' ];
+      const eventsToSkip = ["keydown", "keyup", "selectionchange"];
       if (eventsToSkip.includes(eventType)) {
         return;
       }
@@ -103,16 +102,6 @@ const Editor = () => {
     [rawText]
   );
 
-  const onInput = useCallback((event: ChangeEvent<HTMLDivElement>) => {
-    const textContent = toText(
-      event.target.innerHTML
-        .replace(/\<br\>/g, "")
-        .replace(new RegExp(ZERO_WIDTH_SPACE, "g"), "")
-    );
-
-    setRawText(textContent);
-  }, []);
-
   useEffect(() => {
     const editor = getEditor();
     const selection = getSelection();
@@ -123,7 +112,10 @@ const Editor = () => {
         selection.offset
       );
       const htmlContent = getHTMLContent(caretPosition, rawText);
-      setHtml({ content: htmlContent, selection: { ...selection, offset: selection.offset + 1 } });
+      setHtml({
+        content: htmlContent,
+        selection: { ...selection, offset: selection.offset + 1 },
+      });
     }
   }, [rawText]);
 
@@ -152,7 +144,64 @@ const Editor = () => {
     range.collapse();
     windowSelection?.removeAllRanges();
     windowSelection?.addRange(range);
-  }, [html]); 
+  }, [html]);
+
+  const selectionKeys = [
+    "ArrowRight",
+    "ArrowLeft",
+    "ArrowUp",
+    "ArrowDown",
+    "A",
+  ];
+
+  const getKeyContent = (
+    key: KeyboardEvent<HTMLDivElement>["nativeEvent"]["key"]
+  ) => {
+    switch (key) {
+      case "Enter": {
+        return "\n";
+      }
+      case "Control":
+      case "Shift":
+      case "CapsLock":
+      case "Escape": {
+        return "";
+      }
+      default: {
+        return key;
+      }
+    }
+  };
+  const onKeyDown = useCallback((event: KeyboardEvent<HTMLDivElement>) => {
+    console.log("Keyboard event: ", event);
+    const key = event.nativeEvent.key;
+    const editor = getEditor();
+    const selection = getSelection();
+
+    if (!selection || !editor) {
+      //@todo: Throw and handle
+      return;
+    }
+
+    const caret = getCaretFromDomNodes(
+      editor,
+      selection.node,
+      selection.offset
+    );
+
+    if (Object.keys(actions).includes(key)) {
+      setRawText((rawText) => {
+        const { text } = actions[key](rawText, caret, event.ctrlKey);
+        return text;
+      });
+    } else if (key in selectionKeys && event.ctrlKey) {
+    } else {
+      const content = getKeyContent(key);
+      if (content) {
+        setRawText((rawText) => `${rawText}${content}`);
+      }
+    }
+  }, []);
 
   return (
     <>
@@ -162,10 +211,9 @@ const Editor = () => {
         dangerouslySetInnerHTML={{
           __html: html?.content ?? "",
         }}
-        onInput={onInput}
         ref={divRef}
         onSelect={onSelection}
-        // onKeyDown={onKeyDown}
+        onKeyDown={onKeyDown}
       />
     </>
   );
