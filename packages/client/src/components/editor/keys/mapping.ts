@@ -12,9 +12,18 @@ type ActionResponse = {
 
 const wordPositon = (text: string, position: number) => {
   let char = "",
-    idx = position - 1;
-  while (char !== " " && idx >= 0) {
+    idx = position - 1,
+    parsedChar = false;
+
+  while (idx >= 0) {
     char = text[idx];
+  
+    if (!parsedChar && char !== " " && char !== '\n') {
+      parsedChar = true;
+    } else if (parsedChar && (char === " " || char === '\n')) {
+      break;
+    }
+
     idx--;
   }
 
