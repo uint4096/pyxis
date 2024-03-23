@@ -121,28 +121,13 @@ const Editor = () => {
   useEffect(() => {
     const { caret, text } = rawText;
     const { htmlContent, selection } = getHTMLContent(caret, text);
-    setHtml({
+    setHtml(() => ({
       content: htmlContent,
       selection,
-    });
-
-    // const editor = getEditor();
-    // const selection = getSelection();
-    // if (selection && editor) {
-    //   const caretPosition = getCaretFromDomNodes(
-    //     editor,
-    //     selection.node,
-    //     selection.offset
-    //   );
-    //   const htmlContent = getHTMLContent(caretPosition, rawText);
-    //   setHtml({
-    //     content: htmlContent,
-    //     selection: { ...selection, offset: selection.offset + 1 },
-    //   });
-    // }
+    }));
   }, [rawText]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const { selection } = html ?? {};
     const editor = getEditor();
 
@@ -187,22 +172,10 @@ const Editor = () => {
       }
     }
   };
+
   const onKeyDown = useCallback((event: KeyboardEvent<HTMLDivElement>) => {
     console.log("Keyboard event: ", event);
     const key = event.nativeEvent.key;
-    const editor = getEditor();
-    const selection = getSelection();
-
-    if (!selection || !editor) {
-      //@todo: Throw and handle
-      return;
-    }
-
-    const caret = getCaretFromDomNodes(
-      editor,
-      selection.node,
-      selection.offset
-    );
 
     if (Object.keys(actions).includes(key)) {
       setRawText((rawText) => {
