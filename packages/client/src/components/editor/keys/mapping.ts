@@ -7,18 +7,18 @@ type ActionKeys = {
 };
 type ActionResponse = {
   text: string;
-  caretPosition: number;
+  caret: number;
 };
 
 const wordPositon = (text: string, position: number) => {
   let char = "",
-    idx = position;
+    idx = position - 1;
   while (char !== " " && idx >= 0) {
     char = text[idx];
     idx--;
   }
 
-  return idx;
+  return idx + 1;
 };
 
 export const actions: ActionKeys = {
@@ -27,7 +27,7 @@ export const actions: ActionKeys = {
 
     return {
       text: `${text.slice(0, start)}${text.slice(caretPosition, text.length)}`,
-      caretPosition: start,
+      caret: start,
     };
   },
 };
