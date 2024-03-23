@@ -1,16 +1,14 @@
 import {
   useState,
   useRef,
-  useLayoutEffect,
   useEffect,
-  SyntheticEvent,
   KeyboardEvent,
+  SyntheticEvent,
 } from "react";
 import { useCallback } from "react";
 import "./editor.css";
 import {
   getCaretFromDomNodes,
-  getDescendant,
   getRelativeElementPosition,
 } from "./dom";
 import { lexer, parser, toHtml } from "./transpiler";
@@ -33,6 +31,8 @@ const Editor = () => {
     selection: Selection;
   }>();
 
+  const [lastKey, setLastKey] = useState('');
+
   const divRef = useRef<HTMLDivElement>(null);
 
   const transpile = (text: string) => toHtml(parser(lexer(text)));
@@ -45,7 +45,7 @@ const Editor = () => {
         const parsedChars = lengthParsed + (index ? 1 : 0);
         const toParse = parsedChars + line.length;
 
-        if (textCaret >= lengthParsed && textCaret <= toParse) {
+        if (textCaret >= parsedChars && textCaret <= toParse) {
           return {
             /*
              * Chrome folds a div that has no content. Hence the use of a zero-width space
@@ -61,9 +61,10 @@ const Editor = () => {
             }
           };
         } else {
+          const content = transpile(line);
           return {
             selection,
-            htmlContent: `${html}<div>${transpile(line)}</div>`,
+            htmlContent: `${html}<div>${content ? content : ZERO_WIDTH_SPACE}</div>`,
             lengthParsed: toParse,
           };
         }
@@ -92,31 +93,31 @@ const Editor = () => {
     }
   };
 
-  // const onSelection = useCallback(
-  //   (event: SyntheticEvent<HTMLDivElement, Event>) => {
-  //     const eventType = event.nativeEvent.type;
-  //     const eventsToSkip = ["keydown", "keyup", "selectionchange"];
-  //     if (eventsToSkip.includes(eventType)) {
-  //       return;
-  //     }
+  const onSelection = useCallback(() => {
+      const allowedKeys = ['ArrowUp', 'ArrowDown'];
+      
+      if (!allowedKeys.includes(lastKey)) {
+        console.log(lastKey);
+        return;
+      }
+      
+      const editor = getEditor();
+      const windowSelection = getSelection();
 
-  //     const { htmlContent, selection } = getHTMLContent(caretPosition, rawText);
-  //     setHtml({ content: htmlContent, selection });
+      if (windowSelection && editor) {
+        const caret = getCaretFromDomNodes(
+          editor,
+          windowSelection.node,
+          windowSelection.offset
+        );
 
-  //     // const editor = getEditor();
-  //     // const selection = getSelection();
-  //     // if (selection && editor) {
-  //     //   const caretPosition = getCaretFromDomNodes(
-  //     //     editor,
-  //     //     selection.node,
-  //     //     selection.offset
-  //     //   );
-  //     //   const { htmlContent, selection } = getHTMLContent(caretPosition, rawText);
-  //     //   setHtml({ content: htmlContent, selection });
-  //     // }
-  //   },
-  //   [rawText]
-  // );
+        setLastKey('');
+        setRawText((rawText) => ({
+          ...rawText,
+          caret
+        }));
+      }
+    }, [lastKey]);
 
   useEffect(() => {
     const { caret, text } = rawText;
@@ -151,8 +152,9 @@ const Editor = () => {
     "ArrowLeft",
     "ArrowUp",
     "ArrowDown",
-    "A",
   ];
+
+  const insertTextAtPosition = (input: string, text: string, position: number) => `${input.slice(0, position)}${text}${input.slice(position, input.length)}`;
 
   const getKeyContent = (
     key: KeyboardEvent<HTMLDivElement>["nativeEvent"]["key"]
@@ -163,6 +165,7 @@ const Editor = () => {
       }
       case "Control":
       case "Shift":
+      case "Alt":
       case "CapsLock":
       case "Escape": {
         return "";
@@ -174,8 +177,12 @@ const Editor = () => {
   };
 
   const onKeyDown = useCallback((event: KeyboardEvent<HTMLDivElement>) => {
-    console.log("Keyboard event: ", event);
     const key = event.nativeEvent.key;
+    
+    if (selectionKeys.includes(key)) {
+      setLastKey(key)
+      return;
+    }
 
     if (Object.keys(actions).includes(key)) {
       setRawText((rawText) => {
@@ -183,17 +190,19 @@ const Editor = () => {
         const text = actions[key](textContent, caret, event.ctrlKey);
         return text;
       });
-    } else if (key in selectionKeys && event.ctrlKey) {
     } else {
       const content = getKeyContent(key);
       if (content) {
-        setRawText((rawText) => ({
-          text: `${rawText.text}${content}`,
-          caret: rawText.caret + 1
-        }));
+        setRawText((rawText) => {
+          const { text, caret } = rawText;
+          return {
+            text: insertTextAtPosition(text, content, caret),
+            caret: caret + content.length
+          }
+        });
       }
     }
-  }, []);
+  }, [rawText]);
 
   return (
     <>
@@ -204,7 +213,7 @@ const Editor = () => {
           __html: html?.content ?? "",
         }}
         ref={divRef}
-        // onSelect={onSelection}
+        onSelect={onSelection}
         onKeyDown={onKeyDown}
       />
     </>
