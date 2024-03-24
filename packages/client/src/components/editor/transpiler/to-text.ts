@@ -20,6 +20,9 @@ const NODE_TEXT_MAP: NodeTextMap = {
 /*
  * There's no need for a lexer and parser here because
  * the output from DOMParser is the equivalent of an AST.
+ * 
+ * CURRENTLY UNUSED!
+ * But maybe I'll need it in future
  */
 export const toText = (html: string) => {
   const parseNode = (nodeList: NodeList) => {
