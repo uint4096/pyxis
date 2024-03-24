@@ -1,38 +1,28 @@
+import { getKeyContent } from "./content";
+import { insertTextAtPosition, wordPositon } from "../../../utils";
+import { Keys } from "./mapping";
+
+type Handler = (
+  text: string,
+  caretPosition: number,
+  ctrl?: boolean
+) => ActionResponse;
+
 type ActionKeys = {
-  [k: string]: (
-    text: string,
-    caretPosition: number,
-    ctrl?: boolean
-  ) => ActionResponse;
+  [k: string]: Handler;
 };
+
 type ActionResponse = {
   text: string;
   caret: number;
 };
 
-const wordPositon = (text: string, position: number) => {
-  let char = "",
-    idx = position - 1,
-    parsedChar = false;
-
-  while (idx >= 0) {
-    char = text[idx];
-  
-    if (!parsedChar && char !== " " && char !== '\n') {
-      parsedChar = true;
-    } else if (parsedChar && (char === " " || char === '\n')) {
-      break;
-    }
-
-    idx--;
-  }
-
-  return idx + 1;
-};
-
-export const actions: ActionKeys = {
-  Backspace: (text, caretPosition, ctrl) => {
-    const start = ctrl ? wordPositon(text, caretPosition) : caretPosition - 1;
+const actions: ActionKeys = {
+  [Keys.BACKSPACE]: (text, caretPosition, ctrl) => {
+    const excludeChars = [" ", "\n", "-", "'"];
+    const start = ctrl
+      ? wordPositon(text, caretPosition, { excludeChars })
+      : caretPosition - 1;
 
     return {
       text: `${text.slice(0, start)}${text.slice(caretPosition, text.length)}`,
@@ -40,3 +30,21 @@ export const actions: ActionKeys = {
     };
   },
 };
+
+const getter: { get: (target: typeof actions, key: string) => Handler } = {
+  get(target, key) {
+    return (text: string, caretPosition: number, ctrl?: boolean) => {
+      if (typeof target[key] === "function") {
+        return Reflect.get(target, key)(text, caretPosition, ctrl);
+      }
+
+      const content = getKeyContent(Keys[key]);
+      return {
+        text: insertTextAtPosition(text, content, caretPosition),
+        caret: caretPosition + content.length,
+      };
+    };
+  },
+};
+
+export const Actions: ActionKeys = new Proxy(actions, getter);

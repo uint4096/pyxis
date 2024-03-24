@@ -2,8 +2,9 @@ import { useState, useEffect, KeyboardEvent } from "react";
 import { useCallback } from "react";
 import "./editor.css";
 import { getCaretFromDomNodes, getSelection } from "./dom";
-import { actions } from "./keys/actions";
+import { Actions } from "./keys/actions";
 import { getHTMLContent } from "./transpiler";
+import { selectionKeys } from "./keys";
 
 type Selection = {
   element: number;
@@ -30,12 +31,10 @@ const Editor = () => {
     }
 
     return editor;
-  }
+  };
 
   const onSelection = useCallback(() => {
-    const allowedKeys = ["ArrowUp", "ArrowDown"];
-
-    if (!allowedKeys.includes(lastKey)) {
+    if (!selectionKeys.includes(lastKey)) {
       return;
     }
 
@@ -58,6 +57,24 @@ const Editor = () => {
     }
   }, [lastKey]);
 
+  const onKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      const key = event.nativeEvent.key;
+
+      if (selectionKeys.includes(key)) {
+        setLastKey(key);
+        return;
+      }
+
+      setRawText((rawText) => {
+        const { text: textContent, caret } = rawText;
+        const text = Actions[key](textContent, caret, event.ctrlKey);
+        return text;
+      });
+    },
+    [rawText]
+  );
+
   useEffect(() => {
     const { caret, text } = rawText;
     const { htmlContent, selection } = getHTMLContent(caret, text);
@@ -71,7 +88,8 @@ const Editor = () => {
     const { selection } = html ?? {};
     const editor = getEditor();
 
-    const firstTextNode = editor?.childNodes[selection?.element ?? 0]?.childNodes?.[0];
+    const firstTextNode =
+      editor?.childNodes[selection?.element ?? 0]?.childNodes?.[0];
     const node = firstTextNode ?? editor;
 
     const windowSelection = window.getSelection();
@@ -81,66 +99,6 @@ const Editor = () => {
     windowSelection?.removeAllRanges();
     windowSelection?.addRange(range);
   }, [html]);
-
-  const selectionKeys = ["ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown"]; //key-const
-
-  const insertTextAtPosition = (
-    input: string,
-    text: string,
-    position: number
-  ) =>
-    `${input.slice(0, position)}${text}${input.slice(position, input.length)}`; //util
-
-  const getKeyContent = (
-    key: KeyboardEvent<HTMLDivElement>["nativeEvent"]["key"]
-  ) => {
-    switch (key) {
-      case "Enter": {
-        return "\n";
-      }
-      case "Control":
-      case "Shift":
-      case "Alt":
-      case "CapsLock":
-      case "Escape": {
-        return "";
-      }
-      default: {
-        return key;
-      }
-    }
-  }; //key
-
-  const onKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLDivElement>) => {
-      const key = event.nativeEvent.key;
-
-      if (selectionKeys.includes(key)) {
-        setLastKey(key);
-        return;
-      }
-
-      if (Object.keys(actions).includes(key)) {
-        setRawText((rawText) => {
-          const { text: textContent, caret } = rawText;
-          const text = actions[key](textContent, caret, event.ctrlKey);
-          return text;
-        });
-      } else {
-        const content = getKeyContent(key);
-        if (content) {
-          setRawText((rawText) => {
-            const { text, caret } = rawText;
-            return {
-              text: insertTextAtPosition(text, content, caret),
-              caret: caret + content.length,
-            };
-          });
-        }
-      }
-    },
-    [rawText]
-  );
 
   return (
     <>
