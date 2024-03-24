@@ -1,4 +1,5 @@
 import { getDescendant } from ".";
+import { ZERO_WIDTH_SPACE_UNICODE } from "../../../utils";
 
 const NODE_TEXT_MAP = {
   span: { type: "nowrap", value: "" },
@@ -10,6 +11,10 @@ const NODE_TEXT_MAP = {
   div: { type: "nowrap", value: "\n" },
   line: { type: "nowrap", value: "" },
 };
+
+const textLength = (text?: string | null) =>
+  (text?.length ?? 0) -
+  (text?.match(new RegExp(ZERO_WIDTH_SPACE_UNICODE, "g")) ?? []).length;
 
 export const getCaretFromDomNodes = (
   base: Node,
@@ -27,9 +32,17 @@ export const getCaretFromDomNodes = (
         NODE_TEXT_MAP[<keyof typeof NODE_TEXT_MAP>node.nodeName.toLowerCase()];
       if (node === elem) {
         foundNode = true;
-        return caretPosition + offset;
+        /*
+         * When textLength returns 0, the line is empty. In that case we always
+         * want to set the caret at the beginning of the line.
+         */
+        return caretPosition + (textLength(node.nodeValue) === 0 ? 0 : offset);
       } else if (node.nodeName === "#text") {
-        caretPosition += node.nodeValue?.length ?? 0;
+        /*
+         * Using textLength here to make sure we don't take into account the
+         * length of the zero width space character
+         */
+        caretPosition += textLength(node.nodeValue) ?? 0;
       } else {
         caretPosition +=
           parseNode(node.childNodes) + (foundNode ? 0 : nodeText.value?.length);
