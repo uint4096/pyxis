@@ -2,11 +2,13 @@ import { getKeyContent } from "./content";
 import { insertTextAtPosition, wordPositon } from "../../../utils";
 import { Keys } from "./mapping";
 
-type Handler = (
-  text: string,
-  caretPosition: number,
-  ctrl?: boolean
-) => ActionResponse;
+export type Caret = {
+  start: number;
+  end: number;
+  collapsed: boolean;
+};
+
+type Handler = (text: string, caret: Caret, ctrl?: boolean) => ActionResponse;
 
 type ActionKeys = {
   [k: string]: Handler;
@@ -14,34 +16,44 @@ type ActionKeys = {
 
 type ActionResponse = {
   text: string;
-  caret: number;
+  caret: Caret;
 };
 
 const actions: ActionKeys = {
-  [Keys.BACKSPACE]: (text, caretPosition, ctrl) => {
+  [Keys.BACKSPACE]: (text, caret, ctrl) => {
     const excludeChars = [" ", "\n", "-", "'", "(", ")"];
-    const start = ctrl
-      ? wordPositon(text, caretPosition, { excludeChars })
-      : caretPosition - 1;
+    const start = caret.collapsed
+      ? ctrl
+        ? wordPositon(text, caret.start, { excludeChars })
+        : caret.start - 1
+      : caret.start;
 
     return {
-      text: `${text.slice(0, start)}${text.slice(caretPosition, text.length)}`,
-      caret: start,
+      text: `${text.slice(0, start)}${text.slice(caret.end, text.length)}`,
+      caret: {
+        start,
+        end: start,
+        collapsed: true,
+      },
     };
   },
 };
 
 const getter: { get: (target: typeof actions, key: string) => Handler } = {
   get(target, key) {
-    return (text: string, caretPosition: number, ctrl?: boolean) => {
+    return (text: string, caret: Caret, ctrl?: boolean) => {
       if (typeof target[key] === "function") {
-        return Reflect.get(target, key)(text, caretPosition, ctrl);
+        return Reflect.get(target, key)(text, caret, ctrl);
       }
 
       const content = getKeyContent(Keys[key]);
       return {
-        text: insertTextAtPosition(text, content, caretPosition),
-        caret: caretPosition + content.length,
+        text: insertTextAtPosition(text, content, caret.start, caret.end),
+        caret: {
+          start: caret.start + content.length,
+          end: caret.start + content.length,
+          collapsed: true,
+        },
       };
     };
   },

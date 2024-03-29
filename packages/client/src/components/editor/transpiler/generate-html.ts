@@ -1,7 +1,27 @@
 import { transpile } from "./transpile";
 import { ZERO_WIDTH_SPACE } from "../../../utils";
 
-export const getHTMLContent = (textCaret: number, rawText: string) => {
+type SelectedElement = {
+  element: number;
+  offset: number;
+};
+
+export type Selection = {
+  anchor: SelectedElement;
+  focus: SelectedElement;
+  collapsed: boolean;
+};
+
+type Content = {
+  htmlContent: string;
+  selection: Selection;
+};
+
+export const getHTMLContent = (
+  start: number,
+  end: number,
+  rawText: string
+): Content => {
   const lines = rawText.split("\n");
   const { htmlContent, selection } = lines.reduce(
     ({ htmlContent: html, lengthParsed, selection }, line, index) => {
@@ -9,7 +29,11 @@ export const getHTMLContent = (textCaret: number, rawText: string) => {
       const parsedChars = lengthParsed + (index ? 1 : 0);
       const toParse = parsedChars + line.length;
 
-      if (textCaret >= parsedChars && textCaret <= toParse) {
+      const startSelected = start >= parsedChars && start <= toParse;
+      const endSelected = end >= parsedChars && end <= toParse;
+
+      if (startSelected || endSelected) {
+        // Process currently selected line(s)
         return {
           /*
            * Chrome folds a div that has no content. Hence the use of a zero-width space
@@ -20,11 +44,23 @@ export const getHTMLContent = (textCaret: number, rawText: string) => {
           }</div>`,
           lengthParsed: toParse,
           selection: {
-            element: index,
-            offset: textCaret - parsedChars,
+            anchor: startSelected
+              ? {
+                  element: index,
+                  offset: start - parsedChars,
+                }
+              : { ...selection.anchor },
+            focus: endSelected
+              ? {
+                  element: index,
+                  offset: end - parsedChars,
+                }
+              : { ...selection.focus },
+            collapsed: start === end,
           },
         };
       } else {
+        // Process all other lines
         const content = transpile(line);
         return {
           selection,
@@ -39,8 +75,15 @@ export const getHTMLContent = (textCaret: number, rawText: string) => {
       htmlContent: "",
       lengthParsed: 0,
       selection: {
-        element: lines.length - 1,
-        offset: lines[lines.length - 1].length,
+        anchor: {
+          element: lines.length - 1,
+          offset: lines[lines.length - 1].length,
+        },
+        focus: {
+          element: lines.length - 1,
+          offset: lines[lines.length - 1].length,
+        },
+        collapsed: true,
       },
     }
   );

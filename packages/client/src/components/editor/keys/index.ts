@@ -1,2 +1,2 @@
-export { Actions } from "./actions";
+export { Actions, type Caret } from "./actions";
 export { selectionKeys } from "./mapping";

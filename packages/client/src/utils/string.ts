@@ -1,8 +1,9 @@
 export const insertTextAtPosition = (
   input: string,
   text: string,
-  position: number
-) => `${input.slice(0, position)}${text}${input.slice(position, input.length)}`;
+  start: number,
+  end: number
+) => `${input.slice(0, start)}${text}${input.slice(end, input.length)}`;
 
 export const wordPositon = (
   text: string,

@@ -1,21 +1,15 @@
-import { useState, useEffect, KeyboardEvent } from "react";
+import { useState, useEffect, KeyboardEvent, SyntheticEvent } from "react";
 import { useCallback } from "react";
 import "./editor.css";
 import { getCaretFromDomNodes, getSelection } from "./dom";
-import { Actions } from "./keys/actions";
-import { getHTMLContent } from "./transpiler";
-import { selectionKeys } from "./keys";
-
-type Selection = {
-  element: number;
-  offset: number;
-};
+import { getHTMLContent, type Selection } from "./transpiler";
+import { selectionKeys, Actions, type Caret } from "./keys";
 
 const Editor = () => {
   const [rawText, setRawText] = useState<{
     text: string;
-    caret: number;
-  }>({ text: "", caret: 0 });
+    caret: Caret;
+  }>({ text: "", caret: { start: 0, end: 0, collapsed: true } });
 
   const [html, setHtml] = useState<{
     content: string;
@@ -33,29 +27,39 @@ const Editor = () => {
     return editor;
   };
 
-  const onSelection = useCallback(() => {
-    if (!selectionKeys.includes(lastKey)) {
-      return;
-    }
+  const onSelection = useCallback(
+    (event: SyntheticEvent) => {
+      if (
+        !selectionKeys.includes(lastKey) &&
+        event.nativeEvent.type !== "mouseup"
+      ) {
+        return;
+      }
 
-    const editor = getEditor();
+      const editor = getEditor();
 
-    const windowSelection = getSelection(editor);
+      const { anchor, focus, collapsed } = getSelection(editor);
 
-    if (windowSelection && editor) {
-      const caret = getCaretFromDomNodes(
-        editor,
-        windowSelection.node,
-        windowSelection.offset
-      );
+      if (anchor && focus && editor) {
+        const start = getCaretFromDomNodes(editor, anchor.node, anchor.offset);
 
-      setLastKey("");
-      setRawText((rawText) => ({
-        ...rawText,
-        caret,
-      }));
-    }
-  }, [lastKey]);
+        const end = collapsed
+          ? start
+          : getCaretFromDomNodes(editor, focus.node, focus.offset);
+
+        setLastKey("");
+        setRawText((rawText) => ({
+          ...rawText,
+          caret: {
+            start,
+            end,
+            collapsed,
+          },
+        }));
+      }
+    },
+    [lastKey]
+  );
 
   const onKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
@@ -77,7 +81,11 @@ const Editor = () => {
 
   useEffect(() => {
     const { caret, text } = rawText;
-    const { htmlContent, selection } = getHTMLContent(caret, text);
+    const { htmlContent, selection } = getHTMLContent(
+      caret.start,
+      caret.end,
+      text
+    );
     setHtml(() => ({
       content: htmlContent,
       selection,
@@ -88,14 +96,22 @@ const Editor = () => {
     const { selection } = html ?? {};
     const editor = getEditor();
 
-    const firstTextNode =
-      editor?.childNodes[selection?.element ?? 0]?.childNodes?.[0];
-    const node = firstTextNode ?? editor;
+    const anchorNode =
+      editor?.childNodes[selection?.anchor.element ?? 0]?.childNodes?.[0];
+    const anchor = anchorNode ?? editor;
+
+    const focusNode =
+      editor?.childNodes[selection?.focus.element ?? 0]?.childNodes?.[0];
+    const focus = focusNode ?? editor;
 
     const windowSelection = window.getSelection();
     const range = new Range();
-    range.setStart(node, selection?.offset ?? 0);
-    range.collapse();
+    range.setStart(anchor, selection?.anchor.offset ?? 0);
+    if (selection?.collapsed) {
+      range.collapse();
+    } else {
+      range.setEnd(focus, selection?.focus.offset ?? 0);
+    }
     windowSelection?.removeAllRanges();
     windowSelection?.addRange(range);
   }, [html]);
