@@ -4,6 +4,8 @@ import "./editor.css";
 import { getCaretFromDomNodes, getSelection } from "./dom";
 import { getHTMLContent, type Selection } from "./transpiler";
 import { selectionKeys, Actions, type Caret } from "./keys";
+import { ctrlSelectionKeys } from "./keys/mapping";
+import { insertTextAtPosition } from "../../utils";
 
 const Editor = () => {
   const [rawText, setRawText] = useState<{
@@ -16,7 +18,7 @@ const Editor = () => {
     selection: Selection;
   }>();
 
-  const [lastKey, setLastKey] = useState("");
+  const [lastKey, setLastKey] = useState({ key: "", ctrl: false });
 
   const getEditor = (): Node => {
     const editor = document.getElementById("editor");
@@ -27,13 +29,31 @@ const Editor = () => {
     return editor;
   };
 
+  const onPaste = useCallback(
+    (event: any) => {
+      setRawText(({ text, caret }) => {
+        const content = event.clipboardData.getData("text");
+        return {
+          text: insertTextAtPosition(text, content, caret.start, caret.end),
+          caret: {
+            start: caret.start + content.length,
+            end: caret.start + content.length,
+            collapsed: true,
+          },
+        };
+      });
+    },
+    [rawText.caret]
+  );
+
   const onSelection = useCallback(
     (event: SyntheticEvent) => {
       if (
-        !selectionKeys.includes(lastKey) &&
+        !selectionKeys.includes(lastKey.key) &&
         event.nativeEvent.type !== "mouseup" &&
         (event.nativeEvent.type !== "selectionchange" ||
-          rawText.caret.collapsed)
+          rawText.caret.collapsed) &&
+        (!ctrlSelectionKeys.includes(lastKey.key) || !lastKey.ctrl)
       ) {
         return;
       }
@@ -49,7 +69,7 @@ const Editor = () => {
           ? start
           : getCaretFromDomNodes(editor, focus.node, focus.offset);
 
-        setLastKey("");
+        setLastKey({ key: "", ctrl: false });
         setRawText((rawText) => ({
           ...rawText,
           caret: {
@@ -67,8 +87,12 @@ const Editor = () => {
     (event: KeyboardEvent<HTMLDivElement>) => {
       const key = event.nativeEvent.key;
 
-      if (selectionKeys.includes(key)) {
-        setLastKey(key);
+      if (
+        selectionKeys.includes(key) ||
+        (event.ctrlKey && ctrlSelectionKeys.includes(key)) ||
+        (event.ctrlKey && !rawText.caret.collapsed)
+      ) {
+        setLastKey({ key, ctrl: event.ctrlKey });
         return;
       }
 
@@ -128,6 +152,7 @@ const Editor = () => {
         }}
         onSelect={onSelection}
         onKeyDown={onKeyDown}
+        onPaste={onPaste}
       />
     </>
   );

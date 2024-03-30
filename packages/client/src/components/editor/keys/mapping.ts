@@ -13,7 +13,10 @@ const MappedKeys = {
   END: "End",
   HOME: "Home",
   PAGE_DOWN: "PageDown",
-  PAGE_UP: "PageUp"
+  PAGE_UP: "PageUp",
+  A: "a",
+  V: "v",
+  C: "c",
 } as const;
 
 const getter = {
@@ -30,6 +33,7 @@ export const Keys: typeof MappedKeys & { [k: string]: string } = new Proxy(
   MappedKeys,
   getter
 );
+
 export const selectionKeys: Array<string> = [
   Keys.ARROW_UP,
   Keys.ARROW_DOWN,
@@ -38,5 +42,7 @@ export const selectionKeys: Array<string> = [
   Keys.END,
   Keys.HOME,
   Keys.PAGE_DOWN,
-  Keys.PAGE_UP
+  Keys.PAGE_UP,
 ];
+
+export const ctrlSelectionKeys: Array<string> = [Keys.A, Keys.C];
