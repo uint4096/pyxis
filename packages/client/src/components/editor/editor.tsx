@@ -31,7 +31,9 @@ const Editor = () => {
     (event: SyntheticEvent) => {
       if (
         !selectionKeys.includes(lastKey) &&
-        event.nativeEvent.type !== "mouseup"
+        event.nativeEvent.type !== "mouseup" &&
+        (event.nativeEvent.type !== "selectionchange" ||
+          rawText.caret.collapsed)
       ) {
         return;
       }
@@ -51,14 +53,14 @@ const Editor = () => {
         setRawText((rawText) => ({
           ...rawText,
           caret: {
-            start,
-            end,
+            start: start > end ? end : start,
+            end: start > end ? start : end,
             collapsed,
           },
         }));
       }
     },
-    [lastKey]
+    [lastKey, rawText.caret.collapsed]
   );
 
   const onKeyDown = useCallback(
