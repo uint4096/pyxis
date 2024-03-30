@@ -44,13 +44,16 @@ export const getCaretFromDomNodes = (
          */
         caretPosition += textLength(node.nodeValue) ?? 0;
       } else {
+        const prefix = nodeText?.type === "wrap" ? nodeText.value?.length : 0;
+
         caretPosition +=
-          parseNode(node.childNodes) + (foundNode ? 0 : nodeText.value?.length);
+          prefix +
+          parseNode(node.childNodes) +
+          (foundNode || (<any>node).hasAttribute("unclosed")
+            ? 0
+            : nodeText.value?.length);
       }
 
-      if (nodeText?.type === "wrap" && !foundNode) {
-        caretPosition += nodeText?.value.length;
-      }
       idx++;
     }
 

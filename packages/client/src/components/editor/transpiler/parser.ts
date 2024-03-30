@@ -4,6 +4,7 @@ export type Node =
   | {
       type: Exclude<TokenType, "text">;
       params: Array<Node>;
+      closed?: boolean;
     }
   | {
       type: Extract<TokenType, "text">;
@@ -17,7 +18,7 @@ export type AST = {
 
 export const parser = (tokens: Array<Token>) => {
   let pointer = 0;
-  const walk = (type?: string): Array<Node> => {
+  const walk = (type?: string) => {
     const body: Array<Node> = [];
     while (pointer < tokens.length) {
       const token = tokens[pointer];
@@ -33,18 +34,20 @@ export const parser = (tokens: Array<Token>) => {
         case "strikethrough": {
           if (type === token?.type) {
             ++pointer;
-            return body;
+            return { body, closed: true };
           }
 
           ++pointer;
-          body.push({ type: token?.type, params: walk(token?.type) });
+          const { body: params, closed } = walk(token?.type);
+          body.push({ type: token?.type, params: params, closed });
           break;
         }
       }
     }
 
-    return body;
+    return { body, closed: false };
   };
 
-  return walk();
+  const ast = walk();
+  return ast.body;
 };
