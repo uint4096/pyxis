@@ -23,6 +23,15 @@ const generateHTML = (type: TokenType, content: string, closed?: boolean) => {
     case "strikethrough": {
       return getTag("s", content, closed);
     }
+    case "code":
+    case "h1":
+    case "h2":
+    case "h3":
+    case "h4":
+    case "h5":
+    case "h6": {
+      return getTag(type, content, closed);
+    }
     default: {
       return "";
     }

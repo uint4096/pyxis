@@ -2,14 +2,20 @@ import { getDescendant } from ".";
 import { ZERO_WIDTH_SPACE_UNICODE } from "../../../utils";
 
 const NODE_TEXT_MAP = {
-  span: { type: "nowrap", value: "" },
-  "#text": { type: "nowrap", value: "" },
-  strong: { type: "wrap", value: "**" },
-  em: { type: "wrap", value: "*" },
-  s: { type: "wrap", value: "~~" },
-  br: { type: "nowrap", value: "" },
-  div: { type: "nowrap", value: "\n" },
-  line: { type: "nowrap", value: "" },
+  span: { prefix: false, value: "" },
+  "#text": { prefix: false, value: "" },
+  strong: { prefix: true, value: "**" },
+  em: { prefix: true, value: "*" },
+  s: { prefix: true, value: "~~" },
+  br: { prefix: false, value: "" },
+  div: { prefix: false, value: "\n" },
+  code: { prefix: true, value: "`" },
+  h1: { prefix: true, value: "#" },
+  h2: { prefix: true, value: "##" },
+  h3: { prefix: true, value: "###" },
+  h4: { prefix: true, value: "####" },
+  h5: { prefix: true, value: "#####" },
+  h6: { prefix: true, value: "######" },
 };
 
 const textLength = (text?: string | null) =>
@@ -44,7 +50,7 @@ export const getCaretFromDomNodes = (
          */
         caretPosition += textLength(node.nodeValue) ?? 0;
       } else {
-        const prefix = nodeText?.type === "wrap" ? nodeText.value?.length : 0;
+        const prefix = nodeText?.prefix ? nodeText.value?.length : 0;
 
         caretPosition +=
           prefix +

@@ -3,12 +3,38 @@ export type TokenType =
   | "bold&italic"
   | "bold"
   | "italic"
-  | "strikethrough";
+  | "strikethrough"
+  | "code"
+  | "h1"
+  | "h2"
+  | "h3"
+  | "h4"
+  | "h5"
+  | "h6";
 
 export type Token = {
   type: TokenType;
   value: string;
   index: number;
+};
+
+const getHeader = (text: string) => {
+  let i = 0,
+    token = "";
+  while (i < text.length || text[i] !== "\n") {
+    if (text[i] !== "#") {
+      break;
+    }
+
+    token = `${token}#`;
+    i++;
+  }
+
+  if (i <= 6 && text[i] === ' ') {
+    return { isHeader: true, type: `h${i}`, value: token };
+  }
+
+  return { isHeader: false };
 };
 
 export const lexer = (text: string) => {
@@ -43,6 +69,30 @@ export const lexer = (text: string) => {
         if (text[i + 1] === "~")
           syntaxTokens.push({ type: "strikethrough", index: i, value: "~~" });
         i += 1;
+        break;
+      }
+      case "`": {
+        syntaxTokens.push({ type: "code", index: i, value: "`" });
+        break;
+      }
+      case "#": {
+        if (i !== 0 && text[i - 1] !== "\n") {
+          break;
+        }
+
+        const { isHeader, type, value } = getHeader(text);
+        if (!isHeader) {
+          break;
+        }
+
+        syntaxTokens.push({
+          type: <NonNullable<TokenType>>type,
+          index: i,
+          value: <NonNullable<string>>value,
+        });
+
+        i += (<NonNullable<string>>value)?.length - 1
+
         break;
       }
     }

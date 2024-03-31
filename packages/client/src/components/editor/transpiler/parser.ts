@@ -22,26 +22,18 @@ export const parser = (tokens: Array<Token>) => {
     const body: Array<Node> = [];
     while (pointer < tokens.length) {
       const token = tokens[pointer];
-      switch (token?.type) {
-        case "text": {
-          body.push({ type: "text", value: token.value });
-          pointer++;
-          break;
-        }
-        case "bold&italic":
-        case "bold":
-        case "italic":
-        case "strikethrough": {
-          if (type === token?.type) {
-            ++pointer;
-            return { body, closed: true };
-          }
-
+      if (token?.type === 'text') {
+        body.push({ type: "text", value: token.value });
+        pointer++;
+      } else {
+        if (type === token?.type) {
           ++pointer;
-          const { body: params, closed } = walk(token?.type);
-          body.push({ type: token?.type, params: params, closed });
-          break;
+          return { body, closed: true };
         }
+
+        ++pointer;
+        const { body: params, closed } = walk(token?.type);
+        body.push({ type: token?.type, params: params, closed });
       }
     }
 
