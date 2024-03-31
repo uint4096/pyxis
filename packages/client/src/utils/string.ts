@@ -5,7 +5,7 @@ export const insertTextAtPosition = (
   end: number
 ) => `${input.slice(0, start)}${text}${input.slice(end, input.length)}`;
 
-export const wordPositon = (
+export const wordPositonBackward = (
   text: string,
   position: number,
   options?: { excludeChars: Array<string> }
@@ -29,4 +29,31 @@ export const wordPositon = (
   }
 
   return idx + 1;
+};
+
+
+export const wordPositonForward = (
+  text: string,
+  position: number,
+  options?: { excludeChars: Array<string> }
+) => {
+  const { excludeChars } = options ?? {};
+
+  let char = "",
+    idx = position,
+    parsedChar = false;
+
+  while (idx < text.length) {
+    char = text[idx];
+
+    if (!parsedChar && !(excludeChars ?? []).includes(char)) {
+      parsedChar = true;
+    } else if (parsedChar && (excludeChars ?? []).includes(char)) {
+      break;
+    }
+
+    idx++;
+  }
+
+  return idx;
 };

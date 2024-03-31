@@ -1,5 +1,5 @@
 import { getKeyContent } from "./content";
-import { insertTextAtPosition, wordPositon } from "../../../utils";
+import { insertTextAtPosition, wordPositonBackward, wordPositonForward } from "../../../utils";
 import { Keys } from "./mapping";
 
 export type Caret = {
@@ -24,7 +24,7 @@ const actions: ActionKeys = {
     const excludeChars = [" ", "\n", "-", "'", "(", ")"];
     const start = caret.collapsed
       ? ctrl
-        ? wordPositon(text, caret.start, { excludeChars })
+        ? wordPositonBackward(text, caret.start, { excludeChars })
         : caret.start - 1
       : caret.start;
 
@@ -37,6 +37,23 @@ const actions: ActionKeys = {
       },
     };
   },
+  [Keys.DELETE]: (text, caret, ctrl) => {
+    const excludeChars = [" ", "\n", "-", "'", "(", ")"];
+    const end = caret.collapsed
+      ? ctrl
+        ? wordPositonForward(text, caret.start, { excludeChars })
+        : caret.start
+      : caret.start;
+
+    return {
+      text: `${text.slice(0, caret.start)}${text.slice(end, text.length)}`,
+      caret: {
+        start: caret.start,
+        end: caret.start,
+        collapsed: true,
+      },
+    };
+  }
 };
 
 const getter: { get: (target: typeof actions, key: string) => Handler } = {

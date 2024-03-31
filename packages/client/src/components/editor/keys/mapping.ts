@@ -10,13 +10,13 @@ const MappedKeys = {
   ARROW_LEFT: "ArrowLeft",
   ARROW_UP: "ArrowUp",
   ARROW_DOWN: "ArrowDown",
+  DELETE: "Delete",
   END: "End",
   HOME: "Home",
   PAGE_DOWN: "PageDown",
   PAGE_UP: "PageUp",
-  A: "a",
-  V: "v",
-  C: "c",
+  TAB: "Tab",
+  SUPER: "Super"
 } as const;
 
 const getter = {
@@ -45,4 +45,4 @@ export const selectionKeys: Array<string> = [
   Keys.PAGE_UP,
 ];
 
-export const ctrlSelectionKeys: Array<string> = [Keys.A, Keys.C];
+export const ctrlSelectionKeys: Array<string> = [Keys.a, Keys.c];
