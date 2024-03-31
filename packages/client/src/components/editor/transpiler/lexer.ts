@@ -10,7 +10,8 @@ export type TokenType =
   | "h3"
   | "h4"
   | "h5"
-  | "h6";
+  | "h6"
+  | "link";
 
 export type Token = {
   type: TokenType;
@@ -30,11 +31,16 @@ const getHeader = (text: string) => {
     i++;
   }
 
-  if (i <= 6 && text[i] === ' ') {
+  if (i <= 6 && text[i] === " ") {
     return { isHeader: true, type: `h${i}`, value: token };
   }
 
   return { isHeader: false };
+};
+
+const getLink = (text: string) => {
+  const match = text.match(/(\bhttps?:\/\/|\bwww\.)\S+/i);
+  return match?.[0];
 };
 
 export const lexer = (text: string) => {
@@ -91,9 +97,30 @@ export const lexer = (text: string) => {
           value: <NonNullable<string>>value,
         });
 
-        i += (<NonNullable<string>>value)?.length - 1
+        i += (<NonNullable<string>>value)?.length - 1;
 
         break;
+      }
+      case "h": {
+        const link = getLink(text.slice(i));
+        if (!link) {
+          break;
+        }
+
+        syntaxTokens.push({
+          type: "link",
+          index: i,
+          value: "",
+        });
+
+        //Closing token so that text is extracted correctly
+        syntaxTokens.push({
+          type: "link",
+          index: i + link.length,
+          value: "",
+        });
+
+        i += link.length - 1;
       }
     }
 

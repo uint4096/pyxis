@@ -16,6 +16,7 @@ const NODE_TEXT_MAP = {
   h4: { prefix: true, value: "####" },
   h5: { prefix: true, value: "#####" },
   h6: { prefix: true, value: "######" },
+  a: { prefix: false, value: "" },
 };
 
 const textLength = (text?: string | null) =>

@@ -1,27 +1,49 @@
 import { TokenType } from "./lexer";
 import { Node } from "./parser";
 
-const getTag = (tag: string, content: string, closed?: boolean) =>
-  closed
-    ? `<${tag}>${content}</${tag}>`
-    : `<${tag} unclosed>${content}</${tag}>`;
+const getTag = (
+  tag: string,
+  content: string,
+  attributeList: Record<string, string | boolean>
+) => {
+  const attr = Object.entries(attributeList).reduce(
+    (attributes, [key, value]) => {
+      if (typeof value === "string") {
+        attributes = `${attributes} ${key}="${value}"`;
+      } else {
+        if (value) {
+          attributes += `${attributes} ${key}`;
+        }
+      }
+
+      return attributes;
+    },
+    ""
+  );
+
+  return `<${tag} ${attr}>${content}</${tag}>`;
+};
 
 const generateHTML = (type: TokenType, content: string, closed?: boolean) => {
+  const attributes = {
+    unclosed: !closed,
+  };
+
   switch (type) {
     case "text": {
       return `${content}`;
     }
     case "bold": {
-      return getTag("strong", content, closed);
+      return getTag("strong", content, attributes);
     }
     case "italic": {
-      return getTag("em", content, closed);
+      return getTag("em", content, attributes);
     }
     case "bold&italic": {
-      return getTag("strong", getTag("em", content, closed), closed);
+      return getTag("strong", getTag("em", content, attributes), attributes);
     }
     case "strikethrough": {
-      return getTag("s", content, closed);
+      return getTag("s", content, attributes);
     }
     case "code":
     case "h1":
@@ -30,7 +52,10 @@ const generateHTML = (type: TokenType, content: string, closed?: boolean) => {
     case "h4":
     case "h5":
     case "h6": {
-      return getTag(type, content, closed);
+      return getTag(type, content, attributes);
+    }
+    case "link": {
+      return getTag("a", content, { ...attributes, href: content });
     }
     default: {
       return "";
