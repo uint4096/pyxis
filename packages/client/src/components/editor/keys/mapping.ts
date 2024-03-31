@@ -16,7 +16,7 @@ const MappedKeys = {
   PAGE_DOWN: "PageDown",
   PAGE_UP: "PageUp",
   TAB: "Tab",
-  SUPER: "Super"
+  SUPER: "Super",
 } as const;
 
 const getter = {
@@ -46,3 +46,4 @@ export const selectionKeys: Array<string> = [
 ];
 
 export const ctrlSelectionKeys: Array<string> = [Keys.a, Keys.c];
+export const ctrlSkipKeys: Array<string> = [Keys.v];

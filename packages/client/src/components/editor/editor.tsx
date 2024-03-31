@@ -4,7 +4,7 @@ import "./editor.css";
 import { getCaretFromDomNodes, getSelection } from "./dom";
 import { getHTMLContent, type Selection } from "./transpiler";
 import { selectionKeys, Actions, type Caret } from "./keys";
-import { ctrlSelectionKeys } from "./keys/mapping";
+import { ctrlSelectionKeys, ctrlSkipKeys } from "./keys/mapping";
 import { insertTextAtPosition } from "../../utils";
 
 const Editor = () => {
@@ -93,6 +93,8 @@ const Editor = () => {
         (event.ctrlKey && !rawText.caret.collapsed)
       ) {
         setLastKey({ key, ctrl: event.ctrlKey });
+        return;
+      } else if (event.ctrlKey && ctrlSkipKeys.includes(key)) {
         return;
       }
 
