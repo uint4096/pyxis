@@ -7,7 +7,6 @@ export const getSelection = (element: Node) => {
   }
 
   const anchor = getRelativeElementPosition(element, selection.anchorNode);
-
   const focus = getRelativeElementPosition(element, selection.focusNode);
 
   return {

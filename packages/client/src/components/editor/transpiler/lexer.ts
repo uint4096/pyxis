@@ -113,7 +113,7 @@ export const lexer = (text: string) => {
           value: "",
         });
 
-        //Closing token so that text is extracted correctly
+        // Closing token so that text is extracted correctly
         syntaxTokens.push({
           type: "link",
           index: i + link.length,

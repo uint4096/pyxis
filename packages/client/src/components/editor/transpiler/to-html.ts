@@ -1,11 +1,19 @@
 import { TokenType } from "./lexer";
 import { Node } from "./parser";
 
-const getTag = (
-  tag: string,
-  content: string,
-  attributeList: Record<string, string | boolean>
-) => {
+type Attributes = Record<string, string | boolean>;
+
+type HTMLProperties = {
+  tag: string;
+  contentOverride?: (content: string, attributes: Attributes) => string;
+  attributeOverride?: (content: string, attributes: Attributes) => Attributes;
+};
+
+const getTag = (tag: string, content: string, attributeList: Attributes) => {
+  if (!tag) {
+    return content;
+  }
+
   const attr = Object.entries(attributeList).reduce(
     (attributes, [key, value]) => {
       if (typeof value === "string") {
@@ -21,7 +29,32 @@ const getTag = (
     ""
   );
 
-  return `<${tag} ${attr}>${content}</${tag}>`;
+  return `<${tag}${attr}>${content}</${tag}>`;
+};
+
+const TOKEN_TAG_MAP: { [k in TokenType]: HTMLProperties } = {
+  "bold&italic": {
+    tag: "strong",
+    contentOverride: (content, attributes) => getTag("em", content, attributes),
+  },
+  bold: { tag: "strong" },
+  code: { tag: "code" },
+  h1: { tag: "h1" },
+  h2: { tag: "h2" },
+  h3: { tag: "h3" },
+  h4: { tag: "h4" },
+  h5: { tag: "h5" },
+  h6: { tag: "h6" },
+  italic: { tag: "em" },
+  link: {
+    tag: "a",
+    attributeOverride: (content, attributes) => ({
+      ...attributes,
+      href: content,
+    }),
+  },
+  strikethrough: { tag: "s" },
+  text: { tag: "" },
 };
 
 const generateHTML = (type: TokenType, content: string, closed?: boolean) => {
@@ -29,46 +62,24 @@ const generateHTML = (type: TokenType, content: string, closed?: boolean) => {
     unclosed: !closed,
   };
 
-  switch (type) {
-    case "text": {
-      return `${content}`;
-    }
-    case "bold": {
-      return getTag("strong", content, attributes);
-    }
-    case "italic": {
-      return getTag("em", content, attributes);
-    }
-    case "bold&italic": {
-      return getTag("strong", getTag("em", content, attributes), attributes);
-    }
-    case "strikethrough": {
-      return getTag("s", content, attributes);
-    }
-    case "code":
-    case "h1":
-    case "h2":
-    case "h3":
-    case "h4":
-    case "h5":
-    case "h6": {
-      return getTag(type, content, attributes);
-    }
-    case "link": {
-      return getTag("a", content, { ...attributes, href: content });
-    }
-    default: {
-      return "";
-    }
-  }
+  const { tag, contentOverride, attributeOverride } = TOKEN_TAG_MAP[type];
+
+  return getTag(
+    tag,
+    contentOverride?.(content, attributes) ?? content,
+    attributeOverride?.(content, attributes) ?? attributes
+  );
 };
 
-export const toHtml = (ast: Array<Node>) =>
-  ast.reduce((html, node) => {
-    if (node.type === "text") {
-      html += generateHTML("text", node.value);
-    } else {
-      html += generateHTML(node.type, toHtml(node.params), node.closed);
-    }
-    return html;
-  }, "");
+export const toHtml = (ast: Array<Node>): string =>
+  ast.reduce(
+    (html, node) => (
+      (html += generateHTML(
+        node.type,
+        node.type === "text" ? node.value : toHtml(node.params),
+        (<Node & { closed?: boolean }>node).closed
+      )),
+      html
+    ),
+    ""
+  );
