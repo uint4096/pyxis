@@ -1,34 +1,12 @@
 import { getDescendant } from ".";
-import { ZERO_WIDTH_SPACE_UNICODE } from "../../../utils";
-
-const NODE_TEXT_MAP = {
-  span: { prefix: false, value: "" },
-  "#text": { prefix: false, value: "" },
-  strong: { prefix: true, value: "**" },
-  em: { prefix: true, value: "*" },
-  s: { prefix: true, value: "~~" },
-  br: { prefix: false, value: "" },
-  div: { prefix: false, value: "\n" },
-  code: { prefix: true, value: "`" },
-  h1: { prefix: true, value: "#" },
-  h2: { prefix: true, value: "##" },
-  h3: { prefix: true, value: "###" },
-  h4: { prefix: true, value: "####" },
-  h5: { prefix: true, value: "#####" },
-  h6: { prefix: true, value: "######" },
-  a: { prefix: false, value: "" },
-};
-
-const textLength = (text?: string | null) =>
-  (text?.length ?? 0) -
-  (text?.match(new RegExp(ZERO_WIDTH_SPACE_UNICODE, "g")) ?? []).length;
+import { NODE_TEXT_MAP, textLength } from "../../../utils";
 
 export const getCaretFromDomNodes = (
   base: Node,
   position: string,
   offset: number
 ) => {
-  const elem = getDescendant(base, position);
+  const elem = position ? getDescendant(base, position) : base;
   let foundNode = false;
   const parseNode = (nodeList: NodeList) => {
     let idx = 0,

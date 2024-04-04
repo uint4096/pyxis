@@ -1,3 +1,5 @@
+import { ZERO_WIDTH_SPACE_UNICODE } from "./constants";
+
 export const insertTextAtPosition = (
   input: string,
   text: string,
@@ -31,7 +33,6 @@ export const wordPositonBackward = (
   return idx + 1;
 };
 
-
 export const wordPositonForward = (
   text: string,
   position: number,
@@ -57,3 +58,7 @@ export const wordPositonForward = (
 
   return idx;
 };
+
+export const textLength = (text?: string | null) =>
+  (text?.length ?? 0) -
+  (text?.match(new RegExp(ZERO_WIDTH_SPACE_UNICODE, "g")) ?? []).length;

@@ -1,6 +1,11 @@
-import { useState, useEffect, KeyboardEvent, SyntheticEvent } from "react";
-import { useCallback } from "react";
 import "./editor.css";
+import {
+  useState,
+  useEffect,
+  KeyboardEvent,
+  SyntheticEvent,
+  useCallback,
+} from "react";
 import { getCaretFromDomNodes, getSelection } from "./dom";
 import { getHTMLContent, type Selection } from "./transpiler";
 import { selectionKeys, Actions, type Caret } from "./keys";
