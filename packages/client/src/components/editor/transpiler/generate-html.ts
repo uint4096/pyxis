@@ -1,8 +1,11 @@
 import { transpile } from "./transpile";
-import { ZERO_WIDTH_SPACE } from "../../../utils";
+import { NODE_TEXT_MAP, TOKEN_TEXT_MAP, ZERO_WIDTH_SPACE, textLength } from "../../../utils";
+import { Token, lexer } from "./lexer";
+import { Node, ElementNode, parser } from "./parser";
+import { TOKEN_TAG_MAP } from "./to-html";
 
 type SelectedElement = {
-  element: number;
+  element: string;
   offset: number;
 };
 
@@ -17,79 +20,173 @@ type Content = {
   selection: Selection;
 };
 
+const findNodeCharSum = (node: NodeList[0]) => {
+  const token =
+    NODE_TEXT_MAP[<keyof typeof NODE_TEXT_MAP>node.nodeName.toLowerCase()];
+  return node.nodeName === "#text"
+    ? node.nodeValue?.length ?? 0
+    : (token.prefix ? token.value.length : 0) +
+        Array.from(node.childNodes).reduce(
+          (sum, node): number => sum + findNodeCharSum(node),
+          0
+        ) +
+        (token.suffix ? token.value.length : 0);
+};
+
+const findCharSum = (nodes: Array<Node>) =>
+  nodes.reduce((sum, node): number => {
+    const token = TOKEN_TEXT_MAP[node.type];
+    return node.type === "text"
+      ? (sum += node.value.length)
+      : (token.prefix ? token.value.length : 0) +
+          sum +
+          findCharSum(node.params) +
+          (token.suffix && node.closed ? token.value.length : 0);
+  }, 0);
+
+const getDomNodeStart = (nodes: NodeList, caret: number) => {
+  let sum = 0;
+  const nodeList = Array.from(nodes);
+  for (const [idx, node] of nodeList.entries()) {
+    const charSum = findNodeCharSum(node);
+    if (sum + charSum >= caret) {
+      return { position: idx, offset: sum }
+    }
+
+    sum += charSum;
+  }
+
+  return { position: nodeList.length - 1, offset: sum };
+};
+
+const getStart = (childNodes: Array<Node>, caret: number) => {
+  let start = 0;
+  for (const node of childNodes) {
+    const sum = findCharSum([node]);
+    if (start + sum > caret) {
+      return start;
+    }
+
+    start += sum;
+  }
+
+  return start;
+};
+
+const getEnd = (childNodes: Array<Node>, caret: number) => {
+  let end = 0;
+  for (const node of childNodes) {
+    const sum = findCharSum([node]);
+    if (end + sum > caret) {
+      end += sum;
+      return end;
+    }
+
+    end += sum;
+  }
+
+  return end;
+};
+
+const getNodeContent = (node: Node) => {
+  const token = TOKEN_TEXT_MAP[node.type];
+  return node.type === "text"
+    ? node.value
+    : (token.prefix ? token.value : "") +
+        node.params.reduce(
+          (text, element): string => text + getNodeContent(element),
+          ""
+        ) + (token.suffix && node.closed ? token.value : "");
+};
+
+const mergeUnclosedNodes = (childNodes: Array<Node>) => {
+  return childNodes.reduce<Array<Node>>((acc, node, idx) => {
+    if (node.type !== "text" && !node.closed) {
+      const lastNode = acc[idx - 1];
+      if (lastNode.type === "text") {
+        lastNode.value += getNodeContent(node);
+      }
+    } else {
+      acc.push(node);
+    }
+
+    return acc;
+  }, []);
+};
+
+const getNodeSelection = (text: string, caret: number) => {
+  const domParser = new DOMParser();
+  const document = domParser.parseFromString(text, "text/html");
+  const nodes = document.childNodes[0].childNodes[1].childNodes;
+  return getDomNodeStart(nodes, caret);
+}
+
 export const getHTMLContent = (
   start: number,
   end: number,
   rawText: string
 ): Content => {
-  const lines = rawText.split("\n");
-  const { htmlContent, selection } = lines.reduce(
-    ({ htmlContent: html, lengthParsed, selection }, line, index) => {
-      // + 1 to account for the \n that gets lost in the split for lines > 0
-      const parsedChars = lengthParsed + (index ? 1 : 0);
-      const toParse = parsedChars + line.length;
+  const defaultSelection = {
+    anchor: { element: "0", offset: 0 },
+    focus: { element: "0", offset: 0 },
+    collapsed: start === end,
+  };
 
-      const startSelected = start >= parsedChars && start <= toParse;
-      const endSelected = end >= parsedChars && end <= toParse;
+  const { html, selection } = rawText
+    .split("\n")
+    .reduce<{ html: string; parsed: number; selection: Selection }>(
+      ({ html, parsed, selection }, line, idx) => {
+        const lParsed = parsed + (idx ? 1 : 0);
+        const toParse = lParsed + line.length;
+        const startSelected = start >= lParsed && start <= toParse;
+        const endSelected = end >= lParsed && end <= toParse;
 
-      if (startSelected || endSelected) {
-        // Process currently selected line(s)
+        let text;
+        if (startSelected || endSelected) {
+          const lineStart = start - lParsed;
+          const lineEnd = end - lParsed;
+          const tokens = mergeUnclosedNodes(parser(lexer(line)));
+          const startOverride = getStart(tokens, lineStart - 1);
+          const endOverride = getEnd(tokens, lineEnd - 1);
+          text = `${transpile(line.slice(0, startOverride))}${line.slice(
+            startOverride,
+            endOverride
+          )}${transpile(line.slice(endOverride))}`;
+
+          if (startSelected) {
+            const { position, offset } = getNodeSelection(text, lineStart);
+            selection.anchor = {
+              element: `${idx}.${position < 0 ? 0 : position}`,
+              offset: lineStart - offset
+            }
+          }
+
+          if (endSelected) {
+            const { position, offset } = getNodeSelection(text, lineEnd);
+            selection.focus = {
+              element: `${idx}.${position < 0 ? 0 : position}`,
+              offset: lineEnd - offset
+            } 
+          }
+        } else if (parsed > start && parsed < end) {
+          text = line;
+        } else {
+          text = transpile(line);
+        }
+
         return {
-          /*
-           * Chrome folds a div that has no content. Hence the use of a zero-width space
-           * https://www.fileformat.info/info/unicode/char/200b/index.htm
-           */
-          htmlContent: `${html ? html : ""}<div>${
-            line ? line : ZERO_WIDTH_SPACE
+          html: `${html ? html : ""}<div>${
+            text ? text : ZERO_WIDTH_SPACE
           }</div>`,
-          lengthParsed: toParse,
-          selection: {
-            anchor: startSelected
-              ? {
-                  element: index,
-                  offset: start - parsedChars,
-                }
-              : { ...selection.anchor },
-            focus: endSelected
-              ? {
-                  element: index,
-                  offset: end - parsedChars,
-                }
-              : { ...selection.focus },
-            collapsed: start === end,
-          },
+          parsed: toParse,
+          selection: selection,
         };
-      } else {
-        // Process all other lines
-        const content = transpile(line);
-        return {
-          selection,
-          htmlContent: `${html}<div>${
-            content ? content : ZERO_WIDTH_SPACE
-          }</div>`,
-          lengthParsed: toParse,
-        };
-      }
-    },
-    {
-      htmlContent: "",
-      lengthParsed: 0,
-      selection: {
-        anchor: {
-          element: lines.length - 1,
-          offset: lines[lines.length - 1].length,
-        },
-        focus: {
-          element: lines.length - 1,
-          offset: lines[lines.length - 1].length,
-        },
-        collapsed: true,
       },
-    }
-  );
+      { html: "", parsed: 0, selection: defaultSelection }
+    );
 
   return {
-    htmlContent,
+    htmlContent: html,
     selection,
   };
 };

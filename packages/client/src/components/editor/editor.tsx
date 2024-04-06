@@ -6,7 +6,7 @@ import {
   SyntheticEvent,
   useCallback,
 } from "react";
-import { getCaretFromDomNodes, getSelection } from "./dom";
+import { getCaretFromDomNodes, getDescendant, getSelection } from "./dom";
 import { getHTMLContent, type Selection } from "./transpiler";
 import { selectionKeys, Actions, type Caret } from "./keys";
 import { ctrlSelectionKeys, ctrlSkipKeys } from "./keys/mapping";
@@ -129,12 +129,10 @@ const Editor = () => {
     const { selection } = html ?? {};
     const editor = getEditor();
 
-    const anchorNode =
-      editor?.childNodes[selection?.anchor.element ?? 0]?.childNodes?.[0];
+    const anchorNode = getDescendant(editor, selection?.anchor.element ?? "0");
     const anchor = anchorNode ?? editor;
 
-    const focusNode =
-      editor?.childNodes[selection?.focus.element ?? 0]?.childNodes?.[0];
+    const focusNode = getDescendant(editor, selection?.focus.element ?? "0");
     const focus = focusNode ?? editor;
 
     const windowSelection = window.getSelection();

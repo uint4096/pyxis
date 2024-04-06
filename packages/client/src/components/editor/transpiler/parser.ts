@@ -1,15 +1,17 @@
 import { Token, TokenType } from "./lexer";
 
-export type Node =
-  | {
-      type: Exclude<TokenType, "text">;
-      params: Array<Node>;
-      closed?: boolean;
-    }
-  | {
-      type: Extract<TokenType, "text">;
-      value: string;
-    };
+export type ElementNode = {
+  type: Exclude<TokenType, "text">;
+  params: Array<Node>;
+  closed: boolean;
+};
+
+export type TextNode = {
+  type: Extract<TokenType, "text">;
+  value: string;
+};
+
+export type Node = TextNode | ElementNode;
 
 export type AST = {
   type: "document";
@@ -22,7 +24,7 @@ export const parser = (tokens: Array<Token>) => {
     const body: Array<Node> = [];
     while (pointer < tokens.length) {
       const token = tokens[pointer];
-      if (token?.type === 'text') {
+      if (token?.type === "text") {
         body.push({ type: "text", value: token.value });
         pointer++;
       } else {
