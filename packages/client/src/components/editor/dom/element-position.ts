@@ -7,6 +7,9 @@
 //     : never
 //   : never;
 
+/**
+ * Returns address of the target element relative to the base element
+ */
 export const getRelativeElementPosition = (
   base: Node,
   target: Node,

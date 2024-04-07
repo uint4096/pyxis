@@ -51,24 +51,3 @@ export const toText = (html: string) => {
   const body = document.childNodes[0].childNodes[1];
   return parseNode(body.childNodes);
 };
-
-export const parseNode = (nodeList: NodeList) => {
-  let idx = 0,
-    text = "";
-  while (idx < nodeList.length) {
-    const node = nodeList[idx];
-    const content =
-      node.nodeName === "#text" ? node.nodeValue : parseNode(node.childNodes);
-    const sign =
-      NODE_TEXT_MAP[<keyof typeof NODE_TEXT_MAP>node.nodeName.toLowerCase()];
-    const isLastELem = node === nodeList[nodeList.length - 1];
-    text += isLastELem
-      ? `${content}`
-      : sign.type === "wrap"
-      ? `${sign.value}${content}${sign.value}`
-      : `${content}${sign.value}`;
-    idx++;
-  }
-
-  return text;
-};
