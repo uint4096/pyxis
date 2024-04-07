@@ -1,4 +1,4 @@
-import { TOKEN_TEXT_MAP } from "../../../utils";
+import { TOKEN_TEXT_MAP } from "../../../../utils";
 import { Node } from "./parser";
 
 const getNodeContent = (node: Node) => {

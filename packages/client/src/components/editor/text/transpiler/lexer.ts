@@ -1,4 +1,4 @@
-export type TokenType =
+export type Tokens =
   | "text"
   | "bold&italic"
   | "bold"
@@ -14,7 +14,7 @@ export type TokenType =
   | "link";
 
 export type Token = {
-  type: TokenType;
+  type: Tokens;
   value: string;
   index: number;
 };
@@ -92,7 +92,7 @@ export const lexer = (text: string) => {
         }
 
         syntaxTokens.push({
-          type: <NonNullable<TokenType>>type,
+          type: <NonNullable<Tokens>>type,
           index: i,
           value: <NonNullable<string>>value,
         });

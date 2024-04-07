@@ -1,13 +1,13 @@
-import { Token, TokenType } from "./lexer";
+import { Token, Tokens } from "./lexer";
 
 export type ElementNode = {
-  type: Exclude<TokenType, "text">;
+  type: Exclude<Tokens, "text">;
   params: Array<Node>;
   closed: boolean;
 };
 
 export type TextNode = {
-  type: Extract<TokenType, "text">;
+  type: Extract<Tokens, "text">;
   value: string;
 };
 

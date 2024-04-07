@@ -1,10 +1,7 @@
-import { transpile } from "./transpile";
+import { transpile, lexer, parser, mergeUnclosedNodes } from "./transpiler";
 import { ZERO_WIDTH_SPACE, textLength } from "../../../utils";
-import { lexer } from "./lexer";
-import { parser } from "./parser";
 import { nodePosition } from "../dom";
 import { getEnd, getStart } from "./tracker";
-import { mergeUnclosedNodes } from "./merge-nodes";
 
 type SelectedElement = {
   element: string;

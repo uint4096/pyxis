@@ -1,5 +1,5 @@
 import { TOKEN_TEXT_MAP, textLength } from "../../../utils";
-import { Node } from "./parser";
+import { Node } from "./transpiler";
 
 const findCharSum = (nodes: Array<Node>) =>
   nodes.reduce((sum, node): number => {

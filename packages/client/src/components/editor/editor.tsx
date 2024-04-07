@@ -7,10 +7,19 @@ import {
   useCallback,
 } from "react";
 import { getCaretFromDomNodes, getDescendant, getSelection } from "./dom";
-import { getHTMLContent, type Selection } from "./transpiler";
-import { selectionKeys, Actions, type Caret } from "./keys";
-import { ctrlSelectionKeys, ctrlSkipKeys } from "./keys/mapping";
-import { ZERO_WIDTH_SPACE_UNICODE, insertTextAtPosition, textLength } from "../../utils";
+import { getHTMLContent, type Selection } from "./text";
+import {
+  selectionKeys,
+  Actions,
+  type Caret,
+  ctrlSelectionKeys,
+  ctrlSkipKeys,
+} from "./keys";
+import {
+  ZERO_WIDTH_SPACE_UNICODE,
+  insertTextAtPosition,
+  textLength,
+} from "../../utils";
 
 const Editor = () => {
   const [rawText, setRawText] = useState<{
@@ -39,7 +48,12 @@ const Editor = () => {
       setRawText(({ text, caret }) => {
         const content = event.clipboardData.getData("text");
         return {
-          text: insertTextAtPosition(text, content.replace(new RegExp(ZERO_WIDTH_SPACE_UNICODE, "g"), ''), caret.start, caret.end),
+          text: insertTextAtPosition(
+            text,
+            content.replace(new RegExp(ZERO_WIDTH_SPACE_UNICODE, "g"), ""),
+            caret.start,
+            caret.end
+          ),
           caret: {
             start: caret.start + textLength(content),
             end: caret.start + textLength(content),

@@ -1,5 +1,5 @@
-import { NODE_TEXT_MAP } from "../../../utils";
-import { TokenType } from "./lexer";
+import { NODE_TEXT_MAP } from "../../../../utils";
+import { Tokens } from "./lexer";
 import { Node } from "./parser";
 
 type Attributes = Record<string, string | boolean>;
@@ -33,7 +33,7 @@ const getTag = (tag: string, content: string, attributeList: Attributes) => {
   return `<${tag}${attr}>${content}</${tag}>`;
 };
 
-export const TOKEN_TAG_MAP: { [k in TokenType]: HTMLProperties } = {
+export const TOKEN_TAG_MAP: { [k in Tokens]: HTMLProperties } = {
   "bold&italic": {
     tag: "strong",
     contentOverride: (content, attributes) => getTag("em", content, attributes),
@@ -58,7 +58,7 @@ export const TOKEN_TAG_MAP: { [k in TokenType]: HTMLProperties } = {
   text: { tag: "" },
 };
 
-const generateHTML = (type: TokenType, content: string, closed?: boolean) => {
+const generateHTML = (type: Tokens, content: string, closed?: boolean) => {
   const attributes = {
     unclosed: !closed,
   };
