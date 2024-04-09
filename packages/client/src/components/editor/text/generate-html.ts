@@ -1,5 +1,5 @@
 import { transpile, lexer, parser, mergeUnclosedNodes } from "./transpiler";
-import { ZERO_WIDTH_SPACE, textLength } from "../../../utils";
+import { ZERO_WIDTH_SPACE, compose, textLength } from "../../../utils";
 import { nodePosition } from "../dom";
 import { getEnd, getStart } from "./tracker";
 
@@ -37,7 +37,7 @@ export const getHTMLContent = (
         if (startSelected || endSelected) {
           const lineStart = start - lParsed;
           const lineEnd = end - lParsed;
-          const tokens = mergeUnclosedNodes(parser(lexer(line)));
+          const tokens = compose(mergeUnclosedNodes, parser, lexer)(line);
           const startOverride = getStart(tokens, lineStart - 1);
           const endOverride = getEnd(tokens, lineEnd - 1);
           text = `${transpile(line.slice(0, startOverride))}${line.slice(

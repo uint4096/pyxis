@@ -13,17 +13,14 @@ const getNodeContent = (node: Node) => {
         (token.suffix && node.closed ? token.value : "");
 };
 
-export const mergeUnclosedNodes = (childNodes: Array<Node>) => {
-  return childNodes.reduce<Array<Node>>((acc, node, idx) => {
-    if (node.type !== "text" && !node.closed) {
-      const lastNode = acc[idx - 1];
-      if (lastNode.type === "text") {
-        lastNode.value += getNodeContent(node);
-      }
-    } else {
-      acc.push(node);
-    }
-
-    return acc;
-  }, []);
-};
+export const mergeUnclosedNodes = (childNodes: Array<Node>) =>
+  childNodes.reduce<Array<Node>>(
+    (acc, node, idx) =>
+      node.type !== "text" && !node.closed
+        ? ((lastNode) =>
+            lastNode.type === "text"
+              ? ((lastNode.value += getNodeContent(node)), acc)
+              : acc)(acc[idx - 1])
+        : (acc.push(node), acc),
+    []
+  );
