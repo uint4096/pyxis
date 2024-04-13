@@ -46,25 +46,25 @@ const getLink = (text: string) => {
 const patterns = [
   {
     type: "bold&italic",
-    pattern: /(?<=^\*\*\*(?=[^\s]))(.*?)(?=(?<!\s)\*\*\*)/,
+    pattern: /(?<=^\*\*\*(?=[^\s]))(.*?)((?<!\s)\*\*\*|$)/,
     value: "***",
   },
   {
     type: "bold",
-    pattern: /(?<=^\*\*(?=[^\s]))(.*?)(?=(?<!\s)\*\*)/,
+    pattern: /(?<=^\*\*(?=[^\s]))(.*?)((?<!\s)\*\*|$)/,
     value: "**",
   },
   {
     type: "italic",
-    pattern: /(?<=^\*(?=[^\s]))(.*?)(?=(?<!\s)\*)/,
+    pattern: /(?<=^\*(?=[^\s]))(.*?)((?<!\s)\*|$)/,
     value: "*",
   },
   {
     type: "strikethrough",
-    pattern: /(?<=^~~(?=[^\s]))(.*?)(?=(?<!\s)~~)/,
+    pattern: /(?<=^~~(?=[^\s]))(.*?)((?<!\s)~~|$)/,
     value: "~~",
   },
-  { type: "code", pattern: /(?<=^`(?=[^\s]))(.*?)(?=(?<!\s)`)/, value: "`" },
+  { type: "code", pattern: /(?<=^`(?=[^\s]))(.*?)((?<!\s)`|$)/, value: "`" },
 ] as const;
 
 export const lexer = (text: string) => {
@@ -77,18 +77,32 @@ export const lexer = (text: string) => {
         (match) => !!txt.match(new RegExp(match.pattern))?.[0]
       );
       if (match) {
-        const content = txt.match(
-          new RegExp(match.pattern)
-        )?.[0] as NonNullable<string>;
+        const _content = txt.match(new RegExp(match.pattern));
+        const content = _content?.[0] as NonNullable<string>;
         tokens.push({ type: match.type, index: i, value: match.value });
-        tokens.push(...walk(content));
-        tokens.push({
-          type: match.type,
-          index: i + match.value.length + content.length,
-          value: match.value,
-        });
 
-        i += 2 * match.value.length + content.length;
+        const hasEndNode = new RegExp(
+          `${match.value.replace(/\*/g, "\\*")}$`
+        ).test(content ?? "");
+        const textContent = hasEndNode
+          ? content.replace(
+              new RegExp(`${match.value.replace(/\*/g, "\\*")}$`),
+              ""
+            )
+          : content;
+        tokens.push(...walk(textContent));
+
+        if (hasEndNode) {
+          tokens.push({
+            type: match.type,
+            index: i + match.value.length + content.length,
+            value: match.value,
+          });
+        }
+
+        i +=
+          (hasEndNode ? 2 * match.value.length : match.value.length) +
+          textContent.length;
       } else {
         tokens.push({ type: "text", index: i, value: text[i] });
         i += 1;

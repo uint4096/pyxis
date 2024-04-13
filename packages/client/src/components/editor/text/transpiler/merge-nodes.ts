@@ -18,9 +18,11 @@ export const mergeUnclosedNodes = (childNodes: Array<Node>) =>
     (acc, node, idx) =>
       node.type !== "text" && !node.closed
         ? ((lastNode) =>
-            lastNode.type === "text"
-              ? ((lastNode.value += getNodeContent(node)), acc)
-              : acc)(acc[idx - 1])
+            lastNode
+              ? lastNode?.type === "text"
+                ? ((lastNode.value += getNodeContent(node)), acc)
+                : acc
+              : [{ type: "text", value: getNodeContent(node) }])(acc[idx - 1])
         : (acc.push(node), acc),
     []
   );
