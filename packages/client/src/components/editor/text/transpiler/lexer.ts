@@ -43,7 +43,65 @@ const getLink = (text: string) => {
   return match?.[0];
 };
 
+const patterns = [
+  {
+    type: "bold&italic",
+    pattern: /(?<=^\*\*\*(?=[^\s]))(.*?)(?=(?<!\s)\*\*\*)/,
+    value: "***",
+  },
+  {
+    type: "bold",
+    pattern: /(?<=^\*\*(?=[^\s]))(.*?)(?=(?<!\s)\*\*)/,
+    value: "**",
+  },
+  {
+    type: "italic",
+    pattern: /(?<=^\*(?=[^\s]))(.*?)(?=(?<!\s)\*)/,
+    value: "*",
+  },
+  {
+    type: "strikethrough",
+    pattern: /(?<=^~~(?=[^\s]))(.*?)(?=(?<!\s)~~)/,
+    value: "~~",
+  },
+  { type: "code", pattern: /(?<=^`(?=[^\s]))(.*?)(?=(?<!\s)`)/, value: "`" },
+] as const;
+
 export const lexer = (text: string) => {
+  const walk = (text: string) => {
+    const tokens: Array<Token> = [];
+    let i = 0;
+    while (i < text.length) {
+      const txt = text.slice(i);
+      const match = patterns.find(
+        (match) => !!txt.match(new RegExp(match.pattern))?.[0]
+      );
+      if (match) {
+        const content = txt.match(
+          new RegExp(match.pattern)
+        )?.[0] as NonNullable<string>;
+        tokens.push({ type: match.type, index: i, value: match.value });
+        tokens.push(...walk(content));
+        tokens.push({
+          type: match.type,
+          index: i + match.value.length + content.length,
+          value: match.value,
+        });
+
+        i += 2 * match.value.length + content.length;
+      } else {
+        tokens.push({ type: "text", index: i, value: text[i] });
+        i += 1;
+      }
+    }
+
+    return tokens;
+  };
+
+  return walk(text);
+};
+
+export const lexer_v0 = (text: string) => {
   const syntaxTokens: Array<Token> = [];
   let i = 0;
 
@@ -52,11 +110,17 @@ export const lexer = (text: string) => {
       case "*":
       case "_": {
         if (text[i + 1] === text[i] && text[i + 2] === text[i]) {
-          syntaxTokens.push({
-            type: "bold&italic",
-            index: i,
-            value: `${text[i]}${text[i]}${text[i]}`,
-          });
+          if (
+            (text[i - 1] !== undefined && text[i - 1] !== " ") ||
+            (text[i + 3] !== undefined && text[i + 3] !== " ")
+          ) {
+            syntaxTokens.push({
+              type: "bold&italic",
+              index: i,
+              value: `${text[i]}${text[i]}${text[i]}`,
+            });
+          }
+
           i += 2;
         } else if (text[i + 1] === text[i]) {
           syntaxTokens.push({
