@@ -39,7 +39,7 @@ export const getHTMLContent = (
           const lineEnd = end - lParsed;
           const tokens = compose(mergeUnclosedNodes, parser, lexer)(line);
           const startOverride = getStart(tokens, lineStart - 1);
-          const endOverride = getEnd(tokens, lineEnd - 1);
+          const endOverride = getEnd(tokens, lineEnd);
           text = `${transpile(line.slice(0, startOverride))}${line.slice(
             startOverride,
             endOverride

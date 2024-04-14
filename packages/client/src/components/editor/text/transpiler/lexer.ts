@@ -23,8 +23,9 @@ type Pattern = {
   type: Tokens;
   pattern: RegExp;
   value: string;
-  textOnly?: boolean;
-  forceEnd?: boolean;
+  textOnly?: boolean; // Should not contain any child elements
+  forceEnd?: boolean; // Force adding a closing token after parsing an element
+  startOnly?: boolean; // Should only be considered if the line begins with the token
 };
 
 const getHeader = (text: string) => {
@@ -80,6 +81,48 @@ const patterns: Readonly<Array<Pattern>> = [
     textOnly: true,
     forceEnd: true,
   },
+  {
+    type: "h1",
+    pattern: /(?<=^#(?=[^#]))\s.*/,
+    value: "#",
+    textOnly: true,
+    startOnly: true,
+  },
+  {
+    type: "h2",
+    pattern: /(?<=^##(?=[^#]))\s.*/,
+    value: "##",
+    textOnly: true,
+    startOnly: true,
+  },
+  {
+    type: "h3",
+    pattern: /(?<=^###(?=[^#]))\s.*/,
+    value: "###",
+    textOnly: true,
+    startOnly: true,
+  },
+  {
+    type: "h4",
+    pattern: /(?<=^####(?=[^#]))\s.*/,
+    value: "####",
+    textOnly: true,
+    startOnly: true,
+  },
+  {
+    type: "h5",
+    pattern: /(?<=^#####(?=[^#]))\s.*/,
+    value: "#####",
+    textOnly: true,
+    startOnly: true,
+  },
+  {
+    type: "h6",
+    pattern: /(?<=^######(?=[^#]))\s.*/,
+    value: "######",
+    textOnly: true,
+    startOnly: true,
+  },
 ] as const;
 
 export const lexer = (text: string) => {
@@ -91,7 +134,8 @@ export const lexer = (text: string) => {
       const match = patterns.find(
         (match) => !!txt.match(new RegExp(match.pattern))?.[0]
       );
-      if (match) {
+
+      if (match && (!match.startOnly || i === 0)) {
         const _content = txt.match(new RegExp(match.pattern));
         const content = _content?.[0] as NonNullable<string>;
         tokens.push({ type: match.type, index: i, value: match.value });
@@ -99,6 +143,7 @@ export const lexer = (text: string) => {
         const hasEndNode = !!content.match(
           new RegExp(`${match.value.replace(/\*/g, "\\*")}$`)
         )?.[0];
+
         const textContent = hasEndNode
           ? content.replace(
               new RegExp(`${match.value.replace(/\*/g, "\\*")}$`),
@@ -124,7 +169,12 @@ export const lexer = (text: string) => {
           (hasEndNode ? 2 * match.value.length : match.value.length) +
           textContent.length;
       } else {
-        tokens.push({ type: "text", index: i, value: text[i] });
+        const lastToken = tokens[tokens.length - 1];
+        if (lastToken?.type === "text") {
+          lastToken.value = lastToken.value + text[i];
+        } else {
+          tokens.push({ type: "text", index: i, value: text[i] });
+        }
         i += 1;
       }
     }
