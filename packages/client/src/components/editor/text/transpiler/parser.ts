@@ -27,20 +27,6 @@ export const parser = (tokens: Array<Token>) => {
       if (token?.type === "text") {
         body.push({ type: "text", value: token.value });
         pointer++;
-      } else if (token?.type === "code") {
-        // Everything until the end of code token is text
-        const endToken = tokens.findIndex(
-          (token, i) => i > pointer && token.type === "code"
-        );
-        const text = tokens
-          .slice(pointer + 1, endToken === -1 ? tokens.length : endToken)
-          .reduce((text, token) => text + token.value, "");
-        body.push({
-          type: "code",
-          params: [{ type: "text", value: text }],
-          closed: endToken !== -1,
-        });
-        pointer = endToken === -1 ? tokens.length : endToken + 1;
       } else {
         if (type === token?.type) {
           ++pointer;

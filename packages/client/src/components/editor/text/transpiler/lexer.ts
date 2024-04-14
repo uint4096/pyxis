@@ -19,6 +19,14 @@ export type Token = {
   index: number;
 };
 
+type Pattern = {
+  type: Tokens;
+  pattern: RegExp;
+  value: string;
+  textOnly?: boolean;
+  forceEnd?: boolean;
+};
+
 const getHeader = (text: string) => {
   let i = 0,
     token = "";
@@ -43,7 +51,7 @@ const getLink = (text: string) => {
   return match?.[0];
 };
 
-const patterns = [
+const patterns: Readonly<Array<Pattern>> = [
   {
     type: "bold&italic",
     pattern: /(?<=^\*\*\*(?=[^\s]))(.*?)((?<!\s)\*\*\*|$)/,
@@ -51,12 +59,12 @@ const patterns = [
   },
   {
     type: "bold",
-    pattern: /(?<=^\*\*(?=[^\s]))(.*?)((?<!\s)\*\*|$)/,
+    pattern: /(?<=^\*\*(?=[^\s|*]))(.*?)((?<![\s|*])\*\*|$)/,
     value: "**",
   },
   {
     type: "italic",
-    pattern: /(?<=^\*(?=[^\s]))(.*?)((?<!\s)\*|$)/,
+    pattern: /(?<=^\*(?=[^\s|*]))(.*?)((?<![\s|*])\*|$)/,
     value: "*",
   },
   {
@@ -64,7 +72,14 @@ const patterns = [
     pattern: /(?<=^~~(?=[^\s]))(.*?)((?<!\s)~~|$)/,
     value: "~~",
   },
-  { type: "code", pattern: /(?<=^`(?=[^\s]))(.*?)((?<!\s)`|$)/, value: "`" },
+  { type: "code", pattern: /(?<=^`)(.*?)(`|$)/, value: "`", textOnly: true },
+  {
+    type: "link",
+    pattern: /(^https?:\/\/|^www\.)\S+/i,
+    value: "",
+    textOnly: true,
+    forceEnd: true,
+  },
 ] as const;
 
 export const lexer = (text: string) => {
@@ -81,21 +96,26 @@ export const lexer = (text: string) => {
         const content = _content?.[0] as NonNullable<string>;
         tokens.push({ type: match.type, index: i, value: match.value });
 
-        const hasEndNode = new RegExp(
-          `${match.value.replace(/\*/g, "\\*")}$`
-        ).test(content ?? "");
+        const hasEndNode = !!content.match(
+          new RegExp(`${match.value.replace(/\*/g, "\\*")}$`)
+        )?.[0];
         const textContent = hasEndNode
           ? content.replace(
               new RegExp(`${match.value.replace(/\*/g, "\\*")}$`),
               ""
             )
           : content;
-        tokens.push(...walk(textContent));
 
-        if (hasEndNode) {
+        if (match.textOnly) {
+          tokens.push({ type: "text", index: i, value: textContent });
+        } else {
+          tokens.push(...walk(textContent));
+        }
+
+        if (hasEndNode || match.forceEnd) {
           tokens.push({
             type: match.type,
-            index: i + match.value.length + content.length,
+            index: i + match.value.length + textContent.length,
             value: match.value,
           });
         }
