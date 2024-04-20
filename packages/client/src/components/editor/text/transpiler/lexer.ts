@@ -142,6 +142,7 @@ export const lexer = (text: string, idx = 0) => {
             : <NonNullable<RegExp>>match.secondaryPattern
         )
       )?.[0] as NonNullable<string>;
+
       tokens.push({
         type: match.type,
         index: i + idx,

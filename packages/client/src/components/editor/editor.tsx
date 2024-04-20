@@ -21,11 +21,11 @@ import {
   textLength,
 } from "../../utils";
 
-const Editor = () => {
+const Editor = ({ initialContent }: { initialContent?: string }) => {
   const [rawText, setRawText] = useState<{
     text: string;
     caret: Caret;
-  }>({ text: "", caret: { start: 0, end: 0, collapsed: true } });
+  }>({ text: initialContent ?? "", caret: { start: 0, end: 0, collapsed: true } });
 
   const [html, setHtml] = useState<{
     content: string;
