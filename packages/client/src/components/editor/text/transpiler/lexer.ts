@@ -23,6 +23,7 @@ type Pattern = {
   type: Tokens;
   pattern: RegExp;
   value: string;
+  secondaryPattern?: RegExp;
   textOnly?: boolean; // Should not contain any child elements
   forceEnd?: boolean; // Force adding a closing token after parsing an element
   startOnly?: boolean; // Should only be considered if the line begins with the token
@@ -31,25 +32,35 @@ type Pattern = {
 const patterns: Readonly<Array<Pattern>> = [
   {
     type: "bold&italic",
-    pattern: /(?<=^\*\*\*(?=[^\s]))(.*?)((?<!\s)\*\*\*|$)/,
+    pattern: /(?<=^\*\*\*(?=[^\s]))(.*?)(?=(?<!\s)\*\*\*)/,
+    secondaryPattern: /(?<=^\*\*\*(?=[^\s]))(.*?)$/,
     value: "***",
   },
   {
     type: "bold",
-    pattern: /(?<=^\*\*(?=[^\s|*]))(.*?)((?<![\s|*])\*\*|$)/,
+    pattern: /(?<=^\*\*(?=[^\s]))(.*?)(?=(?<!\s)\*\*)/,
+    secondaryPattern: /(?<=^\*\*(?=[^\s|*]))(.*?)$/,
     value: "**",
   },
   {
     type: "italic",
-    pattern: /(?<=^\*(?=[^\s|*]))(.*?)((?<![\s|*])\*|$)/,
+    pattern: /(?<=^\*(?=[^\s|*]))(.*?)(?=(?<![\s|*])\*)/,
+    secondaryPattern: /(?<=^\*(?=[^\s|*]))(.*?)$/,
     value: "*",
   },
   {
     type: "strikethrough",
-    pattern: /(?<=^~~(?=[^\s]))(.*?)((?<!\s)~~|$)/,
+    pattern: /(?<=^~~(?=[^\s]))(.*?)(?=(?<!\s)~~)/,
+    secondaryPattern: /(?<=^~~(?=[^\s]))(.*?)$/,
     value: "~~",
   },
-  { type: "code", pattern: /(?<=^`)(.*?)(`|$)/, value: "`", textOnly: true },
+  {
+    type: "code",
+    pattern: /(?<=^`)(.*?)(?=`|$)/,
+    secondaryPattern: /(?<=^`)(.*?)$/,
+    value: "`",
+    textOnly: true,
+  },
   {
     type: "link",
     pattern: /(^https?:\/\/|^www\.)\S+/i,
@@ -101,57 +112,55 @@ const patterns: Readonly<Array<Pattern>> = [
   },
 ] as const;
 
-export const lexer = (text: string) => {
+export const lexer = (text: string, idx = 0) => {
   const tokens: Array<Token> = [];
   let i = 0;
+
   while (i < text.length) {
     const txt = text.slice(i);
-    const match = patterns.find(
+    const primaryMatch = patterns.find(
       (match) => !!txt.match(new RegExp(match.pattern))?.[0]
     );
+  
+    const secondaryMatch = patterns.find((match) => match.secondaryPattern && !!txt.match(new RegExp(match.secondaryPattern))?.[0]);
+  
+    const match = primaryMatch ?? secondaryMatch;
+  
+    if (match && !match.startOnly) {
+      const content = txt.match(
+        new RegExp(primaryMatch ? match.pattern : <NonNullable<RegExp>>match.secondaryPattern)
+      )?.[0] as NonNullable<string>;
+      tokens.push({ type: match.type, index: i + idx, value: match.value });
 
-    if (match && (!match.startOnly || i === 0)) {
-      const content = txt.match(new RegExp(match.pattern))?.[0] as NonNullable<string>;
-      tokens.push({ type: match.type, index: i, value: match.value });
-
-      const hasEndNode = !!content.match(
-        new RegExp(`${match.value.replace(/\*/g, "\\*")}$`)
-      )?.[0];
-
-      const textContent = hasEndNode
-        ? content.replace(
-            new RegExp(`${match.value.replace(/\*/g, "\\*")}$`),
-            ""
-          )
-        : content;
+      const hasEndNode = !!primaryMatch;
 
       if (match.textOnly) {
-        tokens.push({ type: "text", index: i, value: textContent });
+        tokens.push({ type: "text", index: i + idx, value: content });
       } else {
-        tokens.push(...lexer(textContent));
+        tokens.push(...lexer(content, i + idx + match.value.length));
       }
 
       if (hasEndNode || match.forceEnd) {
         tokens.push({
           type: match.type,
-          index: i + match.value.length + textContent.length,
+          index: i + idx + match.value.length + content.length,
           value: match.value,
         });
       }
 
       i +=
         (hasEndNode ? 2 * match.value.length : match.value.length) +
-        textContent.length;
+        content.length;
     } else {
       const lastToken = tokens[tokens.length - 1];
       if (lastToken?.type === "text") {
         lastToken.value = lastToken.value + text[i];
       } else {
-        tokens.push({ type: "text", index: i, value: text[i] });
+        tokens.push({ type: "text", index: idx + i, value: text[i] });
       }
       i += 1;
-    }
+    }  
   }
-
+  
   return tokens;
 };
