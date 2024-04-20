@@ -10,7 +10,9 @@ const findNodeCharSum = (node: NodeList[0]) => {
           (sum, node): number => sum + findNodeCharSum(node),
           0
         ) +
-        (token.suffix ? token.value.length : 0);
+        (token.suffix && !(<any>node).hasAttribute("unclosed")
+          ? token.value.length
+          : 0);
 };
 
 export const _nodePosition = (nodes: NodeList, caret: number) => {

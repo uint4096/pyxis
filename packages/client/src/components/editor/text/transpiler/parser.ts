@@ -18,30 +18,34 @@ export type AST = {
   body: Array<Node>;
 };
 
-export const parser = (tokens: Array<Token>) => {
+export const parser = (tokens: Array<Token>): Array<Node> => {
   let pointer = 0;
-  const walk = (type?: string) => {
-    const body: Array<Node> = [];
-    while (pointer < tokens.length) {
-      const token = tokens[pointer];
-      if (token?.type === "text") {
-        body.push({ type: "text", value: token.value });
-        pointer++;
-      } else {
-        if (type === token?.type && token.position === 'end') {
-          ++pointer;
-          return { body, closed: true };
-        }
+  const body: Array<Node> = [];
+  while (pointer < tokens.length) {
+    const token = tokens[pointer];
+    if (token.type === "text") {
+      body.push({ type: "text", value: token.value });
+      pointer += 1;
+    } else if (token.position === "start") {
+      const tokenEnd = tokens.findIndex(
+        (tkn, idx) =>
+          tkn.type === token.type && tkn.position === "end" && idx > pointer
+      );
+      const tokensToProcess =
+        tokenEnd > -1
+          ? tokens.slice(pointer + 1, tokenEnd)
+          : tokens.slice(pointer + 1);
 
-        ++pointer;
-        const { body: params, closed } = walk(token?.type);
-        body.push({ type: token?.type, params: params, closed });
-      }
+      body.push({
+        type: token.type,
+        params: parser(tokensToProcess),
+        closed: tokenEnd > -1,
+      });
+      pointer += tokensToProcess.length + 1;
+    } else {
+      pointer += 1;
     }
+  }
 
-    return { body, closed: false };
-  };
-
-  const ast = walk();
-  return ast.body;
+  return body;
 };
