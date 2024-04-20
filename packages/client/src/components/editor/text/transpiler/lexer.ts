@@ -17,7 +17,7 @@ export type Token = {
   type: Tokens;
   value: string;
   index: number;
-  position?: 'start' | 'end';
+  position?: "start" | "end";
 };
 
 type Pattern = {
@@ -122,21 +122,41 @@ export const lexer = (text: string, idx = 0) => {
     const primaryMatch = patterns.find(
       (match) => !!txt.match(new RegExp(match.pattern))?.[0]
     );
-  
-    const secondaryMatch = patterns.find((match) => match.secondaryPattern && !!txt.match(new RegExp(match.secondaryPattern))?.[0]);
-  
-    const match = primaryMatch ?? secondaryMatch;
-  
-    if (match && !match.startOnly) {
-      const content = txt.match(
-        new RegExp(primaryMatch ? match.pattern : <NonNullable<RegExp>>match.secondaryPattern)
-      )?.[0] as NonNullable<string>;
-      tokens.push({ type: match.type, index: i + idx, value: match.value, position: 'start' });
 
-      const hasEndNode = !!primaryMatch;
+    const secondaryMatch = patterns.find(
+      (match) =>
+        match.secondaryPattern &&
+        !!txt.match(new RegExp(match.secondaryPattern))?.[0]
+    );
+
+    const match = primaryMatch ?? secondaryMatch;
+
+    if (
+      match &&
+      (!match.startOnly || (match.startOnly && idx === 0 && i === 0))
+    ) {
+      const content = txt.match(
+        new RegExp(
+          primaryMatch
+            ? match.pattern
+            : <NonNullable<RegExp>>match.secondaryPattern
+        )
+      )?.[0] as NonNullable<string>;
+      tokens.push({
+        type: match.type,
+        index: i + idx,
+        value: match.value,
+        position: "start",
+      });
+
+      const hasEndNode = !!primaryMatch && !match.startOnly;
 
       if (match.textOnly) {
-        tokens.push({ type: "text", index: i + idx, value: content });
+        tokens.push({
+          type: "text",
+          index: i + idx + match.value.length,
+          value: content,
+        });
       } else {
         tokens.push(...lexer(content, i + idx + match.value.length));
       }
@@ -146,7 +166,7 @@ export const lexer = (text: string, idx = 0) => {
           type: match.type,
           index: i + idx + match.value.length + content.length,
           value: match.value,
-          position: 'end'
+          position: "end",
         });
       }
 
@@ -161,8 +181,8 @@ export const lexer = (text: string, idx = 0) => {
         tokens.push({ type: "text", index: idx + i, value: text[i] });
       }
       i += 1;
-    }  
+    }
   }
-  
+
   return tokens;
 };
