@@ -28,7 +28,7 @@ export const parser = (tokens: Array<Token>) => {
         body.push({ type: "text", value: token.value });
         pointer++;
       } else {
-        if (type === token?.type) {
+        if (type === token?.type && token.position === 'end') {
           ++pointer;
           return { body, closed: true };
         }

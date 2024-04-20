@@ -17,6 +17,7 @@ export type Token = {
   type: Tokens;
   value: string;
   index: number;
+  position?: 'start' | 'end';
 };
 
 type Pattern = {
@@ -130,7 +131,7 @@ export const lexer = (text: string, idx = 0) => {
       const content = txt.match(
         new RegExp(primaryMatch ? match.pattern : <NonNullable<RegExp>>match.secondaryPattern)
       )?.[0] as NonNullable<string>;
-      tokens.push({ type: match.type, index: i + idx, value: match.value });
+      tokens.push({ type: match.type, index: i + idx, value: match.value, position: 'start' });
 
       const hasEndNode = !!primaryMatch;
 
@@ -145,6 +146,7 @@ export const lexer = (text: string, idx = 0) => {
           type: match.type,
           index: i + idx + match.value.length + content.length,
           value: match.value,
+          position: 'end'
         });
       }
 
