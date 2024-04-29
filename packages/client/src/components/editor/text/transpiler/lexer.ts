@@ -1,3 +1,5 @@
+import { patternMatcher } from "../../pattern-matcher";
+
 export type Tokens =
   | "text"
   | "bold&italic"
@@ -32,28 +34,9 @@ type Pattern = {
 
 const patterns: Readonly<Array<Pattern>> = [
   {
-    type: "bold&italic",
-    pattern: /(?<=^\*\*\*(?=[^\s]))(.*?)(?=(?<!\s)\*\*\*)/,
-    secondaryPattern: /(?<=^\*\*\*(?=[^\s]))(.*?)$/,
-    value: "***",
-  },
-  {
-    type: "bold",
-    pattern: /(?<=^\*\*(?=[^\s]))(.*?)(?=(?<!\s)\*\*)/,
-    secondaryPattern: /(?<=^\*\*(?=[^\s|*]))(.*?)$/,
-    value: "**",
-  },
-  {
-    type: "italic",
-    pattern: /(?<=^\*(?=[^\s|*]))(.*?)(?=(?<![\s|*])\*)/,
-    secondaryPattern: /(?<=^\*(?=[^\s|*]))(.*?)$/,
-    value: "*",
-  },
-  {
-    type: "strikethrough",
-    pattern: /(?<=^~~(?=[^\s]))(.*?)(?=(?<!\s)~~)/,
-    secondaryPattern: /(?<=^~~(?=[^\s]))(.*?)$/,
-    value: "~~",
+    type: "text",
+    pattern: new RegExp("^(?!.*[~*`#]|.*(?:http[s]?://|www\.)).*$"),
+    value: "" 
   },
   {
     type: "code",
@@ -111,6 +94,30 @@ const patterns: Readonly<Array<Pattern>> = [
     textOnly: true,
     startOnly: true,
   },
+  {
+    type: "bold&italic",
+    pattern: /(?<=^\*\*\*(?=[^\s]))(.*?)(?=(?<!\s)\*\*\*)/,
+    secondaryPattern: /(?<=^\*\*\*(?=[^\s]))(.*?)$/,
+    value: "***",
+  },
+  {
+    type: "bold",
+    pattern: /(?<=^\*\*(?=[^\s]))(.*?)(?=(?<!\s)\*\*)/,
+    secondaryPattern: /(?<=^\*\*(?=[^\s|*]))(.*?)$/,
+    value: "**",
+  },
+  {
+    type: "italic",
+    pattern: /(?<=^\*(?=[^\s|*]))(.*?)(?=(?<![\s|*])\*)/,
+    secondaryPattern: /(?<=^\*(?=[^\s|*]))(.*?)$/,
+    value: "*",
+  },
+  {
+    type: "strikethrough",
+    pattern: /(?<=^~~(?=[^\s]))(.*?)(?=(?<!\s)~~)/,
+    secondaryPattern: /(?<=^~~(?=[^\s]))(.*?)$/,
+    value: "~~",
+  },
 ] as const;
 
 export const lexer = (text: string, idx = 0) => {
@@ -119,29 +126,13 @@ export const lexer = (text: string, idx = 0) => {
 
   while (i < text.length) {
     const txt = text.slice(i);
-    const primaryMatch = patterns.find(
-      (match) => !!txt.match(new RegExp(match.pattern))?.[0]
-    );
-
-    const secondaryMatch = patterns.find(
-      (match) =>
-        match.secondaryPattern &&
-        !!txt.match(new RegExp(match.secondaryPattern))?.[0]
-    );
-
-    const match = primaryMatch ?? secondaryMatch;
+    const match = patternMatcher(txt);
 
     if (
-      match &&
+      match && match.type !== 'text' &&
       (!match.startOnly || (match.startOnly && idx === 0 && i === 0))
     ) {
-      const content = txt.match(
-        new RegExp(
-          primaryMatch
-            ? match.pattern
-            : <NonNullable<RegExp>>match.secondaryPattern
-        )
-      )?.[0] as NonNullable<string>;
+      const content = match.capture;
 
       tokens.push({
         type: match.type,
@@ -150,7 +141,7 @@ export const lexer = (text: string, idx = 0) => {
         position: "start",
       });
 
-      const hasEndNode = !!primaryMatch && !match.startOnly;
+      const hasEndNode = !!match.hasEndNode && !match.startOnly;
 
       if (match.textOnly) {
         tokens.push({
