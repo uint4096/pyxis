@@ -1,5 +1,5 @@
-import { Tokens } from "../types";
-import { Token } from "./lexer";
+import { type Tokens } from "../types";
+import { type Token } from "./lexer";
 
 export type ElementNode = {
   type: Exclude<Tokens, "text">;

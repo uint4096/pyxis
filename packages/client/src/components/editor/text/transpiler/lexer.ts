@@ -1,5 +1,5 @@
 import { matchContent } from "../pattern";
-import { Tokens } from "../types";
+import { type Tokens } from "../types";
 
 export type Token = {
   type: Tokens;

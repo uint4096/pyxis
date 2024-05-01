@@ -1,4 +1,4 @@
-import { Matcher } from "./types";
+import { type Matcher } from "./types";
 
 export const mHeaderFactory =
   (size: 1 | 2 | 3 | 4 | 5 | 6): Matcher =>

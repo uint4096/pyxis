@@ -1,4 +1,4 @@
-import { Matcher } from "./types";
+import { type Matcher } from "./types";
 
 export const mBold: Matcher = (captureFunc) => ({
   ...captureFunc({

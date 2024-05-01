@@ -1,4 +1,4 @@
-import { Matcher } from "./types";
+import { type Matcher } from "./types";
 
 export const mItalic: Matcher = (captureFunc) => ({
   ...captureFunc({

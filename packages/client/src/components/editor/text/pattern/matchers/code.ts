@@ -1,4 +1,4 @@
-import { Matcher } from "./types";
+import { type Matcher } from "./types";
 
 export const mCode: Matcher = (captureFunc) => ({
   ...captureFunc({

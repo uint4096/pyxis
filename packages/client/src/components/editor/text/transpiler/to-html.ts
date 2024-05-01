@@ -1,6 +1,6 @@
 import { NODE_TEXT_MAP } from "../../../../utils";
-import { Tokens } from "../types";
-import { Node } from "./parser";
+import { type Tokens } from "../types";
+import { type Node } from "./parser";
 
 type Attributes = Record<string, string | boolean>;
 

@@ -1,4 +1,4 @@
-import { Tokens } from "../../types";
+import { type Tokens } from "../../types";
 import { mBold } from "./bold";
 import { mBoldAndItalic } from "./bold&italic";
 import { mCode } from "./code";

@@ -1,5 +1,5 @@
 import { TOKEN_TEXT_MAP } from "../../../../utils";
-import { Node } from "./parser";
+import { type Node } from "./parser";
 
 const getNodeContent = (node: Node) => {
   const token = TOKEN_TEXT_MAP[node.type];
