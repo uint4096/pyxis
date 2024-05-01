@@ -1,5 +1,5 @@
 import { NODE_TEXT_MAP } from "../../../../utils";
-import { Tokens } from "./lexer";
+import { Tokens } from "../types";
 import { Node } from "./parser";
 
 type Attributes = Record<string, string | boolean>;
