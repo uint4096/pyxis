@@ -1,5 +1,5 @@
 {
-  "name": "client",
+  "name": "pyxis-client",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tauri-apps/api": "^1.5.4",
     "loro-crdt": "^0.10.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
