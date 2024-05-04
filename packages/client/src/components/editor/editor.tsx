@@ -20,13 +20,15 @@ import {
   insertTextAtPosition,
   textLength,
 } from "../../utils";
-import { invoke } from "@tauri-apps/api";
 
 const Editor = ({ initialContent }: { initialContent?: string }) => {
   const [rawText, setRawText] = useState<{
     text: string;
     caret: Caret;
-  }>({ text: initialContent ?? "", caret: { start: 0, end: 0, collapsed: true } });
+  }>({
+    text: initialContent ?? "",
+    caret: { start: 0, end: 0, collapsed: true },
+  });
 
   const [html, setHtml] = useState<{
     content: string;
@@ -138,16 +140,6 @@ const Editor = ({ initialContent }: { initialContent?: string }) => {
       content,
       selection,
     }));
-
-    invoke('read_config', { path: '/home/abhishek/personal_projects/pyxis/packages/client' })
-      .then(response => {
-        console.log("Save response: ", response);
-      })
-      .catch(e => {
-        if (e.message?.match(/window\.__TAURI_IPC__ is not a function/)) {
-          console.error("[Invoke error] Running on a browser window!");
-        }
-      });
   }, [rawText]);
 
   useEffect(() => {
