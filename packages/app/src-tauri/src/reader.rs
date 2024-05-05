@@ -2,22 +2,19 @@ use std::io::prelude::*;
 use std::io::BufReader;
 use std::fs::File;
 use std::path::Path;
-use serde::ser::{Serialize, Serializer, SerializeStruct};
 
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct FileContent {
     read_status: bool,
     content: Option<String>
 }
 
-impl Serialize for FileContent {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut state = serializer.serialize_struct("FileContent", 2)?;
-        state.serialize_field("read_status", &self.read_status)?;
-        state.serialize_field("content", &self.content)?;
-        state.end()
+impl FileContent {
+    pub fn new_failed() -> Self {
+        FileContent {
+            read_status: false,
+            content: None
+        }
     }
 }
 
@@ -51,7 +48,7 @@ pub fn read_file(path: &str) -> FileContent {
             }
         }
         Err(e) => {
-            println!("[Reader] Error while reading files! {e}");
+            println!("[Reader] Error while opening file! {e}");
             FileContent {
                 read_status: false,
                 content: None
