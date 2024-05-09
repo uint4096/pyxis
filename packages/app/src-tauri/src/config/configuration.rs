@@ -1,27 +1,18 @@
+use serde::{Serialize, Deserialize};
 use std::path::Path;
-
 use crate::{
     reader::{read_file, FileContent},
     writer::write_file
 };
 
-#[derive(serde::Serialize, serde::Deserialize)]
-struct Workspace {
-    id: String,
-    name: String,
-}
-
-#[derive(serde::Serialize, serde::Deserialize)]
-struct StoreConfig {
-    worspaces: Vec<Workspace>,
-    last_selected_workspace: Workspace,
-}
-
-pub struct Store<'a> (pub &'a str);
-
-impl<'a> Store<'a> {
-    pub fn get_config(&self) -> FileContent {
-        let config_path = Path::new(self.0);
+pub trait Configuration <'a, T>
+where
+    T: Serialize + Deserialize<'a>
+{
+    fn config_path(&self) -> &str;
+    fn get_config(&self) -> FileContent {
+        let path = &self.config_path();
+        let config_path = Path::new(path);
         match config_path.join(".config").to_str() {
             Some(path) => {
                 read_file(path)
@@ -32,8 +23,9 @@ impl<'a> Store<'a> {
         }
     }
 
-    pub fn save_config(&self, config: StoreConfig) -> bool {
-        let config_path = Path::new(self.0);
+    fn save_config(&self, config: T) -> bool {
+        let path = &self.config_path();
+        let config_path = Path::new(path);
         match config_path.join(".config").to_str() {
             Some(path) => {
                 match serde_json::to_string(&config) {
@@ -50,6 +42,5 @@ impl<'a> Store<'a> {
                 false
             }
         }
-       
     }
 }
