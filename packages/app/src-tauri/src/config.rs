@@ -1,4 +1,4 @@
-pub mod store;
 pub mod configuration;
-pub mod workspaces;
+pub mod store;
 pub mod system;
+pub mod workspaces;

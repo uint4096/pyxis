@@ -1,19 +1,19 @@
+use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufReader;
-use std::fs::File;
 use std::path::Path;
 
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct FileContent {
     read_status: bool,
-    content: Option<String>
+    content: Option<String>,
 }
 
 impl FileContent {
     pub fn new_failed() -> Self {
         FileContent {
             read_status: false,
-            content: None
+            content: None,
         }
     }
 }
@@ -23,7 +23,7 @@ pub fn read_file(path: &str) -> FileContent {
     if file_path.is_dir() {
         return FileContent {
             read_status: false,
-            content: None
+            content: None,
         };
     }
 
@@ -44,14 +44,14 @@ pub fn read_file(path: &str) -> FileContent {
             }
             FileContent {
                 read_status: true,
-                content: Some(content)
+                content: Some(content),
             }
         }
         Err(e) => {
             println!("[Reader] Error while opening file! {e}");
             FileContent {
                 read_status: false,
-                content: None
+                content: None,
             }
         }
     }

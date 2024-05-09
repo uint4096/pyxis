@@ -6,8 +6,7 @@ pub struct SystemConfig {
     organization: String,
 }
 
-
-pub struct System<'a> (pub &'a str);
+pub struct System<'a>(pub &'a str);
 
 impl<'a> Configuration<'a, SystemConfig> for System<'a> {
     fn config_path(&self) -> &str {

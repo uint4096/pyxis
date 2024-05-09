@@ -12,7 +12,7 @@ pub struct StoreConfig {
     last_selected_workspace: Workspace,
 }
 
-pub struct Store<'a> (pub &'a str);
+pub struct Store<'a>(pub &'a str);
 
 impl<'a> Configuration<'a, StoreConfig> for Store<'a> {
     fn config_path(&self) -> &str {

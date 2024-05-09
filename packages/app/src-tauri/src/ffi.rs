@@ -38,11 +38,11 @@ pub fn read_system_config() -> FileContent {
         let system = System(
             &home_dir
                 .to_str()
-                .expect("[Config Error!] Failed to convert dir to string!"),
+                .expect("[Config Error] Failed to convert dir to string!"),
         );
         system.get_config()
     } else {
-        println!("[Config Error!] Failed to retrieve home directory!");
+        println!("[Config Error] Failed to retrieve home directory!");
         FileContent::new_failed()
     }
 }
@@ -50,15 +50,15 @@ pub fn read_system_config() -> FileContent {
 #[tauri::command]
 pub fn write_system_config(config: SystemConfig) -> bool {
     if let Some(home_dir) = dirs::home_dir() {
+        let dir = home_dir.join("pyxis");
         let system = System(
-            &home_dir
-                .to_str()
-                .expect("[Config Error!] Failed to convert dir to string!"),
+            &dir.to_str()
+                .expect("[Config Error] Failed to convert dir to string!"),
         );
 
         system.save_config(config)
     } else {
-        println!("[Config Error!] Failed to retrieve home directory!");
+        println!("[Config Error] Failed to retrieve home directory!");
         false
     }
 }

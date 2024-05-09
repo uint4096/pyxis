@@ -1,6 +1,6 @@
+use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufWriter;
-use std::fs::File;
 use std::path::Path;
 
 pub fn write_file(path: &str, content: &str) -> bool {
