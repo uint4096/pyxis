@@ -62,3 +62,11 @@ export const wordPositonForward = (
 export const textLength = (text?: string | null) =>
   (text?.length ?? 0) -
   (text?.match(new RegExp(ZERO_WIDTH_SPACE_UNICODE, "g")) ?? []).length;
+
+export const parse = <T>(jsonLike: string): T | null => {
+  try {
+    return <T>JSON.parse(jsonLike);
+  } catch (e) {
+    return null;
+  }
+};

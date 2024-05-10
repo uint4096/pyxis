@@ -1,30 +1,37 @@
 import { invoke as invokeCommand } from "@tauri-apps/api";
 
-export type Config = {
-  [k: string]: Config | boolean | number | string | null;
-};
-
 type FileContent = {
   read_status: boolean;
   content: string | null;
 };
 
-type Args = {
-  read_config: { path: string };
-  save_config: { path: string; content: Config };
+export type Args<T extends object> = {
+  read_system_config: never;
+  write_system_config: { config: T };
+  read_workspace_config: { path: string };
+  write_workspace_config: { path: string; config: T };
+  read_store_config: { path: string };
+  write_store_config: { path: string; config: T };
 };
 
-type Response = {
-  read_config: FileContent;
-  save_config: boolean;
+export type Response = {
+  read_system_config: FileContent;
+  write_system_config: boolean;
+  read_workspace_config: FileContent;
+  write_workspace_config: boolean;
+  read_store_config: FileContent;
+  write_store_config: boolean;
 };
 
-export const invoke = async <T extends keyof Args | keyof Response>(
-  command: T,
-  args: Args[T]
-): Promise<Response[T]> => {
+export const invoke = async <
+  T extends object,
+  U extends keyof Args<T> | keyof Response
+>(
+  command: U,
+  args: Args<T>[U]
+): Promise<Response[U]> => {
   try {
-    const response: Response[T] = await invokeCommand(command, args);
+    const response: Response[U] = await invokeCommand(command, args);
     return response;
   } catch (e) {
     if ((<Error>e)?.message?.match(/window\.__TAURI_IPC__ is not a function/)) {
