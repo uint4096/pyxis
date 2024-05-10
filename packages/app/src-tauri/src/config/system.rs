@@ -4,6 +4,7 @@ use super::configuration::Configuration;
 pub struct SystemConfig {
     username: String,
     organization: String,
+    store: String
 }
 
 pub struct System<'a>(pub &'a str);
