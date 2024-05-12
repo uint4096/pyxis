@@ -8,7 +8,7 @@ export const mHeaderFactory =
       validator: (text) => text[size] === " " && !!text[size + 1],
     }),
     type: `h${size}`,
-    value: Array.from({ length: size }, () => "#").join(""),
+    value: `${Array.from({ length: size }, () => "#").join("")} `,
     textOnly: true,
     startOnly: true,
   });
