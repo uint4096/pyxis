@@ -6,18 +6,18 @@ import {
   read_worksapce_config,
 } from "../../ffi";
 import { StoreConfig, SystemConfig } from "./types";
-import { Modal } from "../modal";
-import './explorer.css';
+import "./explorer.css";
+import { StoreForm } from "./forms/store";
 
 export const Explorer = () => {
   const [showEditor, setEditor] = useState<boolean>(true);
-  const [showModal, setModal] = useState<boolean>(true);
+  const [showModal, setModal] = useState<boolean>(false);
 
   useEffect(() => {
     (async () => {
       const systemConfig = await read_system_config<SystemConfig>({} as never);
-      if (!systemConfig) {
-        // setModal(true);
+      if (!systemConfig || !systemConfig.store) {
+        setModal(true);
         return;
       }
 
@@ -25,7 +25,7 @@ export const Explorer = () => {
         path: systemConfig.store,
       });
       if (!storeConfig) {
-        //Show Modal
+        //Show workspaces Modal
         return;
       }
 
@@ -33,7 +33,8 @@ export const Explorer = () => {
         path: `${systemConfig.store}/${storeConfig.last_selected_workspace.name}`,
       });
       if (!workspaceConfig) {
-        //Show Modal
+        // Show worksapces modal
+        // Corrupted workspace? @todo: How can we handle this?
         return;
       }
 
@@ -41,8 +42,10 @@ export const Explorer = () => {
     })();
   }, []);
 
-  return <div className='explorer'>
-    {showEditor && <Editor />}
-    {showModal && <Modal body={<></>} size="large" visible={showModal} allowClosing/>}
-  </div>;
+  return (
+    <div className="explorer">
+      {showEditor && <Editor />}
+      {showModal && <StoreForm visible={showModal} />}
+    </div>
+  );
 };

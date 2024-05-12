@@ -1,5 +1,5 @@
 import { useState } from "react";
-import './modal.css';
+import "./modal.css";
 
 export type ModalSize = "small" | "medium" | "large";
 export type ModalProps = {
@@ -7,28 +7,39 @@ export type ModalProps = {
   body: JSX.Element;
   footer?: JSX.Element;
   size?: ModalSize;
-  visible?: boolean;
+  visible: boolean;
   allowClosing?: boolean;
 };
 
-export const Modal = ({ body, footer, header, size, visible, allowClosing }: ModalProps) => {
+export const Modal = ({
+  body,
+  footer,
+  header,
+  size,
+  visible,
+  allowClosing,
+}: ModalProps) => {
   const [showModal, setShowModal] = useState(visible ?? false);
 
-  return (showModal &&
-    <>
-      <div className="modal-overlay" />
-      <div className={`modal-${size} modal-container`}>
-        {
-          <div className="modal-header">
-            {header ?? <></>}
-            {allowClosing && <div className="modal-close-btn">
-              <button onClick={() => setShowModal(false)}>x</button>
-            </div>}
-          </div>
-        }
-        <div className="modal-body">{body}</div>
-        {footer && <div className="modal-footer">{footer}</div>}
-      </div>
-    </>
+  return (
+    showModal && (
+      <>
+        <div className="modal-overlay" />
+        <div className={`modal-${size} modal-container`}>
+          {
+            <div className="modal-header">
+              {header ?? <></>}
+              {allowClosing && (
+                <div className="modal-close-btn">
+                  <button onClick={() => setShowModal(false)}>x</button>
+                </div>
+              )}
+            </div>
+          }
+          <div className="modal-body">{body}</div>
+          {footer && <div className="modal-footer">{footer}</div>}
+        </div>
+      </>
+    )
   );
 };

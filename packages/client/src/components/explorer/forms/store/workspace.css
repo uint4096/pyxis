@@ -1,0 +1,10 @@
+.ws-form-container {
+  width: 20vw;
+  height: 10vw;
+  position: fixed;
+}
+
+.ws-form-footer {
+  display: flex;
+  justify-content: flex-end;
+}
