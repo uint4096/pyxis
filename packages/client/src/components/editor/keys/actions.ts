@@ -22,7 +22,7 @@ type ActionResponse = {
 const actions: ActionKeys = {
   [Keys.BACKSPACE]: (text, caret, ctrl) => {
     const excludeChars = [" ", "\n", "-", "'", "(", ")"];
-    const start = caret.collapsed
+    const start = caret.collapsed && caret.start !== 0
       ? ctrl
         ? wordPositonBackward(text, caret.start, { excludeChars })
         : caret.start - 1
