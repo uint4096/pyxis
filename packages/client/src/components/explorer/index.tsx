@@ -6,15 +6,18 @@ import {
   read_worksapce_config,
 } from "../../ffi";
 import { StoreConfig, SystemConfig } from "./types";
+import { Modal } from "../modal";
+import './explorer.css';
 
 export const Explorer = () => {
-  const [showEditor, setEditor] = useState<boolean>();
+  const [showEditor, setEditor] = useState<boolean>(true);
+  const [showModal, setModal] = useState<boolean>(true);
 
   useEffect(() => {
     (async () => {
       const systemConfig = await read_system_config<SystemConfig>({} as never);
       if (!systemConfig) {
-        //Show Modal
+        // setModal(true);
         return;
       }
 
@@ -38,5 +41,8 @@ export const Explorer = () => {
     })();
   }, []);
 
-  return <>{showEditor && <Editor />}</>;
+  return <div className='explorer'>
+    {showEditor && <Editor />}
+    {showModal && <Modal body={<></>} size="large" visible={showModal} allowClosing/>}
+  </div>;
 };

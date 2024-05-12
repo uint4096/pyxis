@@ -1,7 +1,7 @@
 #editor {
   margin-top: 10vh;
-  height: 120%;
   width: 40vw;
+  height: inherit;
   background-color: inherit;
   color: #fff000;
   font-size: 20px;
