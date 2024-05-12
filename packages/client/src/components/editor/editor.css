@@ -1,10 +1,10 @@
 #editor {
-  height: 60vh;
-  width: 50vw;
-  background-color: rgb(190, 190, 190);
-  color: black;
-  border: 2px solid black;
-  border-radius: 20px;
+  margin-top: 10vh;
+  height: 120%;
+  width: 40vw;
+  background-color: inherit;
+  color: #fff000;
+  font-size: 20px;
   text-align: left;
   padding: 20px;
   overflow: auto;
