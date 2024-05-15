@@ -9,7 +9,7 @@ struct Workspace {
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct StoreConfig {
     worspaces: Vec<Workspace>,
-    last_selected_workspace: Workspace,
+    last_selected_workspace: Option<Workspace>,
 }
 
 pub struct Store<'a>(pub &'a str);

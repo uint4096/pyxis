@@ -1,9 +1,7 @@
 use super::configuration::Configuration;
 
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct SystemConfig {
-    username: String,
-    organization: String,
     store: String
 }
 

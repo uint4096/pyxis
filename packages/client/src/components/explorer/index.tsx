@@ -24,7 +24,8 @@ export const Explorer = () => {
       const storeConfig = await read_store_config<StoreConfig>({
         path: systemConfig.store,
       });
-      if (!storeConfig) {
+
+      if (!storeConfig || !storeConfig.last_selected_workspace) {
         //Show workspaces Modal
         return;
       }

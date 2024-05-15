@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import "./input.css";
-import { open } from '@tauri-apps/api/dialog';
+import { open } from "@tauri-apps/api/dialog";
 
 export type InputProps = {
   size: "small" | "medium" | "large";
@@ -28,11 +28,12 @@ export const DirSelection = ({
     });
 
     if (!selected) {
-      setValidationMsg('You must select a directory');
+      setValidationMsg("You must select a directory");
       return;
     }
 
     setVal(selected as string);
+    onChange(selected as string);
   }, []);
 
   return (
@@ -43,9 +44,11 @@ export const DirSelection = ({
           className={`input input-${size}`}
           value={inputVal}
           placeholder={placeholder}
-          onChange={(e) => onChange(e.currentTarget.value)}
+          readOnly
         />
-        <button className="dir-select-btn" onClick={onOpen}>...</button>
+        <button className="dir-select-btn" onClick={onOpen}>
+          ...
+        </button>
       </div>
       {validationMessage && (
         <span className="validation-message">{validationMsg}</span>

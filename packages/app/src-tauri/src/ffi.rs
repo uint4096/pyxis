@@ -50,7 +50,7 @@ pub fn read_system_config() -> FileContent {
 #[tauri::command]
 pub fn write_system_config(config: SystemConfig) -> bool {
     if let Some(home_dir) = dirs::home_dir() {
-        let dir = home_dir.join("pyxis");
+        let dir = home_dir.join(".config").join("pyxis");
         let system = System(
             &dir.to_str()
                 .expect("[Config Error] Failed to convert dir to string!"),

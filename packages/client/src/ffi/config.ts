@@ -34,6 +34,7 @@ export const read_store_config = read_config("read_store_config");
 export const read_worksapce_config = read_config("read_workspace_config");
 export const read_system_config = read_config("read_system_config");
 
+//@todo: Refactor the same way read_* was above
 export const save_config = async <
   T extends object,
   U extends Extract<
