@@ -5,7 +5,11 @@ import "./workspace.css";
 import { save_config } from "../../../../ffi";
 import { SystemConfig } from "../../types";
 
-export const StoreForm = ({ visible }: { visible: boolean }) => {
+type StoreFormProps = {
+  setVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export const StoreForm = ({ setVisibility }: StoreFormProps) => {
   const [selectedPath, setSelectedPath] = useState("");
   const onSave = useCallback(async () => {
     const saveResponse = await save_config<SystemConfig, "write_system_config">(
@@ -13,6 +17,7 @@ export const StoreForm = ({ visible }: { visible: boolean }) => {
       { config: { store: selectedPath } }
     );
     console.log("Save response", saveResponse);
+    setVisibility(false);
   }, [selectedPath]);
 
   const body = (
@@ -36,10 +41,8 @@ export const StoreForm = ({ visible }: { visible: boolean }) => {
   return (
     <div className="ws-form-container">
       <Modal
-        allowClosing={false}
         body={body}
         size="small"
-        visible={visible}
         footer={footer}
       />
     </div>

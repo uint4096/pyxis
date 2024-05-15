@@ -1,4 +1,3 @@
-import { useState } from "react";
 import "./modal.css";
 
 export type ModalSize = "small" | "medium" | "large";
@@ -7,8 +6,7 @@ export type ModalProps = {
   body: JSX.Element;
   footer?: JSX.Element;
   size?: ModalSize;
-  visible: boolean;
-  allowClosing?: boolean;
+  onClose?: () => void;
 };
 
 export const Modal = ({
@@ -16,22 +14,19 @@ export const Modal = ({
   footer,
   header,
   size,
-  visible,
-  allowClosing,
+  onClose,
 }: ModalProps) => {
-  const [showModal, setShowModal] = useState(visible ?? false);
 
   return (
-    showModal && (
       <>
         <div className="modal-overlay" />
         <div className={`modal-${size} modal-container`}>
           {
             <div className="modal-header">
               {header ?? <></>}
-              {allowClosing && (
+              {onClose && (
                 <div className="modal-close-btn">
-                  <button onClick={() => setShowModal(false)}>x</button>
+                  <button onClick={onClose}>x</button>
                 </div>
               )}
             </div>
@@ -40,6 +35,5 @@ export const Modal = ({
           {footer && <div className="modal-footer">{footer}</div>}
         </div>
       </>
-    )
   );
 };

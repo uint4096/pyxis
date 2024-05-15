@@ -35,8 +35,9 @@ pub fn write_workspace_config(path: String, config: WorkspaceConfig) -> bool {
 #[tauri::command]
 pub fn read_system_config() -> FileContent {
     if let Some(home_dir) = dirs::home_dir() {
+        let dir = home_dir.join(".config").join("pyxis");
         let system = System(
-            &home_dir
+            &dir
                 .to_str()
                 .expect("[Config Error] Failed to convert dir to string!"),
         );

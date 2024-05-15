@@ -11,13 +11,13 @@ import { StoreForm } from "./forms/store";
 
 export const Explorer = () => {
   const [showEditor, setEditor] = useState<boolean>(true);
-  const [showModal, setModal] = useState<boolean>(false);
+  const [showStoreForm, setStoreForm] = useState<boolean>(false);
 
   useEffect(() => {
     (async () => {
       const systemConfig = await read_system_config<SystemConfig>({} as never);
       if (!systemConfig || !systemConfig.store) {
-        setModal(true);
+        setStoreForm(true);
         return;
       }
 
@@ -33,6 +33,7 @@ export const Explorer = () => {
       const workspaceConfig = await read_worksapce_config({
         path: `${systemConfig.store}/${storeConfig.last_selected_workspace.name}`,
       });
+
       if (!workspaceConfig) {
         // Show worksapces modal
         // Corrupted workspace? @todo: How can we handle this?
@@ -46,7 +47,7 @@ export const Explorer = () => {
   return (
     <div className="explorer">
       {showEditor && <Editor />}
-      {showModal && <StoreForm visible={showModal} />}
+      {showStoreForm && <StoreForm setVisibility={setStoreForm} />}
     </div>
   );
 };
