@@ -9,11 +9,14 @@ pub fn write_file(path: &str, content: &str) -> bool {
         return false;
     }
 
-    match File::open(path) {
+    match File::create(path) {
         Ok(file) => {
             let mut writer = BufWriter::new(file);
             match writer.write_all(content.as_bytes()) {
-                Ok(_) => true,
+                Ok(_) => {
+                    // let _ = writer.flush().expect("Flush failed!");
+                    true
+                },
                 Err(e) => {
                     println!("[Reader] Error while writing to file! {e}");
                     false
