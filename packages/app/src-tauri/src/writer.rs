@@ -1,4 +1,4 @@
-use std::fs::File;
+use std::fs::{OpenOptions, create_dir_all};
 use std::io::prelude::*;
 use std::io::BufWriter;
 use std::path::Path;
@@ -9,7 +9,33 @@ pub fn write_file(path: &str, content: &str) -> bool {
         return false;
     }
 
-    match File::create(path) {
+    if let Some(parent) = file_path.parent() {
+        println!("[Writer] Parent: {}", parent.display());
+        match parent.try_exists() {
+            Ok(exists) => {
+                if !exists {
+                    match create_dir_all(parent) {
+                        Ok(_) => (),
+                        Err(e) => {
+                            println!("[Writer] Error while creating directory! {e}");
+                            return false;
+                        }
+                    } 
+                }
+            },
+            Err(_) => {
+                match create_dir_all(parent) {
+                    Ok(_) => (),
+                    Err(e) => {
+                        println!("[Writer] Error while creating directory! {e}");
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+
+    match OpenOptions::new().write(true).create(true).open(path) {
         Ok(file) => {
             let mut writer = BufWriter::new(file);
             match writer.write_all(content.as_bytes()) {
@@ -18,13 +44,13 @@ pub fn write_file(path: &str, content: &str) -> bool {
                     true
                 },
                 Err(e) => {
-                    println!("[Reader] Error while writing to file! {e}");
+                    println!("[Writer] Error while writing to file! {e}");
                     false
                 }
             }
         }
         Err(e) => {
-            println!("[Reader] Error while opening file! {e}");
+            println!("[Writer] Error while opening file! {e}");
             false
         }
     }
