@@ -1,30 +1,54 @@
+import { useCallback, useEffect, useRef, useState } from "react";
 import "./input.css";
+import { open } from '@tauri-apps/api/dialog';
 
 export type InputProps = {
   size: "small" | "medium" | "large";
   value: string;
   placeholder?: string;
   validationMessage?: string;
+  message?: string;
   onChange: React.Dispatch<React.SetStateAction<string>>;
 };
 
-export const Input = ({
+export const DirSelection = ({
   size,
   value,
   placeholder,
   validationMessage,
+  message,
   onChange,
 }: InputProps) => {
+  const [inputVal, setVal] = useState(value);
+  const [validationMsg, setValidationMsg] = useState(validationMessage);
+
+  const onOpen = useCallback(async () => {
+    const selected = await open({
+      directory: true,
+    });
+
+    if (!selected) {
+      setValidationMsg('You must select a directory');
+      return;
+    }
+
+    setVal(selected as string);
+  }, []);
+
   return (
     <div className="input-wrapper">
-      <input
-        className={`input input-${size}`}
-        value={value}
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.currentTarget.value)}
-      ></input>
+      <span className="input-message">{message}</span>
+      <div className="input-selection">
+        <input
+          className={`input input-${size}`}
+          value={inputVal}
+          placeholder={placeholder}
+          onChange={(e) => onChange(e.currentTarget.value)}
+        />
+        <button className="dir-select-btn" onClick={onOpen}>...</button>
+      </div>
       {validationMessage && (
-        <span className="validation-message">{validationMessage}</span>
+        <span className="validation-message">{validationMsg}</span>
       )}
     </div>
   );

@@ -1,10 +1,15 @@
 .input-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 2em;
   margin-top: 0;
   margin-bottom: auto;
-  align-items: center;
+  align-items: flex-start;
+  position: relative;
+}
+
+.input-message {
+  margin-left: 2em;
 }
 
 .input {
@@ -13,7 +18,19 @@
   border-radius: 10px;
 }
 
+.input-selection {
+  display: flex;
+  width: 100%;
+  justify-content: center;  
+}
+
+.dir-select-btn {
+  height: 2.7vh;
+  padding: 10px 10px;
+}
+
 .input-small {
+  height: 2.4vh;
   width: 60%;
 }
 
@@ -22,7 +39,12 @@
   width: 80%;
 }
 
+.dir-select-btn:focus {
+  outline: none;
+}
+
 .input-large {
+  height: 3.7vh;
   width: 90%;
 }
 

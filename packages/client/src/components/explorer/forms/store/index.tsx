@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Input } from "../../../input";
+import { useEffect, useState } from "react";
+import { DirSelection } from "../../../input";
 import { Modal } from "../../../modal";
 import "./workspace.css";
 
@@ -8,11 +8,12 @@ export const StoreForm = ({ visible }: { visible: boolean }) => {
 
   const body = (
     <div className="ws-form-wrapper">
-      <Input
+      <DirSelection
         value={selectedPath}
         placeholder="Path to workspaces..."
         size="medium"
         onChange={setSelectedPath}
+        message="Select a directory to store your workspaces"
       />
     </div>
   );
