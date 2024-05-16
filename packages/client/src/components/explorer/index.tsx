@@ -3,15 +3,36 @@ import Editor from "../editor/editor";
 import {
   read_store_config,
   read_system_config,
-  read_worksapce_config,
+  read_workspace_config,
 } from "../../ffi";
-import { StoreConfig, SystemConfig } from "./types";
+import { StoreConfig, SystemConfig, WorkspaceBase } from "./types";
 import "./explorer.css";
 import { StoreForm } from "./forms/store";
+import { NoWorkspaceMessage } from "./no-workspace";
+import { CreateWorkspace } from "./forms/workspaces/creation";
 
 export const Explorer = () => {
-  const [showEditor, setEditor] = useState<boolean>(true);
+  const [showEditor, setEditor] = useState<boolean>(false);
   const [showStoreForm, setStoreForm] = useState<boolean>(false);
+  const [workspaces, setWorkspaces] = useState<
+    Array<WorkspaceBase & { selected?: boolean }>
+  >([]);
+  const [noWorkspaces, setNoWorkspaces] = useState<boolean>(false);
+  const [showWorkspaceForm, setWorkspaceForm] = useState<boolean>(false);
+  const [systemConfig, setSystemConfig] = useState<SystemConfig>();
+  const [storeConfig, setStoreConfig] = useState<StoreConfig>();
+
+  const onWorkspaceCreation = (currentWorkspace: WorkspaceBase) => {
+    if (noWorkspaces) {
+      setNoWorkspaces(false);
+    }
+
+    setWorkspaces((workspaces) => [
+      ...workspaces,
+      { ...currentWorkspace, selected: true },
+    ]);
+    setWorkspaceForm(false);
+  };
 
   useEffect(() => {
     (async () => {
@@ -21,16 +42,29 @@ export const Explorer = () => {
         return;
       }
 
+      setSystemConfig(systemConfig);
+
       const storeConfig = await read_store_config<StoreConfig>({
         path: systemConfig.store,
       });
 
-      if (!storeConfig || !storeConfig.last_selected_workspace) {
+      if (
+        !storeConfig ||
+        !storeConfig.workspaces ||
+        storeConfig.workspaces.length === 0
+      ) {
         //Show workspaces Modal
+        setNoWorkspaces(true);
         return;
       }
 
-      const workspaceConfig = await read_worksapce_config({
+      setStoreConfig(storeConfig);
+
+      if (!storeConfig.last_selected_workspace) {
+        return;
+      }
+
+      const workspaceConfig = await read_workspace_config({
         path: `${systemConfig.store}/${storeConfig.last_selected_workspace.name}`,
       });
 
@@ -46,8 +80,18 @@ export const Explorer = () => {
 
   return (
     <div className="explorer">
-      {showEditor && <Editor />}
+      {showEditor && !noWorkspaces && <Editor />}
+      {noWorkspaces && (
+        <NoWorkspaceMessage onCreate={() => setWorkspaceForm(true)} />
+      )}
       {showStoreForm && <StoreForm setVisibility={setStoreForm} />}
+      {systemConfig && showWorkspaceForm && (
+        <CreateWorkspace
+          onCreate={onWorkspaceCreation}
+          pathToStore={systemConfig.store}
+          storeConfig={storeConfig}
+        />
+      )}
     </div>
   );
 };

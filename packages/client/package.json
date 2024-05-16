@@ -12,6 +12,7 @@
   "dependencies": {
     "@tauri-apps/api": "^1.5.4",
     "loro-crdt": "^0.10.1",
+    "nanoid": "^5.0.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "string-differ": "1.0.0"

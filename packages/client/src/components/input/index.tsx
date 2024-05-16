@@ -56,3 +56,25 @@ export const DirSelection = ({
     </div>
   );
 };
+
+export const TextInput = ({
+  size,
+  value,
+  placeholder,
+  validationMessage,
+  message,
+  onChange,
+}: InputProps) => (
+  <div className="input-wrapper">
+    <span className="input-message">{message}</span>
+    <input
+      className={`input input-${size}`}
+      value={value}
+      placeholder={placeholder}
+      onChange={(e) => onChange(e.currentTarget.value)}
+    />
+    {validationMessage && (
+      <span className="validation-message">{validationMessage}</span>
+    )}
+  </div>
+);

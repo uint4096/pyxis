@@ -1,13 +1,13 @@
 import { useCallback, useState } from "react";
 import { DirSelection } from "../../../input";
 import { Modal } from "../../../modal";
-import "./workspace.css";
+import "./store.css";
 import { save_config } from "../../../../ffi";
 import { SystemConfig } from "../../types";
 
 type StoreFormProps = {
   setVisibility: React.Dispatch<React.SetStateAction<boolean>>;
-}
+};
 
 export const StoreForm = ({ setVisibility }: StoreFormProps) => {
   const [selectedPath, setSelectedPath] = useState("");
@@ -40,11 +40,7 @@ export const StoreForm = ({ setVisibility }: StoreFormProps) => {
 
   return (
     <div className="ws-form-container">
-      <Modal
-        body={body}
-        size="small"
-        footer={footer}
-      />
+      <Modal body={body} size="small" footer={footer} />
     </div>
   );
 };
