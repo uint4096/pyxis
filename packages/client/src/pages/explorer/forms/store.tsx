@@ -2,7 +2,7 @@ import { styled } from "@linaria/react";
 import { useCallback, useState } from "react";
 import { DirSelection } from "../../../components/input";
 import { Modal } from "../../../components/modal";
-import { save_config } from "../../../ffi";
+import { saveSystemConfig } from "../../../ffi";
 import { SystemConfig } from "../types";
 
 type StoreFormProps = {
@@ -13,10 +13,8 @@ export const StoreForm = ({ onCreate }: StoreFormProps) => {
   const [selectedPath, setSelectedPath] = useState("");
   const onSave = useCallback(async () => {
     const systemConfig = { store: selectedPath };
-    await save_config<SystemConfig, "write_system_config">(
-      "write_system_config",
-      { config: systemConfig }
-    );
+
+    await saveSystemConfig<SystemConfig>({ config: systemConfig });
 
     onCreate(systemConfig);
   }, [selectedPath]);

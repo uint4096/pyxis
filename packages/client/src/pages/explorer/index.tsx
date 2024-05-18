@@ -2,9 +2,9 @@ import { styled } from "@linaria/react";
 import { useCallback, useEffect, useState } from "react";
 import Editor from "../editor/editor";
 import {
-  read_store_config,
-  read_system_config,
-  read_workspace_config,
+  readStoreConfig,
+  readSystemConfig,
+  readWorkspaceConfig,
 } from "../../ffi";
 import {
   StoreConfig,
@@ -62,7 +62,7 @@ export const Explorer = () => {
 
   useEffect(() => {
     (async () => {
-      const systemConfig = await read_system_config<SystemConfig>({} as never);
+      const systemConfig = await readSystemConfig<SystemConfig>({} as never);
 
       if (!systemConfig || !systemConfig.store) {
         setStoreForm(true);
@@ -79,7 +79,7 @@ export const Explorer = () => {
         return;
       }
 
-      const storeConfig = await read_store_config<StoreConfig>({
+      const storeConfig = await readStoreConfig<StoreConfig>({
         path: systemConfig.store,
       });
 
@@ -109,7 +109,7 @@ export const Explorer = () => {
         return;
       }
 
-      const workspaceConfig = await read_workspace_config<WorkspaceConfig>({
+      const workspaceConfig = await readWorkspaceConfig<WorkspaceConfig>({
         path: `${systemConfig.store}/${storeConfig.selected_workspace.name}`,
       });
 
@@ -129,9 +129,7 @@ export const Explorer = () => {
       {noWorkspaces && (
         <NoWorkspaceMessage onCreate={() => setWorkspaceForm(true)} />
       )}
-      {showStoreForm && (
-        <StoreForm onCreate={onSaveSystemConfig} />
-      )}
+      {showStoreForm && <StoreForm onCreate={onSaveSystemConfig} />}
       {systemConfig && showWorkspaceForm && (
         <CreateWorkspace
           onCreate={onWorkspaceCreation}

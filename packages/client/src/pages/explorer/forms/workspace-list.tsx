@@ -2,7 +2,7 @@ import { styled } from '@linaria/react';
 import { useCallback } from "react";
 import { Modal } from "../../../components/modal";
 import type { ArrayElement, StoreConfig, SystemConfig } from "../types";
-import { save_config } from "../../../ffi";
+import { saveStoreConfig } from "../../../ffi";
 
 type WorkspaceElement = ArrayElement<StoreConfig["workspaces"]>;
 
@@ -16,8 +16,8 @@ export const WorkspaceSelection = ({
   workspaces,
   onSelect,
 }: WorkspaceListProps) => {
-  const selectWorkspace = useCallback((workspace: WorkspaceElement) => {
-    save_config<StoreConfig, "write_store_config">("write_store_config", {
+  const selectWorkspace = useCallback(async (workspace: WorkspaceElement) => {
+    await saveStoreConfig<StoreConfig>({
       path: store,
       config: {
         workspaces,

@@ -3,7 +3,7 @@ import { useCallback, useState } from "react";
 
 import { TextInput } from "../../../components/input";
 import { Modal } from "../../../components/modal";
-import { save_config } from "../../../ffi";
+import { saveStoreConfig, saveWorkspaceConfig } from "../../../ffi";
 import { StoreConfig, WorkspaceBase, WorkspaceConfig } from "../types";
 import { nanoid } from "nanoid";
 
@@ -44,14 +44,14 @@ export const CreateWorkspace = ({
       };
 
       await Promise.all([
-        save_config("write_store_config", {
+        saveStoreConfig<StoreConfig>({
           path: pathToStore,
           config: storeConfig,
         }),
-        save_config("write_workspace_config", {
+        saveWorkspaceConfig<WorkspaceConfig>({
           path: `${pathToStore}/${name}`,
           config: workspaceConfig,
-        }),
+        })
       ]);
 
       onCreate(currentWorkspace);
