@@ -40,7 +40,7 @@ export const CreateWorkspace = ({
           ...(currentStoreConfig?.workspaces ?? []),
           currentWorkspace,
         ],
-        last_selected_workspace: currentWorkspace,
+        selected_workspace: currentWorkspace,
       };
 
       await Promise.all([

@@ -7,16 +7,19 @@ import { SystemConfig } from "../types";
 
 type StoreFormProps = {
   setVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  onCreate: (config: SystemConfig) => void;
 };
 
-export const StoreForm = ({ setVisibility }: StoreFormProps) => {
+export const StoreForm = ({ setVisibility, onCreate }: StoreFormProps) => {
   const [selectedPath, setSelectedPath] = useState("");
   const onSave = useCallback(async () => {
+    const systemConfig = { store: selectedPath };
     await save_config<SystemConfig, "write_system_config">(
       "write_system_config",
-      { config: { store: selectedPath } }
+      { config: systemConfig }
     );
 
+    onCreate(systemConfig);
     setVisibility(false);
   }, [selectedPath]);
 

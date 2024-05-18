@@ -5,7 +5,7 @@ export type WorkspaceBase = {
 
 export type StoreConfig = {
   workspaces: Array<WorkspaceBase>;
-  last_selected_workspace?: WorkspaceBase;
+  selected_workspace?: WorkspaceBase;
 };
 
 type Entity = string | { [k: string]: Array<Entity> };
