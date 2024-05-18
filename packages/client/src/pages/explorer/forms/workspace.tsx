@@ -1,9 +1,10 @@
+import { styled } from "@linaria/react";
 import { useCallback, useState } from "react";
-import { TextInput } from "../../../../components/input";
-import { Modal } from "../../../../components/modal";
-import "./workspace.css";
-import { save_config } from "../../../../ffi";
-import { StoreConfig, WorkspaceBase, WorkspaceConfig } from "../../types";
+
+import { TextInput } from "../../../components/input";
+import { Modal } from "../../../components/modal";
+import { save_config } from "../../../ffi";
+import { StoreConfig, WorkspaceBase, WorkspaceConfig } from "../types";
 import { nanoid } from "nanoid";
 
 type WorkspaceSelectionProps = {
@@ -59,7 +60,7 @@ export const CreateWorkspace = ({
   );
 
   const body = (
-    <div className="ws-form-wrapper">
+    <div>
       <TextInput
         value={name}
         placeholder="Workspace Name"
@@ -71,18 +72,29 @@ export const CreateWorkspace = ({
   );
 
   const footer = (
-    <div className="ws-form-footer">
+    <FormFooter>
       <button
         onClick={() => onWorkspaceCreation(name, storeConfig, pathToStore)}
       >
         Create
       </button>
-    </div>
+    </FormFooter>
   );
 
   return (
-    <div className="ws-form-container">
+    <FormContainer>
       <Modal body={body} size="small" footer={footer} />
-    </div>
+    </FormContainer>
   );
 };
+
+const FormContainer = styled.div`
+  width: 20vw;
+  height: 10vw;
+  position: fixed;
+`;
+
+const FormFooter = styled.div`
+  display: flex;
+  justify-content: flex-end;
+`;

@@ -9,7 +9,7 @@ import { StoreConfig, SystemConfig, WorkspaceBase } from "./types";
 import "./explorer.css";
 import { StoreForm } from "./forms/store";
 import { NoWorkspaceMessage } from "./no-workspace";
-import { CreateWorkspace } from "./forms/workspaces/creation";
+import { CreateWorkspace } from "./forms/workspace";
 
 export const Explorer = () => {
   const [showEditor, setEditor] = useState<boolean>(false);

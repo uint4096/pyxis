@@ -1,9 +1,9 @@
+import { styled } from "@linaria/react";
 import { useCallback, useState } from "react";
-import { DirSelection } from "../../../../components/input";
-import { Modal } from "../../../../components/modal";
-import "./store.css";
-import { save_config } from "../../../../ffi";
-import { SystemConfig } from "../../types";
+import { DirSelection } from "../../../components/input";
+import { Modal } from "../../../components/modal";
+import { save_config } from "../../../ffi";
+import { SystemConfig } from "../types";
 
 type StoreFormProps = {
   setVisibility: React.Dispatch<React.SetStateAction<boolean>>;
@@ -12,16 +12,16 @@ type StoreFormProps = {
 export const StoreForm = ({ setVisibility }: StoreFormProps) => {
   const [selectedPath, setSelectedPath] = useState("");
   const onSave = useCallback(async () => {
-    const saveResponse = await save_config<SystemConfig, "write_system_config">(
+    await save_config<SystemConfig, "write_system_config">(
       "write_system_config",
       { config: { store: selectedPath } }
     );
-    console.log("Save response", saveResponse);
+
     setVisibility(false);
   }, [selectedPath]);
 
   const body = (
-    <div className="ws-form-wrapper">
+    <div>
       <DirSelection
         value={selectedPath}
         placeholder="Path to workspaces..."
@@ -33,14 +33,25 @@ export const StoreForm = ({ setVisibility }: StoreFormProps) => {
   );
 
   const footer = (
-    <div className="ws-form-footer">
+    <FormFooter>
       <button onClick={onSave}>Save</button>
-    </div>
+    </FormFooter>
   );
 
   return (
-    <div className="ws-form-container">
+    <FormContainer>
       <Modal body={body} size="small" footer={footer} />
-    </div>
+    </FormContainer>
   );
 };
+
+const FormContainer = styled.div`
+  width: 20vw;
+  height: 10vw;
+  position: fixed;
+`;
+
+const FormFooter = styled.div`
+  display: flex;
+  justify-content: flex-end;
+`;
