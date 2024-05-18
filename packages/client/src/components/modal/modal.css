@@ -16,7 +16,7 @@
   box-shadow: 5px 5px 5px black;
   justify-content: flex-end;
   position: fixed;
-  gap: 0.1vw;
+  gap: 1em;
   padding: 0.5vw;
   background-color: rgb(17, 19, 25);
   z-index: 1000;

@@ -1,3 +1,4 @@
+import { styled } from "@linaria/react";
 import { useCallback, useEffect, useState } from "react";
 import Editor from "../editor/editor";
 import {
@@ -5,37 +6,58 @@ import {
   read_system_config,
   read_workspace_config,
 } from "../../ffi";
-import { StoreConfig, SystemConfig, WorkspaceBase, WorkspaceConfig } from "./types";
-import "./explorer.css";
+import {
+  StoreConfig,
+  SystemConfig,
+  WorkspaceBase,
+  WorkspaceConfig,
+} from "./types";
 import { StoreForm } from "./forms/store";
-import { NoWorkspaceMessage } from "./no-workspace";
+import { NoWorkspaceMessage } from "./forms/no-workspace";
 import { CreateWorkspace } from "./forms/workspace";
+import { WorkspaceSelection } from "./forms/workspace-list";
 
 export const Explorer = () => {
-  const [showEditor, setEditor] = useState<boolean>(false);
   const [showStoreForm, setStoreForm] = useState<boolean>(false);
-  const [noWorkspaces, setNoWorkspaces] = useState<boolean>(false);
   const [showWorkspaceForm, setWorkspaceForm] = useState<boolean>(false);
+  const [showWorkspaceSelectionForm, setWorkspaceSelectionForm] =
+    useState<boolean>(false);
+  const [noWorkspaces, setNoWorkspaces] = useState<boolean>(false);
+
   const [systemConfig, setSystemConfig] = useState<SystemConfig>();
   const [storeConfig, setStoreConfig] = useState<StoreConfig>();
   const [workspaceConfig, setWorkspaceConfig] = useState<WorkspaceConfig>();
 
-  const onWorkspaceCreation = useCallback((currentWorkspace: WorkspaceBase) => {
-    if (noWorkspaces) {
-      setNoWorkspaces(false);
-    }
+  const [showEditor, setEditor] = useState<boolean>(false);
 
-    setStoreConfig((storeConfig) => ({
-      workspaces: [...(storeConfig?.workspaces ?? []), currentWorkspace],
-      selected_workspace: currentWorkspace
-    }));
+  const onWorkspaceCreation = useCallback(
+    (currentWorkspace: WorkspaceBase) => {
+      if (noWorkspaces) {
+        setNoWorkspaces(false);
+      }
 
-    setWorkspaceForm(false);
-    setEditor(true);
-  }, [noWorkspaces]);
+      setStoreConfig((storeConfig) => ({
+        workspaces: [...(storeConfig?.workspaces ?? []), currentWorkspace],
+        selected_workspace: currentWorkspace,
+      }));
+
+      setWorkspaceForm(false);
+      setEditor(true);
+    },
+    [noWorkspaces]
+  );
 
   const onSaveSystemConfig = useCallback((systemConfig: SystemConfig) => {
     setSystemConfig(systemConfig);
+    setStoreForm(false);
+  }, []);
+
+  const onWorkspaceSelection = useCallback((workspace: WorkspaceBase) => {
+    setStoreConfig((storeConfig) => ({
+      workspaces: [...(storeConfig?.workspaces ?? [])],
+      selected_workspace: workspace,
+    }));
+    setWorkspaceSelectionForm(false);
   }, []);
 
   useEffect(() => {
@@ -81,7 +103,8 @@ export const Explorer = () => {
       }
 
       if (!storeConfig.selected_workspace) {
-        // Show worksapces modal
+        setWorkspaceSelectionForm(true);
+
         // Corrupted workspace? @todo: How can we handle this?
         return;
       }
@@ -101,12 +124,14 @@ export const Explorer = () => {
   }, [storeConfig, systemConfig]);
 
   return (
-    <div className="explorer">
+    <ExplorerWrapper>
       {showEditor && !noWorkspaces && <Editor />}
       {noWorkspaces && (
         <NoWorkspaceMessage onCreate={() => setWorkspaceForm(true)} />
       )}
-      {showStoreForm && <StoreForm setVisibility={setStoreForm} onCreate={onSaveSystemConfig} />}
+      {showStoreForm && (
+        <StoreForm onCreate={onSaveSystemConfig} />
+      )}
       {systemConfig && showWorkspaceForm && (
         <CreateWorkspace
           onCreate={onWorkspaceCreation}
@@ -114,6 +139,23 @@ export const Explorer = () => {
           storeConfig={storeConfig}
         />
       )}
-    </div>
+      {showWorkspaceSelectionForm &&
+        storeConfig &&
+        systemConfig?.store &&
+        storeConfig.workspaces.length > 0 && (
+          <WorkspaceSelection
+            store={systemConfig.store}
+            workspaces={storeConfig.workspaces}
+            onSelect={onWorkspaceSelection}
+          />
+        )}
+    </ExplorerWrapper>
   );
 };
+
+const ExplorerWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+`;

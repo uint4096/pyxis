@@ -21,3 +21,5 @@ export type WorkspaceConfig = {
 export type SystemConfig = {
   store: string;
 };
+
+export type ArrayElement<T> = T extends Array<infer X> ? X : never;

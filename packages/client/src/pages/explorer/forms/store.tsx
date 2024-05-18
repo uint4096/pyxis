@@ -6,11 +6,10 @@ import { save_config } from "../../../ffi";
 import { SystemConfig } from "../types";
 
 type StoreFormProps = {
-  setVisibility: React.Dispatch<React.SetStateAction<boolean>>;
   onCreate: (config: SystemConfig) => void;
 };
 
-export const StoreForm = ({ setVisibility, onCreate }: StoreFormProps) => {
+export const StoreForm = ({ onCreate }: StoreFormProps) => {
   const [selectedPath, setSelectedPath] = useState("");
   const onSave = useCallback(async () => {
     const systemConfig = { store: selectedPath };
@@ -20,7 +19,6 @@ export const StoreForm = ({ setVisibility, onCreate }: StoreFormProps) => {
     );
 
     onCreate(systemConfig);
-    setVisibility(false);
   }, [selectedPath]);
 
   const body = (
