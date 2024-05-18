@@ -8,7 +8,7 @@ struct Workspace {
 
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct StoreConfig {
-    worspaces: Vec<Workspace>,
+    workspaces: Vec<Workspace>,
     last_selected_workspace: Option<Workspace>,
 }
 

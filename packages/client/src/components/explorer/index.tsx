@@ -32,11 +32,13 @@ export const Explorer = () => {
       { ...currentWorkspace, selected: true },
     ]);
     setWorkspaceForm(false);
+    setEditor(true);
   };
 
   useEffect(() => {
     (async () => {
       const systemConfig = await read_system_config<SystemConfig>({} as never);
+
       if (!systemConfig || !systemConfig.store) {
         setStoreForm(true);
         return;

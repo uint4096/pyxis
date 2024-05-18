@@ -62,10 +62,10 @@ export const CreateWorkspace = ({
     <div className="ws-form-wrapper">
       <TextInput
         value={name}
-        placeholder="Path to workspaces..."
+        placeholder="Workspace Name"
         size="medium"
         onChange={setName}
-        message="Select a directory to store your workspaces"
+        message="Select a name for your workspace"
       />
     </div>
   );
