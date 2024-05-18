@@ -9,7 +9,8 @@ import {
 import { Loro, LoroText } from "loro-crdt";
 import { getStepsForTransformation } from "string-differ";
 import { useWebsockets } from "./hooks/useWebsockets";
-import Editor from "./components/editor/editor";
+import Editor from "./pages/editor/editor";
+import { Explorer } from "./pages/explorer";
 
 function App() {
   const [loroText, setLoroText] = useState<LoroText>();
@@ -49,7 +50,7 @@ function App() {
   useEffect(() => {
     if (online && loroDoc) {
       const snapshot = loroDoc.exportFrom();
-      sendMessage(snapshot);
+      // sendMessage(snapshot);
     }
   }, [online, loroDoc]);
 
@@ -88,7 +89,7 @@ function App() {
 
       if (online) {
         const snapshot = loroDoc?.exportFrom() ?? new Uint8Array();
-        sendMessage(snapshot);
+        // sendMessage(snapshot);
       }
     },
     [loroDoc, loroText, online]
@@ -96,12 +97,12 @@ function App() {
 
   return (
     <>
-      <Editor />
-      <div>
+      <Explorer />
+      {/* <div>
         <button onClick={() => setOnline((online) => !online)}>
           {online ? "Go Offline" : "Go Online"}
         </button>
-      </div>
+      </div> */}
     </>
   );
 }

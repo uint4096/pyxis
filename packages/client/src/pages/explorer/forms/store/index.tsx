@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
-import { DirSelection } from "../../../input";
-import { Modal } from "../../../modal";
+import { DirSelection } from "../../../../components/input";
+import { Modal } from "../../../../components/modal";
 import "./store.css";
 import { save_config } from "../../../../ffi";
 import { SystemConfig } from "../../types";

@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
-import { TextInput } from "../../../input";
-import { Modal } from "../../../modal";
+import { TextInput } from "../../../../components/input";
+import { Modal } from "../../../../components/modal";
 import "./workspace.css";
 import { save_config } from "../../../../ffi";
 import { StoreConfig, WorkspaceBase, WorkspaceConfig } from "../../types";
