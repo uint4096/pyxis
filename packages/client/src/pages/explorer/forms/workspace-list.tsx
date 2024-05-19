@@ -71,5 +71,5 @@ const WorkspaceListElement = styled.div`
   width: 90%;
   cursor: pointer;
   text-align: left;
-  border-radius: 3%;
+  border-radius: 10px;
 `;
