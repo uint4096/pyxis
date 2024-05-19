@@ -1,4 +1,4 @@
-use std::fs::{OpenOptions, create_dir_all};
+use std::fs::{create_dir_all, OpenOptions};
 use std::io::prelude::*;
 use std::io::BufWriter;
 use std::path::Path;
@@ -20,18 +20,16 @@ pub fn write_file(path: &str, content: &str) -> bool {
                             println!("[Writer] Error while creating directory! {e}");
                             return false;
                         }
-                    } 
-                }
-            },
-            Err(_) => {
-                match create_dir_all(parent) {
-                    Ok(_) => (),
-                    Err(e) => {
-                        println!("[Writer] Error while creating directory! {e}");
-                        return false;
                     }
                 }
             }
+            Err(_) => match create_dir_all(parent) {
+                Ok(_) => (),
+                Err(e) => {
+                    println!("[Writer] Error while creating directory! {e}");
+                    return false;
+                }
+            },
         }
     }
 
@@ -42,7 +40,7 @@ pub fn write_file(path: &str, content: &str) -> bool {
                 Ok(_) => {
                     // let _ = writer.flush().expect("Flush failed!");
                     true
-                },
+                }
                 Err(e) => {
                     println!("[Writer] Error while writing to file! {e}");
                     false

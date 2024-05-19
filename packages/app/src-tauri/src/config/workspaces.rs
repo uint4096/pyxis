@@ -1,10 +1,7 @@
-use super::configuration::Configuration;
+use crate::dir_reader::{read_directory, DirContent, Entity};
+use std::path::Path;
 
-#[derive(serde::Serialize, serde::Deserialize)]
-enum Entity {
-    File(String),
-    Dir(String, Vec<Entity>),
-}
+use super::configuration::Configuration;
 
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct WorkspaceConfig {
@@ -20,5 +17,11 @@ pub struct Workspace<'a>(pub &'a str);
 impl<'a> Configuration<'a, WorkspaceConfig> for Workspace<'a> {
     fn config_path(&self) -> &str {
         self.0
+    }
+}
+
+impl<'a> Workspace<'a> {
+    pub fn read_dir(&self) -> DirContent {
+        read_directory(Path::new(self.config_path()))
     }
 }

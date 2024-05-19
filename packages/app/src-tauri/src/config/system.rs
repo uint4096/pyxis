@@ -2,7 +2,7 @@ use super::configuration::Configuration;
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct SystemConfig {
-    store: String
+    store: String,
 }
 
 pub struct System<'a>(pub &'a str);

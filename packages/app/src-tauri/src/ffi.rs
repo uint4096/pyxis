@@ -1,4 +1,7 @@
-use crate::config::system::SystemConfig;
+use crate::{
+    config::system::SystemConfig,
+    dir_reader::{DirContent, Entity},
+};
 
 use super::config::{
     configuration::Configuration,
@@ -27,6 +30,12 @@ pub fn read_workspace_config(path: String) -> FileContent {
 }
 
 #[tauri::command]
+pub fn read_workspace(path: String) -> DirContent {
+    let workspace = Workspace(&path);
+    workspace.read_dir()
+}
+
+#[tauri::command]
 pub fn write_workspace_config(path: String, config: WorkspaceConfig) -> bool {
     let workspace = Workspace(&path);
     workspace.save_config(config)
@@ -37,8 +46,7 @@ pub fn read_system_config() -> FileContent {
     if let Some(home_dir) = dirs::home_dir() {
         let dir = home_dir.join(".config").join("pyxis");
         let system = System(
-            &dir
-                .to_str()
+            &dir.to_str()
                 .expect("[Config Error] Failed to convert dir to string!"),
         );
         system.get_config()
