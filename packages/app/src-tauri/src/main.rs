@@ -6,7 +6,7 @@ mod ffi;
 mod reader;
 mod writer;
 use crate::ffi::{
-    read_store_config, read_system_config, read_workspace, read_workspace_config,
+    read_store_config, read_system_config, read_workspace_tree, read_workspace_config,
     write_store_config, write_system_config, write_workspace_config,
 };
 use tauri::{App, Manager};
@@ -18,7 +18,7 @@ fn main() {
             write_store_config,
             read_workspace_config,
             write_workspace_config,
-            read_workspace,
+            read_workspace_tree,
             read_system_config,
             write_system_config
         ])

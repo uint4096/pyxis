@@ -30,7 +30,7 @@ pub fn read_workspace_config(path: String) -> FileContent {
 }
 
 #[tauri::command]
-pub fn read_workspace(path: String) -> DirContent {
+pub fn read_workspace_tree(path: String) -> DirContent {
     let workspace = Workspace(&path);
     workspace.read_dir()
 }

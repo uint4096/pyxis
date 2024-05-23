@@ -5,6 +5,7 @@ import {
   readStoreConfig,
   readSystemConfig,
   readWorkspaceConfig,
+  read_dir_tree,
 } from "../../ffi";
 import {
   StoreConfig,
@@ -109,8 +110,9 @@ export const Explorer = () => {
         return;
       }
 
+      const workspacePath = `${systemConfig.store}/${storeConfig.selected_workspace.name}`;
       const workspaceConfig = await readWorkspaceConfig<WorkspaceConfig>({
-        path: `${systemConfig.store}/${storeConfig.selected_workspace.name}`,
+        path: workspacePath,
       });
 
       if (!workspaceConfig) {
@@ -118,7 +120,11 @@ export const Explorer = () => {
         return;
       }
 
-      setWorkspaceConfig(workspaceConfig);
+      //@todo: this should be done when files are being saved. Read and save it in workspace config
+      const tree = (await read_dir_tree(workspacePath)) ?? [];
+      console.log("Workspace Tree:", tree);
+
+      setWorkspaceConfig({ ...workspaceConfig, tree });
       setEditor(true);
     })();
   }, [storeConfig, systemConfig]);

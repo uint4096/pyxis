@@ -7,6 +7,7 @@ pub enum Entity {
     Dir(String, Vec<Entity>),
 }
 
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct DirContent {
     read_status: bool,
     entries: Option<Vec<Entity>>,
