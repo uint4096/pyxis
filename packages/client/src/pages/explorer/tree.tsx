@@ -33,7 +33,9 @@ const EntitiesWrapper = styled.div`
   display: flex;
   flex-direction: column;
   border-radius: 5px;
-`
+  width: 13vw;
+`;
+
 const DirTreeWrapper = styled.div`
   display: flex;
   flex-direction: column;

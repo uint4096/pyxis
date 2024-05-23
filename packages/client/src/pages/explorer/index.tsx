@@ -161,8 +161,10 @@ export const Explorer = () => {
 
 const ExplorerWrapper = styled.div`
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 7vh 5vw;
   height: 100%;
-  gap: 3vw;
+  flex-grow: 1;
+  gap: 10vw;
 `;

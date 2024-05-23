@@ -1,6 +1,6 @@
 use crate::{
     config::system::SystemConfig,
-    dir_reader::{DirContent, Entity},
+    dir_reader::DirContent,
 };
 
 use super::config::{
