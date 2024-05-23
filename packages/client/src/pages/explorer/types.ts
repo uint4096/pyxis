@@ -8,8 +8,8 @@ export type StoreConfig = {
   selected_workspace?: WorkspaceBase;
 };
 
-export type File = { [k in 'File']: string; };
-export type Directory = { [k in 'Dir']: [ string, Array<Entity> ] }; 
+export type File = { [k in "File"]: string };
+export type Directory = { [k in "Dir"]: [string, Array<Entity>] };
 export type Entity = File | Directory;
 
 export type WorkspaceConfig = {

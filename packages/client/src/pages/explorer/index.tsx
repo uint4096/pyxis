@@ -17,6 +17,7 @@ import { StoreForm } from "./forms/store";
 import { NoWorkspaceMessage } from "./forms/no-workspace";
 import { CreateWorkspace } from "./forms/workspace";
 import { WorkspaceSelection } from "./forms/workspace-list";
+import { Tree } from "./tree";
 
 export const Explorer = () => {
   const [showStoreForm, setStoreForm] = useState<boolean>(false);
@@ -131,6 +132,7 @@ export const Explorer = () => {
 
   return (
     <ExplorerWrapper>
+      {workspaceConfig?.tree?.length && <Tree name={workspaceConfig.name} dirTree={workspaceConfig.tree}/>}
       {showEditor && !noWorkspaces && <Editor />}
       {noWorkspaces && (
         <NoWorkspaceMessage onCreate={() => setWorkspaceForm(true)} />
@@ -162,4 +164,5 @@ const ExplorerWrapper = styled.div`
   justify-content: center;
   align-items: center;
   height: 100%;
+  gap: 3vw;
 `;
