@@ -1,4 +1,3 @@
-import { isFile } from "../pages/explorer/guards";
 import { parse } from "../utils";
 import { invoke, type Args } from "./invoke";
 

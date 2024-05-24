@@ -132,7 +132,7 @@ export const Explorer = () => {
 
   return (
     <ExplorerWrapper>
-      {workspaceConfig?.tree?.length && <Tree name={workspaceConfig.name} dirTree={workspaceConfig.tree}/>}
+      {workspaceConfig?.tree?.length && <Tree workspace={workspaceConfig} />}
       {showEditor && !noWorkspaces && <Editor />}
       {noWorkspaces && (
         <NoWorkspaceMessage onCreate={() => setWorkspaceForm(true)} />
