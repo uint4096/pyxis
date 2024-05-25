@@ -1,3 +1,5 @@
+import { Entity } from "../../types";
+
 export type WorkspaceBase = {
   id: string;
   name: string;
@@ -7,10 +9,6 @@ export type StoreConfig = {
   workspaces: Array<WorkspaceBase>;
   selected_workspace?: WorkspaceBase;
 };
-
-export type File = { [k in "File"]: string };
-export type Directory = { [k in "Dir"]: [string, Array<Entity>] };
-export type Entity = File | Directory;
 
 export type WorkspaceConfig = {
   id: string;
