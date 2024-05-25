@@ -1,6 +1,6 @@
-import { styled } from '@linaria/react';
+import { styled } from "@linaria/react";
 import { open } from "@tauri-apps/api/dialog";
-import { useCallback, useState } from "react";
+import { KeyboardEventHandler, Ref, useCallback, useState } from "react";
 
 export type InputProps = {
   size: "small" | "medium" | "large";
@@ -9,7 +9,28 @@ export type InputProps = {
   validationMessage?: string;
   message?: string;
   onChange: React.Dispatch<React.SetStateAction<string>>;
+  ref?: Ref<HTMLInputElement>;
+  onKeyDown?: KeyboardEventHandler<HTMLInputElement>;
 };
+
+export const InputInPlace = ({
+  size,
+  value,
+  placeholder,
+  onChange,
+  readonly,
+  onKeyDown,
+}: InputProps & { readonly?: boolean }) => (
+  <Input
+    value={value}
+    placeholder={placeholder ?? ""}
+    onChange={(e: any) => onChange(e.currentTarget.value)}
+    variation={size}
+    readOnly={readonly ?? false}
+    autoFocus={true}
+    onKeyDown={onKeyDown}
+  />
+);
 
 export const DirSelection = ({
   size,
@@ -40,19 +61,16 @@ export const DirSelection = ({
     <InputWrapper>
       <InputMessage>{message}</InputMessage>
       <InputSelection>
-        <Input
+        <InputInPlace
           value={inputVal}
-          placeholder={placeholder ?? ''}
-          readOnly
-          variation={size}
+          placeholder={placeholder ?? ""}
+          readonly={true}
+          size={size}
+          onChange={onChange}
         />
-        <DirSelectButton onClick={onOpen}>
-          ...
-        </DirSelectButton>
+        <DirSelectButton onClick={onOpen}>...</DirSelectButton>
       </InputSelection>
-      {validationMessage && (
-        <span>{validationMsg}</span>
-      )}
+      {validationMessage && <span>{validationMsg}</span>}
     </InputWrapper>
   );
 };
@@ -67,15 +85,14 @@ export const TextInput = ({
 }: InputProps) => (
   <InputWrapper>
     <InputMessage>{message}</InputMessage>
-    <Input
+    <InputInPlace
       value={value}
-      placeholder={placeholder ?? ''}
-      onChange={(e: any) => onChange(e.currentTarget.value)}
-      variation={size}
+      placeholder={placeholder ?? ""}
+      readonly={true}
+      size={size}
+      onChange={onChange}
     />
-    {validationMessage && (
-      <span>{validationMessage}</span>
-    )}
+    {validationMessage && <span>{validationMessage}</span>}
   </InputWrapper>
 );
 
@@ -93,7 +110,7 @@ const InputMessage = styled.span`
   margin-left: 2em;
 `;
 
-const Input = styled.input<{ variation: InputProps['size'] }>`
+const Input = styled.input<{ variation: InputProps["size"] }>`
   border: 1px solid grey;
   background-color: inherit;
   border-radius: 10px;
@@ -108,8 +125,10 @@ const Input = styled.input<{ variation: InputProps['size'] }>`
     font-size: 0.9rem;
   }
 
-  width: ${(props) => ({small: '60%', medium: '80%', large: '90%'})[props.variation]};
-  height: ${(props) => ({small: '2.4vh', medium: '2.7vh', large: '2.9vh'})[props.variation]};
+  width: ${(props) =>
+    ({ small: "60%", medium: "80%", large: "90%" }[props.variation])};
+  height: ${(props) =>
+    ({ small: "2.4vh", medium: "2.7vh", large: "2.9vh" }[props.variation])};
 `;
 
 const InputSelection = styled.div`

@@ -1,5 +1,5 @@
 import { invoke as invokeCommand } from "@tauri-apps/api";
-import { Entity } from "../pages/explorer/types";
+import type { File, Entity } from "../types";
 
 type FileContent = {
   read_status: boolean;
@@ -19,6 +19,7 @@ export type Args<T extends object> = {
   read_store_config: { path: string };
   write_store_config: { path: string; config: T };
   read_workspace_tree: { path: string };
+  create_file: { file: File; path: string };
 };
 
 export type Response = {
@@ -29,6 +30,7 @@ export type Response = {
   read_store_config: FileContent;
   write_store_config: boolean;
   read_workspace_tree: DirContent;
+  create_file: boolean;
 };
 
 export const invoke = async <
