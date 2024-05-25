@@ -2,11 +2,11 @@ import { css } from "@linaria/core";
 import { styled } from "@linaria/react";
 import { isFile } from "../guards";
 import { InputInPlace } from "../../../components/input";
-import { GoKebabHorizontal } from "react-icons/go";
 import { HiPlus } from "react-icons/hi";
 import { MdKeyboardArrowDown, MdKeyboardArrowRight } from "react-icons/md";
-import { KeyboardEventHandler, useCallback, useState } from "react";
+import { KeyboardEventHandler, useCallback, useEffect, useState } from "react";
 import { Entity } from "../../../types";
+import { KebabMenu, MenuOption } from "../../../components/kebab-menu";
 
 type EntityProps = {
   dirTree: Array<Entity>;
@@ -25,8 +25,20 @@ export const Entities = ({
   const [newDocument, setNewDocument] = useState(false);
   const [documentName, setDocumentName] = useState("");
 
+  /**
+   * Managed outside of CSS because I need to persist the kebab menu
+   * regardless of hover once it's clicked
+   */
+  const [showOptionsElement, setOptionsElement] = useState<string>();
+  const [persistOptions, setPersistOptions] = useState<boolean>();
+
   const inputKeydown: KeyboardEventHandler<HTMLInputElement> = useCallback(
     async (e) => {
+      if (e.key === "Escape") {
+        setDocumentName("");
+        setNewDocument(false);
+      }
+
       if (e.key !== "Enter") {
         return;
       }
@@ -38,9 +50,30 @@ export const Entities = ({
     [documentName]
   );
 
+  const menuOptions: Array<MenuOption> = [
+    {
+      handler: async () => {},
+      id: "new_directory",
+      name: "New Directory",
+    },
+    {
+      handler: async () => {},
+      id: "rename",
+      name: "Rename",
+    },
+    {
+      handler: async () => {},
+      id: "delete",
+      name: "Delete",
+    },
+  ];
+
   return (
     <DirTreeWrapper>
-      <NameContainer>
+      <NameContainer
+        onMouseEnter={() => setOptionsElement(id)}
+        onMouseLeave={() => (persistOptions ? null : setOptionsElement(""))}
+      >
         <Collapsable onClick={() => setCollapsed((c) => !c)}>
           {collapased ? (
             <MdKeyboardArrowRight className={verticallyMiddle} />
@@ -49,12 +82,15 @@ export const Entities = ({
           )}
         </Collapsable>
         <Name>{name}</Name>
-        <OptionsContainer>
+        <OptionsContainer className={id === showOptionsElement ? show : hide}>
           <HiPlus
             className={verticallyMiddle}
             onClick={() => setNewDocument(true)}
           />
-          <GoKebabHorizontal className={verticallyMiddle} />
+          <KebabMenu
+            options={menuOptions}
+            onClickHook={() => setPersistOptions((p) => !p)}
+          />
         </OptionsContainer>
       </NameContainer>
       {!collapased && (
@@ -76,7 +112,7 @@ export const Entities = ({
                 name={entity.Dir.name}
                 id={entity.Dir.id}
                 onDocumentCreation={onDocumentCreation}
-              ></Entities>
+              />
             )
           )}
         </EntityContainer>
@@ -93,6 +129,14 @@ const verticallyMiddle = css`
   }
 `;
 
+const hide = css`
+  display: none;
+`;
+
+const show = css`
+  display: flex;
+`;
+
 const DirTreeWrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -106,7 +150,6 @@ const EntityContainer = styled.div`
 `;
 
 const OptionsContainer = styled.div`
-  display: none;
   height: 100%;
   align-items: center;
   gap: 0.5vw;
@@ -122,10 +165,6 @@ const NameContainer = styled.div`
 
   &:hover {
     background-color: #080808;
-  }
-
-  &:hover ${OptionsContainer} {
-    display: flex;
   }
 `;
 
