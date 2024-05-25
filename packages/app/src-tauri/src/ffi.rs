@@ -1,6 +1,6 @@
 use crate::{
     config::system::SystemConfig,
-    dir_reader::DirContent,
+    dir_reader::DirContent, document::file::File,
 };
 
 use super::config::{
@@ -70,4 +70,9 @@ pub fn write_system_config(config: SystemConfig) -> bool {
         println!("[Config Error] Failed to retrieve home directory!");
         false
     }
+}
+
+#[tauri::command]
+pub fn create_file(path: &str, file: File) -> bool {
+   file.create(path)
 }
