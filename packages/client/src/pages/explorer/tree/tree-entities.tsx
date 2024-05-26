@@ -4,7 +4,7 @@ import { isFile } from "../guards";
 import { InputInPlace } from "../../../components/input";
 import { HiPlus } from "react-icons/hi";
 import { MdKeyboardArrowDown, MdKeyboardArrowRight } from "react-icons/md";
-import { KeyboardEventHandler, useCallback, useEffect, useState } from "react";
+import { KeyboardEventHandler, forwardRef, useCallback, useState } from "react";
 import { Entity } from "../../../types";
 import { KebabMenu, MenuOption } from "../../../components/kebab-menu";
 
@@ -13,113 +13,128 @@ type EntityProps = {
   name: string;
   id: string;
   onDocumentCreation: (id: string, name: string) => Promise<void>;
+  dirOptionsState: [string, React.Dispatch<React.SetStateAction<string>>];
+  showOptionsState: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
 };
 
-export const Entities = ({
-  dirTree,
-  name,
-  id,
-  onDocumentCreation,
-}: EntityProps) => {
-  const [collapased, setCollapsed] = useState(false);
-  const [newDocument, setNewDocument] = useState(false);
-  const [documentName, setDocumentName] = useState("");
+export const Entities = forwardRef<HTMLDivElement, EntityProps>(
+  (
+    {
+      dirTree,
+      name,
+      id,
+      onDocumentCreation,
+      dirOptionsState: [optionsElement, setOptionsElement],
+      showOptionsState: [showOptions, setOptions],
+    }: EntityProps,
+    ref
+  ) => {
+    const [collapased, setCollapsed] = useState(false);
+    const [newDocument, setNewDocument] = useState(false);
+    const [documentName, setDocumentName] = useState("");
 
-  /**
-   * Managed outside of CSS because I need to persist the kebab menu
-   * regardless of hover once it's clicked
-   */
-  const [showOptionsElement, setOptionsElement] = useState<string>();
-  const [persistOptions, setPersistOptions] = useState<boolean>();
+    const inputKeydown: KeyboardEventHandler<HTMLInputElement> = useCallback(
+      async (e) => {
+        if (e.key === "Escape") {
+          setDocumentName("");
+          setNewDocument(false);
+        }
 
-  const inputKeydown: KeyboardEventHandler<HTMLInputElement> = useCallback(
-    async (e) => {
-      if (e.key === "Escape") {
+        if (e.key !== "Enter") {
+          return;
+        }
+
+        await onDocumentCreation(id, documentName);
         setDocumentName("");
         setNewDocument(false);
-      }
+      },
+      [documentName]
+    );
 
-      if (e.key !== "Enter") {
-        return;
-      }
+    const dirMenuOptions: Array<MenuOption> = [
+      {
+        handler: async () => {},
+        id: "new_directory",
+        name: "New Directory",
+      },
+      {
+        handler: async () => {},
+        id: "rename",
+        name: "Rename",
+      },
+      {
+        handler: async () => {},
+        id: "delete",
+        name: "Delete",
+      },
+    ];
 
-      await onDocumentCreation(id, documentName);
-      setDocumentName("");
-      setNewDocument(false);
-    },
-    [documentName]
-  );
+    const setElement = useCallback(
+      (val: string) => {
+        if (!showOptions) {
+          setOptionsElement(val);
+        }
+      },
+      [showOptions]
+    );
 
-  const menuOptions: Array<MenuOption> = [
-    {
-      handler: async () => {},
-      id: "new_directory",
-      name: "New Directory",
-    },
-    {
-      handler: async () => {},
-      id: "rename",
-      name: "Rename",
-    },
-    {
-      handler: async () => {},
-      id: "delete",
-      name: "Delete",
-    },
-  ];
-
-  return (
-    <DirTreeWrapper>
-      <NameContainer
-        onMouseEnter={() => setOptionsElement(id)}
-        onMouseLeave={() => (persistOptions ? null : setOptionsElement(""))}
-      >
-        <Collapsable onClick={() => setCollapsed((c) => !c)}>
-          {collapased ? (
-            <MdKeyboardArrowRight className={verticallyMiddle} />
-          ) : (
-            <MdKeyboardArrowDown className={verticallyMiddle} />
-          )}
-        </Collapsable>
-        <Name>{name}</Name>
-        <OptionsContainer className={id === showOptionsElement ? show : hide}>
-          <HiPlus
-            className={verticallyMiddle}
-            onClick={() => setNewDocument(true)}
-          />
-          <KebabMenu
-            options={menuOptions}
-            onClickHook={() => setPersistOptions((p) => !p)}
-          />
-        </OptionsContainer>
-      </NameContainer>
-      {!collapased && (
-        <EntityContainer>
-          {newDocument && (
-            <InputInPlace
-              size="small"
-              value={documentName}
-              onKeyDown={inputKeydown}
-              onChange={setDocumentName}
-            />
-          )}
-          {dirTree.map((entity) =>
-            isFile(entity) ? (
-              <FileName key={entity.File}>{entity.File}</FileName>
+    return (
+      <DirTreeWrapper>
+        <NameContainer
+          onMouseEnter={() => setElement(id)}
+          onMouseLeave={() => setElement("")}
+        >
+          <Collapsable onClick={() => setCollapsed((c) => !c)}>
+            {collapased ? (
+              <MdKeyboardArrowRight className={verticallyMiddle} />
             ) : (
-              <Entities
-                dirTree={entity.Dir.content}
-                name={entity.Dir.name}
-                id={entity.Dir.id}
-                onDocumentCreation={onDocumentCreation}
+              <MdKeyboardArrowDown className={verticallyMiddle} />
+            )}
+          </Collapsable>
+          <Name>{name}</Name>
+          <OptionsContainer className={id === optionsElement ? show : hide}>
+            <HiPlus
+              className={verticallyMiddle}
+              onClick={() => setNewDocument(true)}
+            />
+            <KebabMenu
+              options={dirMenuOptions}
+              onClick={() => setOptions((opt) => !opt)}
+              showMenu={!!showOptions && id === optionsElement}
+              ref={ref}
+            />
+          </OptionsContainer>
+        </NameContainer>
+        {!collapased && (
+          <EntityContainer>
+            {newDocument && (
+              <InputInPlace
+                size="small"
+                value={documentName}
+                onKeyDown={inputKeydown}
+                onChange={setDocumentName}
               />
-            )
-          )}
-        </EntityContainer>
-      )}
-    </DirTreeWrapper>
-  );
-};
+            )}
+            {dirTree.map((entity) =>
+              isFile(entity) ? (
+                <FileName key={entity.File}>{entity.File}</FileName>
+              ) : (
+                <Entities
+                  dirTree={entity.Dir.content}
+                  name={entity.Dir.name}
+                  id={entity.Dir.id}
+                  onDocumentCreation={onDocumentCreation}
+                  dirOptionsState={[optionsElement, setOptionsElement]}
+                  showOptionsState={[showOptions, setOptions]}
+                />
+              )
+            )}
+          </EntityContainer>
+        )}
+      </DirTreeWrapper>
+    );
+  }
+);
 
 const verticallyMiddle = css`
   vertical-align: middle;
@@ -159,6 +174,7 @@ const NameContainer = styled.div`
   padding: 0.2vh 0.3vw;
   cursor: pointer;
   display: flex;
+  justify-content: space-between;
   gap: 0.1vw;
   border-radius: 5px;
   opacity: 0.9;
@@ -179,4 +195,8 @@ const Collapsable = styled.div`
 const FileName = styled.div`
   padding: 0.2vh 1vw;
   opacity: 0.5;
+  &:hover {
+    background-color: #080808;
+    opacity: 0.9;
+  }
 `;

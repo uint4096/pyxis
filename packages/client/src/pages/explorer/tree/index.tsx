@@ -1,10 +1,11 @@
 import { styled } from "@linaria/react";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { WorkspaceConfig } from "../types";
 import type { DirEntity, Entity, File } from "../../../types";
 import { isFile } from "../guards";
 import { createFile } from "../../../ffi";
 import { Entities } from "./tree-entities";
+import { useOutsideEvent } from "../../../hooks/useOutsideEvent";
 
 type TreeProps = {
   workspace: WorkspaceConfig;
@@ -13,6 +14,12 @@ type TreeProps = {
 
 export const Tree = ({ workspace, store }: TreeProps) => {
   const [dirTree, setDirTree] = useState(workspace.tree);
+  /**
+   * Managed outside of CSS because I need to persist the kebab menu
+   * regardless of hover once it's clicked
+   */
+  const dirOptionsElementState = useState<string>("");
+  const showOptionsState = useState<boolean>(false);
 
   const updateTree = useCallback(
     (tree: Array<Entity>, id: string, name: string): typeof dirTree => {
@@ -94,6 +101,12 @@ export const Tree = ({ workspace, store }: TreeProps) => {
     []
   );
 
+  const menuRef = useRef<HTMLDivElement>(null);
+  useOutsideEvent(menuRef, () => {
+    dirOptionsElementState[1]("");
+    showOptionsState[1](false);
+  });
+
   return (
     <EntitiesWrapper>
       <Entities
@@ -101,6 +114,9 @@ export const Tree = ({ workspace, store }: TreeProps) => {
         name={workspace.name}
         id={workspace.id}
         onDocumentCreation={onDocumentCreation}
+        dirOptionsState={dirOptionsElementState}
+        showOptionsState={showOptionsState}
+        ref={menuRef}
       />
     </EntitiesWrapper>
   );

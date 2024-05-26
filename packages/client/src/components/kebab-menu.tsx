@@ -1,6 +1,6 @@
 import { css } from "@linaria/core";
 import { styled } from "@linaria/react";
-import { useCallback, useState } from "react";
+import { forwardRef, useCallback } from "react";
 import { GoKebabHorizontal } from "react-icons/go";
 
 export type MenuOption = {
@@ -11,32 +11,34 @@ export type MenuOption = {
 
 export type MenuProps = {
   options: Array<MenuOption>;
-  onClickHook: () => void;
+  showMenu: boolean;
+  onClick: () => void;
 };
 
-export const KebabMenu = ({ options, onClickHook }: MenuProps) => {
-  const [showMenu, setMenu] = useState(false);
+export const KebabMenu = forwardRef<HTMLDivElement, MenuProps>(
+  ({ onClick, options, showMenu }: MenuProps, ref) => {
+    const onShow = useCallback(
+      (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        e.stopPropagation();
+        onClick();
+      },
+      [onClick]
+    );
 
-  const onClick = useCallback(() => {
-    onClickHook();
-    setMenu((menu) => !menu);
-  }, []);
-
-  return (
-    <MenuWrapper>
-      <GoKebabHorizontal onClick={onClick} className={verticallyMiddle}/>
-      {showMenu && (
-        <Menu>
-          {options.map((option) => (
-            <Option key={option.id}>{option.name}</Option>
-          ))}
-        </Menu>
-      )}
-    </MenuWrapper>
-  );
-};
-
-const MenuWrapper = styled.div``;
+    return (
+      <div ref={ref} onClick={onShow}>
+        <GoKebabHorizontal className={verticallyMiddle} />
+        {showMenu && (
+          <Menu>
+            {options.map((option) => (
+              <Option key={option.id}>{option.name}</Option>
+            ))}
+          </Menu>
+        )}
+      </div>
+    );
+  }
+);
 
 const verticallyMiddle = css`
   vertical-align: middle;
