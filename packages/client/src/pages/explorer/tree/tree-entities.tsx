@@ -52,6 +52,25 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
       [documentName]
     );
 
+    const setElement = useCallback(
+      (val: string) => {
+        if (!showOptions) {
+          setOptionsElement(val);
+        }
+      },
+      [showOptions]
+    );
+
+    const onMenuKeydown: KeyboardEventHandler<HTMLDivElement> = useCallback(
+      (e) => {
+        if (e.key === "Escape") {
+          setOptionsElement("");
+          setOptions(false);
+        }
+      },
+      []
+    );
+
     const dirMenuOptions: Array<MenuOption> = [
       {
         handler: async () => {},
@@ -82,22 +101,6 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
         name: "Delete",
       },
     ];
-
-    const setElement = useCallback(
-      (val: string) => {
-        if (!showOptions) {
-          setOptionsElement(val);
-        }
-      },
-      [showOptions]
-    );
-
-    const onMenuKeydown: KeyboardEventHandler<HTMLDivElement> = useCallback((e) => {
-      if (e.key === 'Escape') {
-        setOptionsElement("");
-        setOptions(false);
-      }
-    }, []);
 
     return (
       <DirTreeWrapper>
@@ -143,14 +146,25 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
                 <NameContainer
                   onMouseEnter={() => setElement(`${id}/${entity.File}`)}
                   onMouseLeave={() => setElement("")}
-                  className={optionsElement === `${id}/${entity.File}` ? backgroundHighlight : ""}
+                  className={
+                    optionsElement === `${id}/${entity.File}`
+                      ? backgroundHighlight
+                      : ""
+                  }
                 >
                   <FileName key={entity.File}>{entity.File}</FileName>
-                  <OptionsContainer className={optionsElement === `${id}/${entity.File}` ? show : hide}>
+                  <OptionsContainer
+                    className={
+                      optionsElement === `${id}/${entity.File}` ? show : hide
+                    }
+                  >
                     <KebabMenu
                       options={fileMenuOptions}
                       onClick={() => setOptions((opt) => !opt)}
-                      showMenu={!!showOptions && optionsElement === `${id}/${entity.File}`}
+                      showMenu={
+                        !!showOptions &&
+                        optionsElement === `${id}/${entity.File}`
+                      }
                       onKeyDown={onMenuKeydown}
                       ref={ref}
                     />

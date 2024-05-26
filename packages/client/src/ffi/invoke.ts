@@ -20,6 +20,11 @@ export type Args<T extends object> = {
   write_store_config: { path: string; config: T };
   read_workspace_tree: { path: string };
   create_file: { file: File; path: string };
+  rename_file: { file: File; path: string; new_name: string };
+  delete_file: { file: File; path: string };
+  create_dir: { file: File; path: string };
+  rename_dir: { file: File; path: string; new_name: string };
+  delete_dir: { file: File; path: string };
 };
 
 export type Response = {
@@ -31,6 +36,11 @@ export type Response = {
   write_store_config: boolean;
   read_workspace_tree: DirContent;
   create_file: boolean;
+  rename_file: boolean;
+  delete_file: boolean;
+  create_dir: boolean;
+  rename_dir: boolean;
+  delete_dir: boolean;
 };
 
 export const invoke = async <

@@ -95,7 +95,7 @@ export const Tree = ({ workspace, store }: TreeProps) => {
 
       const dirPath = pathToDir(dirId)?.filePath;
       const path = `${store}/${workspace.name}${dirPath}`;
-      await createFile(file, path);
+      await createFile({ file, path });
       setDirTree((tree) => updateTree(tree, dirId, name));
     },
     []
