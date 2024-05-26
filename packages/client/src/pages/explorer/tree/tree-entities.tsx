@@ -70,6 +70,19 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
       },
     ];
 
+    const fileMenuOptions: Array<MenuOption> = [
+      {
+        handler: async () => {},
+        id: "rename",
+        name: "Rename",
+      },
+      {
+        handler: async () => {},
+        id: "delete",
+        name: "Delete",
+      },
+    ];
+
     const setElement = useCallback(
       (val: string) => {
         if (!showOptions) {
@@ -91,6 +104,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
         <NameContainer
           onMouseEnter={() => setElement(id)}
           onMouseLeave={() => setElement("")}
+          className={optionsElement === id ? backgroundHighlight : ""}
         >
           <Collapsable onClick={() => setCollapsed((c) => !c)}>
             {collapased ? (
@@ -126,7 +140,22 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
             )}
             {dirTree.map((entity) =>
               isFile(entity) ? (
-                <FileName key={entity.File}>{entity.File}</FileName>
+                <NameContainer
+                  onMouseEnter={() => setElement(`${id}/${entity.File}`)}
+                  onMouseLeave={() => setElement("")}
+                  className={optionsElement === `${id}/${entity.File}` ? backgroundHighlight : ""}
+                >
+                  <FileName key={entity.File}>{entity.File}</FileName>
+                  <OptionsContainer className={optionsElement === `${id}/${entity.File}` ? show : hide}>
+                    <KebabMenu
+                      options={fileMenuOptions}
+                      onClick={() => setOptions((opt) => !opt)}
+                      showMenu={!!showOptions && optionsElement === `${id}/${entity.File}`}
+                      onKeyDown={onMenuKeydown}
+                      ref={ref}
+                    />
+                  </OptionsContainer>
+                </NameContainer>
               ) : (
                 <Entities
                   dirTree={entity.Dir.content}
@@ -153,6 +182,10 @@ const verticallyMiddle = css`
   }
 `;
 
+const backgroundHighlight = css`
+  background-color: #080808;
+`;
+
 const hide = css`
   display: none;
 `;
@@ -171,6 +204,15 @@ const EntityContainer = styled.div`
   display: flex;
   flex-direction: column;
   margin-left: 1vw;
+`;
+
+const FileName = styled.div`
+  padding: 0.2vh 1vw;
+  opacity: 0.5;
+  &:hover {
+    background-color: #080808;
+    opacity: 0.9;
+  }
 `;
 
 const OptionsContainer = styled.div`
@@ -199,13 +241,4 @@ const Name = styled.span`
 
 const Collapsable = styled.div`
   height: max-content;
-`;
-
-const FileName = styled.div`
-  padding: 0.2vh 1vw;
-  opacity: 0.5;
-  &:hover {
-    background-color: #080808;
-    opacity: 0.9;
-  }
 `;

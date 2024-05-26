@@ -63,6 +63,7 @@ const Menu = styled.div`
 const Option = styled.div`
   padding: 0.5vh 1vw;
   &:hover {
+    background-color: #000;
     opacity: 0.8;
   }
 `;
