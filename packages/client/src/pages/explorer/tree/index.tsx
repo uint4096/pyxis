@@ -1,7 +1,7 @@
 import { styled } from "@linaria/react";
 import { useCallback, useRef, useState } from "react";
 import type { WorkspaceConfig } from "../types";
-import type { DirEntity, Entity, File } from "../../../types";
+import type { DirEntity, File } from "../../../types";
 import { isFile } from "../guards";
 import { createFile } from "../../../ffi";
 import { Entities } from "./tree-entities";
@@ -10,52 +10,21 @@ import { useOutsideEvent } from "../../../hooks/useOutsideEvent";
 type TreeProps = {
   workspace: WorkspaceConfig;
   store: string;
+  refreshTree: () => Promise<void>;
 };
 
-export const Tree = ({ workspace, store }: TreeProps) => {
-  const [dirTree, setDirTree] = useState(workspace.tree);
+export const Tree = ({ workspace, store, refreshTree }: TreeProps) => {
   /**
-   * Managed outside of CSS because I need to persist the kebab menu
+   * Managed outside of CSS because I need to persist the overflow menu
    * regardless of hover once it's clicked
    */
   const [optionsElement, setOptionsElement] = useState<string>("");
   const [showOptions, setOptions] = useState<boolean>(false);
 
-  const updateTree = useCallback(
-    (tree: Array<Entity>, id: string, name: string): typeof dirTree => {
-      const recursivelyUpdate = (tree: Array<Entity>): Array<Entity> => {
-        return tree.map((d) => {
-          if (isFile(d)) {
-            return d;
-          }
-
-          if (d.Dir.id === id) {
-            return {
-              Dir: {
-                ...d.Dir,
-                content: [{ File: name }, ...d.Dir.content],
-              },
-            };
-          }
-
-          return {
-            Dir: {
-              ...d.Dir,
-              content: recursivelyUpdate(d.Dir.content),
-            },
-          };
-        });
-      };
-
-      return recursivelyUpdate(tree);
-    },
-    []
-  );
-
   const pathToDir = useCallback(
     (
       id: string,
-      tree = dirTree,
+      tree = workspace.tree,
       path = ""
     ): { filePath: string; found: boolean } =>
       tree
@@ -75,7 +44,7 @@ export const Tree = ({ workspace, store }: TreeProps) => {
           },
           { filePath: "", found: false as boolean }
         ),
-    [dirTree]
+    [workspace.tree]
   );
 
   const onDocumentCreation = useCallback(
@@ -96,7 +65,7 @@ export const Tree = ({ workspace, store }: TreeProps) => {
       const dirPath = pathToDir(dirId)?.filePath;
       const path = `${store}/${workspace.name}${dirPath}`;
       await createFile({ file, path });
-      setDirTree((tree) => updateTree(tree, dirId, name));
+      await refreshTree();
     },
     []
   );
@@ -110,7 +79,7 @@ export const Tree = ({ workspace, store }: TreeProps) => {
   return (
     <EntitiesWrapper>
       <Entities
-        dirTree={dirTree}
+        dirTree={workspace.tree}
         name={workspace.name}
         id={workspace.id}
         onDocumentCreation={onDocumentCreation}

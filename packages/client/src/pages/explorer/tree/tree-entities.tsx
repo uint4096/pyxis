@@ -6,7 +6,7 @@ import { HiPlus } from "react-icons/hi";
 import { MdKeyboardArrowDown, MdKeyboardArrowRight } from "react-icons/md";
 import { KeyboardEventHandler, forwardRef, useCallback, useState } from "react";
 import { Entity } from "../../../types";
-import { KebabMenu, MenuOption } from "../../../components/kebab-menu";
+import { OverflowMenu, MenuOption } from "../../../components/overflow-menu";
 
 type EntityProps = {
   dirTree: Array<Entity>;
@@ -122,7 +122,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
               className={verticallyMiddle}
               onClick={() => setNewDocument(true)}
             />
-            <KebabMenu
+            <OverflowMenu
               options={dirMenuOptions}
               onClick={() => setOptions((opt) => !opt)}
               showMenu={!!showOptions && id === optionsElement}
@@ -158,7 +158,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
                       optionsElement === `${id}/${entity.File}` ? show : hide
                     }
                   >
-                    <KebabMenu
+                    <OverflowMenu
                       options={fileMenuOptions}
                       onClick={() => setOptions((opt) => !opt)}
                       showMenu={

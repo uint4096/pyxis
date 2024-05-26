@@ -17,7 +17,7 @@ export type MenuProps = {
   onKeyDown?: KeyboardEventHandler<HTMLDivElement>;
 };
 
-export const KebabMenu = forwardRef<HTMLDivElement, MenuProps>(
+export const OverflowMenu = forwardRef<HTMLDivElement, MenuProps>(
   ({ onClick, options, showMenu, onKeyDown }: MenuProps, ref) => {
     const onShow = useCallback(
       (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -28,7 +28,12 @@ export const KebabMenu = forwardRef<HTMLDivElement, MenuProps>(
     );
 
     return (
-      <div ref={ref} onClick={onShow} onKeyDown={onKeyDown ?? noop} tabIndex={0}>
+      <div
+        ref={ref}
+        onClick={onShow}
+        onKeyDown={onKeyDown ?? noop}
+        tabIndex={0}
+      >
         <GoKebabHorizontal className={verticallyMiddle} />
         {showMenu && (
           <Menu>

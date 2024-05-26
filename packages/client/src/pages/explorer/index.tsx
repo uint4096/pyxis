@@ -6,6 +6,7 @@ import {
   readSystemConfig,
   readWorkspaceConfig,
   read_dir_tree,
+  saveWorkspaceConfig,
 } from "../../ffi";
 import {
   StoreConfig,
@@ -61,6 +62,37 @@ export const Explorer = () => {
     }));
     setWorkspaceSelectionForm(false);
   }, []);
+
+  const refreshTree = useCallback(async () => {
+    if (!systemConfig || !storeConfig || !storeConfig.selected_workspace) {
+      return;
+    }
+
+    const workspacePath = `${systemConfig.store}/${storeConfig.selected_workspace.name}`;
+    const tree = (await read_dir_tree(workspacePath)) ?? [];
+
+    setWorkspaceConfig((config) => {
+      if (!config) {
+        return undefined;
+      }
+
+      return {
+        ...config,
+        tree,
+      };
+    });
+  }, [systemConfig, storeConfig]);
+
+  useEffect(() => {
+    // Save workspace config to disk
+    if (!systemConfig || !workspaceConfig || !storeConfig || !storeConfig.selected_workspace) {
+      return;
+    }
+
+    const workspacePath = `${systemConfig.store}/${storeConfig.selected_workspace.name}`;
+
+    (async () => await saveWorkspaceConfig({ path: workspacePath, config: { ...workspaceConfig } }))();
+  }, [workspaceConfig]);
 
   useEffect(() => {
     (async () => {
@@ -123,7 +155,6 @@ export const Explorer = () => {
 
       //@todo: this should be done when files are being saved. Read and save it in workspace config
       const tree = (await read_dir_tree(workspacePath)) ?? [];
-      console.log("Workspace Tree:", tree);
 
       setWorkspaceConfig({ ...workspaceConfig, tree });
       setEditor(true);
@@ -133,7 +164,7 @@ export const Explorer = () => {
   return (
     <ExplorerWrapper>
       {workspaceConfig?.tree?.length && systemConfig && (
-        <Tree workspace={workspaceConfig} store={systemConfig.store} />
+        <Tree workspace={workspaceConfig} store={systemConfig.store} refreshTree={refreshTree} />
       )}
       {showEditor && !noWorkspaces && <Editor />}
       {noWorkspaces && (
