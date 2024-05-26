@@ -18,8 +18,8 @@ export const Tree = ({ workspace, store }: TreeProps) => {
    * Managed outside of CSS because I need to persist the kebab menu
    * regardless of hover once it's clicked
    */
-  const dirOptionsElementState = useState<string>("");
-  const showOptionsState = useState<boolean>(false);
+  const [optionsElement, setOptionsElement] = useState<string>("");
+  const [showOptions, setOptions] = useState<boolean>(false);
 
   const updateTree = useCallback(
     (tree: Array<Entity>, id: string, name: string): typeof dirTree => {
@@ -103,8 +103,8 @@ export const Tree = ({ workspace, store }: TreeProps) => {
 
   const menuRef = useRef<HTMLDivElement>(null);
   useOutsideEvent(menuRef, () => {
-    dirOptionsElementState[1]("");
-    showOptionsState[1](false);
+    setOptionsElement("");
+    setOptions(false);
   });
 
   return (
@@ -114,8 +114,8 @@ export const Tree = ({ workspace, store }: TreeProps) => {
         name={workspace.name}
         id={workspace.id}
         onDocumentCreation={onDocumentCreation}
-        dirOptionsState={dirOptionsElementState}
-        showOptionsState={showOptionsState}
+        dirOptionsState={[optionsElement, setOptionsElement]}
+        showOptionsState={[showOptions, setOptions]}
         ref={menuRef}
       />
     </EntitiesWrapper>

@@ -38,6 +38,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
         if (e.key === "Escape") {
           setDocumentName("");
           setNewDocument(false);
+          return;
         }
 
         if (e.key !== "Enter") {
@@ -78,6 +79,13 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
       [showOptions]
     );
 
+    const onMenuKeydown: KeyboardEventHandler<HTMLDivElement> = useCallback((e) => {
+      if (e.key === 'Escape') {
+        setOptionsElement("");
+        setOptions(false);
+      }
+    }, []);
+
     return (
       <DirTreeWrapper>
         <NameContainer
@@ -101,6 +109,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
               options={dirMenuOptions}
               onClick={() => setOptions((opt) => !opt)}
               showMenu={!!showOptions && id === optionsElement}
+              onKeyDown={onMenuKeydown}
               ref={ref}
             />
           </OptionsContainer>

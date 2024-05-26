@@ -1,7 +1,8 @@
 import { css } from "@linaria/core";
 import { styled } from "@linaria/react";
-import { forwardRef, useCallback } from "react";
+import { KeyboardEventHandler, forwardRef, useCallback } from "react";
 import { GoKebabHorizontal } from "react-icons/go";
+import { noop } from "../utils";
 
 export type MenuOption = {
   id: string;
@@ -13,10 +14,11 @@ export type MenuProps = {
   options: Array<MenuOption>;
   showMenu: boolean;
   onClick: () => void;
+  onKeyDown?: KeyboardEventHandler<HTMLDivElement>;
 };
 
 export const KebabMenu = forwardRef<HTMLDivElement, MenuProps>(
-  ({ onClick, options, showMenu }: MenuProps, ref) => {
+  ({ onClick, options, showMenu, onKeyDown }: MenuProps, ref) => {
     const onShow = useCallback(
       (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         e.stopPropagation();
@@ -26,7 +28,7 @@ export const KebabMenu = forwardRef<HTMLDivElement, MenuProps>(
     );
 
     return (
-      <div ref={ref} onClick={onShow}>
+      <div ref={ref} onClick={onShow} onKeyDown={onKeyDown ?? noop} tabIndex={0}>
         <GoKebabHorizontal className={verticallyMiddle} />
         {showMenu && (
           <Menu>
