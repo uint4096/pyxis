@@ -44,7 +44,15 @@ pub fn read_directory(path: &Path) -> DirContent {
                                 return DirContent::new_failed();
                             }
                         } else if entry.path().is_file() {
-                            entries.push(Entity::File(File::new(entry.file_name().into_string().unwrap())))
+                            let file_name = entry.file_name().into_string().unwrap();
+                            /*
+                             * @todo: Find a better, platform agnostic way (if possible) for determining if a file is hidden
+                             */
+                            if file_name.starts_with('.') {
+                                entries.push(Entity::File(File::new(file_name, true)));
+                            } else {
+                                entries.push(Entity::File(File::new(file_name, false)));
+                            }
                         }
                     }
                     Err(e) => {

@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import { Modal } from "../../../components/modal";
 import type { ArrayElement, StoreConfig, SystemConfig } from "../types";
 import { saveStoreConfig } from "../../../ffi";
+import { FormWrapper } from './common';
 
 type WorkspaceElement = ArrayElement<StoreConfig["workspaces"]>;
 
@@ -43,9 +44,9 @@ export const WorkspaceSelection = ({
   );
 
   return (
-    <>
+    <FormWrapper>
       <Modal header={label} body={list} size="medium" />
-    </>
+    </FormWrapper>
   );
 };
 

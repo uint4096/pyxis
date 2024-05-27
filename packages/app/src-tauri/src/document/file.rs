@@ -19,10 +19,11 @@ pub struct File {
     created_at: Option<String>,
     updated_at: Option<String>,
     links: Option<Vec<Link>>,
+    hidden: bool,
 }
 
 impl File {
-    pub fn new (name: String) -> Self {
+    pub fn new (name: String, hidden: bool) -> Self {
         File {
             name,
             created_at: None,
@@ -32,7 +33,8 @@ impl File {
             title: None,
             updated_at: None,
             whitelisted_groups: None,
-            whitelisted_users: None
+            whitelisted_users: None,
+            hidden
         }
     }
 }

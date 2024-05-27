@@ -16,6 +16,7 @@ export type File = {
   created_at?: string;
   updated_at?: string;
   links?: Array<Link>;
+  hidden: boolean;
 };
 
 export type Directory = { id: string; name: string; content: Array<Entity> };

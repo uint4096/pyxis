@@ -6,6 +6,7 @@ import { Modal } from "../../../components/modal";
 import { saveStoreConfig, saveWorkspaceConfig } from "../../../ffi";
 import { StoreConfig, WorkspaceBase, WorkspaceConfig } from "../types";
 import { nanoid } from "nanoid";
+import { FormWrapper } from "./common";
 
 type WorkspaceSelectionProps = {
   storeConfig: StoreConfig | undefined;
@@ -82,9 +83,11 @@ export const CreateWorkspace = ({
   );
 
   return (
-    <FormContainer>
-      <Modal body={body} size="small" footer={footer} />
-    </FormContainer>
+    <FormWrapper>
+      <FormContainer>
+        <Modal body={body} size="small" footer={footer} />
+      </FormContainer>
+    </FormWrapper>
   );
 };
 

@@ -148,7 +148,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
             )}
             {dirTree.map((entity) =>
               isFile(entity) ? (
-                <NameContainer
+                !entity.File.hidden && <NameContainer
                   onMouseEnter={() => setElement(`${id}/${entity.File.name}`)}
                   onMouseLeave={() => setElement("")}
                   className={

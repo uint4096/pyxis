@@ -1,4 +1,5 @@
 import { styled } from "@linaria/react";
+import { FormWrapper } from "./common";
 
 export type WorkspaceMessageProps = {
   onCreate: () => void;
@@ -6,10 +7,12 @@ export type WorkspaceMessageProps = {
 
 export const NoWorkspaceMessage = ({ onCreate }: WorkspaceMessageProps) => {
   return (
-    <MessageWrapper>
-      <WorkspaceMessage>You have no workspaces!</WorkspaceMessage>
-      <button onClick={onCreate}>Create a Workspace</button>
-    </MessageWrapper>
+    <FormWrapper>
+      <MessageWrapper>
+        <WorkspaceMessage>You have no workspaces!</WorkspaceMessage>
+        <button onClick={onCreate}>Create a Workspace</button>
+      </MessageWrapper>
+    </FormWrapper>
   );
 };
 

@@ -4,6 +4,7 @@ import { DirSelection } from "../../../components/input";
 import { Modal } from "../../../components/modal";
 import { saveSystemConfig } from "../../../ffi";
 import { SystemConfig } from "../types";
+import { FormWrapper } from "./common";
 
 type StoreFormProps = {
   onCreate: (config: SystemConfig) => void;
@@ -38,9 +39,11 @@ export const StoreForm = ({ onCreate }: StoreFormProps) => {
   );
 
   return (
-    <FormContainer>
-      <Modal body={body} size="small" footer={footer} />
-    </FormContainer>
+    <FormWrapper>
+      <FormContainer>
+        <Modal body={body} size="small" footer={footer} />
+      </FormContainer>
+    </FormWrapper>
   );
 };
 
