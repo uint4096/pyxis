@@ -12,6 +12,7 @@ import { isFile } from "../guards";
 import { createFile, createDir } from "../../../ffi";
 import { Entities } from "./tree-entities";
 import { useOutsideEvent } from "../../../hooks/useOutsideEvent";
+import { nanoid } from "nanoid";
 
 type TreeProps = {
   workspace: WorkspaceConfig;
@@ -116,6 +117,7 @@ export const Tree = ({ workspace, store, refreshTree }: TreeProps) => {
           tags: [],
           whitelisted_groups: [],
           whitelisted_users: [],
+          hidden: false,
         };
 
         await createFile({ file, path });
@@ -124,7 +126,7 @@ export const Tree = ({ workspace, store, refreshTree }: TreeProps) => {
       } else {
         const dir = {
           name,
-          id: dirId,
+          id: nanoid(),
           content: [],
         };
 

@@ -1,17 +1,18 @@
-import { styled } from '@linaria/react';
+import { styled } from "@linaria/react";
 import { useCallback } from "react";
 import { Modal } from "../../../components/modal";
 import type { ArrayElement, StoreConfig, SystemConfig } from "../types";
 import { saveStoreConfig } from "../../../ffi";
-import { FormWrapper } from './common';
+import { FormWrapper } from "./common";
 
 type WorkspaceElement = ArrayElement<StoreConfig["workspaces"]>;
 
 type WorkspaceListProps = {
-  store: SystemConfig['store'];
+  store: SystemConfig["store"];
   workspaces: StoreConfig["workspaces"];
   onSelect: (workspace: WorkspaceElement) => void;
 };
+
 export const WorkspaceSelection = ({
   store,
   workspaces,
@@ -22,20 +23,25 @@ export const WorkspaceSelection = ({
       path: store,
       config: {
         workspaces,
-        selected_workspace: workspace
-      }
+        selected_workspace: workspace,
+      },
     });
 
     onSelect(workspace);
   }, []);
 
-  const label = <WorkspaceSelectionMessage>Select a workspace</WorkspaceSelectionMessage>;
+  const label = (
+    <WorkspaceSelectionMessage>Select a workspace</WorkspaceSelectionMessage>
+  );
 
   const list = (
     <WorkspaceList>
       {workspaces.map((workspace) => {
         return (
-          <WorkspaceListElement onClick={() => selectWorkspace(workspace)} key={workspace.id}>
+          <WorkspaceListElement
+            onClick={() => selectWorkspace(workspace)}
+            key={workspace.id}
+          >
             {workspace.name}
           </WorkspaceListElement>
         );

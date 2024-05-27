@@ -13,6 +13,8 @@ type Actions = {
   onDirCreation: (id: string, name: string) => Promise<void>;
 };
 
+type Document = "file" | "dir";
+
 type EntityProps = {
   dirTree: Array<Entity>;
   name: string;
@@ -35,14 +37,14 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
     ref
   ) => {
     const [collapased, setCollapsed] = useState(false);
-    const [newDocument, setNewDocument] = useState(false);
+    const [newDocument, setNewDocument] = useState<Document>();
     const [documentName, setDocumentName] = useState("");
 
     const inputKeydown: KeyboardEventHandler<HTMLInputElement> = useCallback(
       async (e) => {
         if (e.key === "Escape") {
           setDocumentName("");
-          setNewDocument(false);
+          setNewDocument(undefined);
           return;
         }
 
@@ -50,9 +52,11 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
           return;
         }
 
-        await actions.onFileCreation(id, documentName);
+        await (newDocument === "file"
+          ? actions.onFileCreation(id, documentName)
+          : actions.onDirCreation(id, documentName));
         setDocumentName("");
-        setNewDocument(false);
+        setNewDocument(undefined);
       },
       [documentName]
     );
@@ -78,7 +82,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
 
     const dirMenuOptions: Array<MenuOption> = [
       {
-        handler: async () => {},
+        handler: async () => setNewDocument("dir"),
         id: "new_directory",
         name: "New Directory",
       },
@@ -125,7 +129,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
           <OptionsContainer className={id === optionsElement ? show : hide}>
             <HiPlus
               className={verticallyMiddle}
-              onClick={() => setNewDocument(true)}
+              onClick={() => setNewDocument("file")}
             />
             <OverflowMenu
               options={dirMenuOptions}
@@ -148,37 +152,39 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
             )}
             {dirTree.map((entity) =>
               isFile(entity) ? (
-                !entity.File.hidden && <NameContainer
-                  onMouseEnter={() => setElement(`${id}/${entity.File.name}`)}
-                  onMouseLeave={() => setElement("")}
-                  className={
-                    optionsElement === `${id}/${entity.File.name}`
-                      ? backgroundHighlight
-                      : ""
-                  }
-                >
-                  <FileName key={`${id}/${entity.File.name}}`}>
-                    {entity.File.name}
-                  </FileName>
-                  <OptionsContainer
+                !entity.File.hidden && (
+                  <NameContainer
+                    onMouseEnter={() => setElement(`${id}/${entity.File.name}`)}
+                    onMouseLeave={() => setElement("")}
                     className={
                       optionsElement === `${id}/${entity.File.name}`
-                        ? show
-                        : hide
+                        ? backgroundHighlight
+                        : ""
                     }
                   >
-                    <OverflowMenu
-                      options={fileMenuOptions}
-                      onClick={() => setOptions((opt) => !opt)}
-                      showMenu={
-                        !!showOptions &&
+                    <FileName key={`${id}/${entity.File.name}}`}>
+                      {entity.File.name}
+                    </FileName>
+                    <OptionsContainer
+                      className={
                         optionsElement === `${id}/${entity.File.name}`
+                          ? show
+                          : hide
                       }
-                      onKeyDown={onMenuKeydown}
-                      ref={ref}
-                    />
-                  </OptionsContainer>
-                </NameContainer>
+                    >
+                      <OverflowMenu
+                        options={fileMenuOptions}
+                        onClick={() => setOptions((opt) => !opt)}
+                        showMenu={
+                          !!showOptions &&
+                          optionsElement === `${id}/${entity.File.name}`
+                        }
+                        onKeyDown={onMenuKeydown}
+                        ref={ref}
+                      />
+                    </OptionsContainer>
+                  </NameContainer>
+                )
               ) : (
                 <Entities
                   dirTree={entity.Dir.content}

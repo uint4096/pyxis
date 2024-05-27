@@ -7,7 +7,7 @@ import { noop } from "../utils";
 export type MenuOption = {
   id: string;
   name: string;
-  handler: (name: string) => Promise<void>;
+  handler: () => Promise<void>;
 };
 
 export type MenuProps = {
@@ -38,7 +38,9 @@ export const OverflowMenu = forwardRef<HTMLDivElement, MenuProps>(
         {showMenu && (
           <Menu>
             {options.map((option) => (
-              <Option key={option.id}>{option.name}</Option>
+              <Option key={option.id} onClick={() => option.handler()}>
+                {option.name}
+              </Option>
             ))}
           </Menu>
         )}
