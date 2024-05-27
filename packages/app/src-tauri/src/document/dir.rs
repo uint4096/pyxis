@@ -4,12 +4,18 @@ use std::{
     path::Path,
 };
 
+use crate::dir_reader::Entity;
 use super::actions::Actions;
 
 #[derive(Serialize, Deserialize)]
-pub struct Dir<'a>(&'a str);
 
-impl<'a> Actions<'a, Dir<'a>> for Dir<'a> {
+pub struct Directory {
+    pub name: String,
+    pub id: String,
+    pub content: Vec<Entity>,
+}
+
+impl<'a> Actions<'a, Directory> for Directory {
     fn create(&self, path_to_dir: &str) -> bool {
         let dir_path = Path::new(path_to_dir).join(&self.get_name());
 
@@ -34,7 +40,7 @@ impl<'a> Actions<'a, Dir<'a>> for Dir<'a> {
         }
     }
 
-    fn get_name(&self) -> &'a str {
-        self.0
+    fn get_name(&self) -> String {
+        self.name.clone()
     }
 }

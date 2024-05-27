@@ -1,5 +1,5 @@
 import { invoke as invokeCommand } from "@tauri-apps/api";
-import type { File, Entity } from "../types";
+import type { File, Entity, Directory } from "../types";
 
 type FileContent = {
   read_status: boolean;
@@ -22,9 +22,9 @@ export type Args<T extends object> = {
   create_file: { file: File; path: string };
   rename_file: { file: File; path: string; new_name: string };
   delete_file: { file: File; path: string };
-  create_dir: { file: File; path: string };
-  rename_dir: { file: File; path: string; new_name: string };
-  delete_dir: { file: File; path: string };
+  create_dir: { dir: Directory; path: string };
+  rename_dir: { dir: Directory; path: string; new_name: string };
+  delete_dir: { dir: Directory; path: string };
 };
 
 export type Response = {

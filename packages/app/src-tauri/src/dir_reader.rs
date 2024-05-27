@@ -1,17 +1,12 @@
 use nanoid::nanoid;
 use std::fs;
 use std::path::Path;
-
-#[derive(serde::Serialize, serde::Deserialize)]
-pub struct Directory {
-    name: String,
-    id: String,
-    content: Vec<Entity>,
-}
+use crate::document::dir::Directory;
+use crate::document::file::File;
 
 #[derive(serde::Serialize, serde::Deserialize)]
 pub enum Entity {
-    File(String),
+    File(File),
     Dir(Directory),
 }
 
@@ -49,7 +44,7 @@ pub fn read_directory(path: &Path) -> DirContent {
                                 return DirContent::new_failed();
                             }
                         } else if entry.path().is_file() {
-                            entries.push(Entity::File(entry.file_name().into_string().unwrap()))
+                            entries.push(Entity::File(File::new(entry.file_name().into_string().unwrap())))
                         }
                     }
                     Err(e) => {

@@ -9,19 +9,35 @@ use super::actions::Actions;
 pub struct Link(String, String);
 
 #[derive(Serialize, Deserialize)]
-pub struct File<'a> {
-    name: &'a str,
-    title: String,
-    tags: Vec<&'a str>,
-    owned_by: &'a str,
-    whitelisted_groups: Vec<&'a str>,
-    whitelisted_users: Vec<&'a str>,
-    created_at: &'a str,
-    updated_at: &'a str,
-    links: Vec<Link>,
+pub struct File {
+    name: String,
+    title: Option<String>,
+    tags: Option<Vec<String>>,
+    owned_by: Option<String>,
+    whitelisted_groups: Option<Vec<String>>,
+    whitelisted_users: Option<Vec<String>>,
+    created_at: Option<String>,
+    updated_at: Option<String>,
+    links: Option<Vec<Link>>,
 }
 
-impl<'a> Actions<'a, File<'a>> for File<'a> {
+impl File {
+    pub fn new (name: String) -> Self {
+        File {
+            name,
+            created_at: None,
+            links: None,
+            owned_by: None,
+            tags: None,
+            title: None,
+            updated_at: None,
+            whitelisted_groups: None,
+            whitelisted_users: None
+        }
+    }
+}
+
+impl<'a> Actions<'a, File> for File {
     fn create(&self, path_to_dir: &str) -> bool {
         let file_path = Path::new(path_to_dir).join(&self.name);
         let path_str = file_path.to_str();
@@ -44,7 +60,7 @@ impl<'a> Actions<'a, File<'a>> for File<'a> {
         }
     }
 
-    fn get_name(&self) -> &'a str {
-        self.name
+    fn get_name(&self) -> String {
+        self.name.clone()
     }
 }

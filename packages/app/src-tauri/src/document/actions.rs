@@ -6,7 +6,7 @@ pub trait Actions<'a, T>
 where
     T: Serialize + Deserialize<'a>,
 {
-    fn get_name(&self) -> &'a str;
+    fn get_name(&self) -> String;
     fn create(&self, path_to_dir: &'a str) -> bool;
     fn delete(&self, path_to_dir: &'a str) -> bool;
     fn rename(&self, path_to_dir: &str, new_name: &str) -> bool {

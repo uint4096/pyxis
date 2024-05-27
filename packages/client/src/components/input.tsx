@@ -88,7 +88,7 @@ export const TextInput = ({
     <InputInPlace
       value={value}
       placeholder={placeholder ?? ""}
-      readonly={true}
+      readonly={false}
       size={size}
       onChange={onChange}
     />

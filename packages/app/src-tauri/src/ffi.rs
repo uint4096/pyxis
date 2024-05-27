@@ -1,7 +1,7 @@
 use crate::{
     config::system::SystemConfig,
     dir_reader::DirContent,
-    document::{actions::Actions, dir::Dir, file::File},
+    document::{actions::Actions, dir::Directory, file::File},
 };
 
 use super::config::{
@@ -89,16 +89,16 @@ pub fn delete_file(path: &str, file: File) -> bool {
 }
 
 #[tauri::command]
-pub fn create_dir(path: &str, dir: Dir) -> bool {
+pub fn create_dir(path: &str, dir: Directory) -> bool {
     dir.create(path)
 }
 
 #[tauri::command]
-pub fn rename_dir(path: &str, dir: Dir, new_name: &str) -> bool {
+pub fn rename_dir(path: &str, dir: Directory, new_name: &str) -> bool {
     dir.rename(path, new_name)
 }
 
 #[tauri::command]
-pub fn delete_dir(path: &str, dir: Dir) -> bool {
+pub fn delete_dir(path: &str, dir: Directory) -> bool {
     dir.delete(path)
 }

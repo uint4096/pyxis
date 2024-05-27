@@ -8,11 +8,16 @@ import { KeyboardEventHandler, forwardRef, useCallback, useState } from "react";
 import { Entity } from "../../../types";
 import { OverflowMenu, MenuOption } from "../../../components/overflow-menu";
 
+type Actions = {
+  onFileCreation: (id: string, name: string) => Promise<void>;
+  onDirCreation: (id: string, name: string) => Promise<void>;
+};
+
 type EntityProps = {
   dirTree: Array<Entity>;
   name: string;
   id: string;
-  onDocumentCreation: (id: string, name: string) => Promise<void>;
+  actions: Actions;
   dirOptionsState: [string, React.Dispatch<React.SetStateAction<string>>];
   showOptionsState: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
 };
@@ -23,7 +28,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
       dirTree,
       name,
       id,
-      onDocumentCreation,
+      actions,
       dirOptionsState: [optionsElement, setOptionsElement],
       showOptionsState: [showOptions, setOptions],
     }: EntityProps,
@@ -45,7 +50,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
           return;
         }
 
-        await onDocumentCreation(id, documentName);
+        await actions.onFileCreation(id, documentName);
         setDocumentName("");
         setNewDocument(false);
       },
@@ -144,18 +149,22 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
             {dirTree.map((entity) =>
               isFile(entity) ? (
                 <NameContainer
-                  onMouseEnter={() => setElement(`${id}/${entity.File}`)}
+                  onMouseEnter={() => setElement(`${id}/${entity.File.name}`)}
                   onMouseLeave={() => setElement("")}
                   className={
-                    optionsElement === `${id}/${entity.File}`
+                    optionsElement === `${id}/${entity.File.name}`
                       ? backgroundHighlight
                       : ""
                   }
                 >
-                  <FileName key={entity.File}>{entity.File}</FileName>
+                  <FileName key={`${id}/${entity.File.name}}`}>
+                    {entity.File.name}
+                  </FileName>
                   <OptionsContainer
                     className={
-                      optionsElement === `${id}/${entity.File}` ? show : hide
+                      optionsElement === `${id}/${entity.File.name}`
+                        ? show
+                        : hide
                     }
                   >
                     <OverflowMenu
@@ -163,7 +172,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
                       onClick={() => setOptions((opt) => !opt)}
                       showMenu={
                         !!showOptions &&
-                        optionsElement === `${id}/${entity.File}`
+                        optionsElement === `${id}/${entity.File.name}`
                       }
                       onKeyDown={onMenuKeydown}
                       ref={ref}
@@ -175,7 +184,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
                   dirTree={entity.Dir.content}
                   name={entity.Dir.name}
                   id={entity.Dir.id}
-                  onDocumentCreation={onDocumentCreation}
+                  actions={actions}
                   dirOptionsState={[optionsElement, setOptionsElement]}
                   showOptionsState={[showOptions, setOptions]}
                 />
