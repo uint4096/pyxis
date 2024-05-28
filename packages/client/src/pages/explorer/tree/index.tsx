@@ -4,12 +4,13 @@ import type { WorkspaceConfig } from "../types";
 import type {
   DirEntity,
   Directory,
+  Document,
   Entity,
   File,
   FileEntity,
 } from "../../../types";
 import { isFile } from "../guards";
-import { createFile, createDir } from "../../../ffi";
+import { createFile, createDir, deleteFile, deleteDir } from "../../../ffi";
 import { Entities } from "./tree-entities";
 import { useOutsideEvent } from "../../../hooks/useOutsideEvent";
 import { nanoid } from "nanoid";
@@ -30,7 +31,7 @@ export const Tree = ({ workspace, store, refreshTree }: TreeProps) => {
 
   const updateTree = useCallback(
     (dir: Directory, targetId: string) =>
-      (type: "file" | "dir", entity: File | Directory): Array<Entity> => {
+      (type: Document, entity: File | Directory): Array<Entity> => {
         const addition =
           type === "file"
             ? ({ File: entity } as FileEntity)
@@ -67,6 +68,52 @@ export const Tree = ({ workspace, store, refreshTree }: TreeProps) => {
     []
   );
 
+  const deleteFromTree = useCallback(
+    (dir: Directory, targetId: string) =>
+      (type: Document, entity: File | Directory): Array<Entity> => {
+        const filterEntity = (e: Entity) => {
+          if (type === 'file' && isFile(e) && e.File.name === entity.name) {
+            return false;
+          }
+          
+          if (type === 'dir' && !isFile(e) && e.Dir.id === (entity as Directory).id) {
+            return false
+          }
+
+          return true;
+        }
+
+        const recursivelyUpdate = (tree: Array<Entity>): Array<Entity> => {
+          return tree.map((d) => {
+            if (isFile(d)) {
+              return d;
+            }
+
+            if (d.Dir.id === targetId) {
+              return {
+                Dir: {
+                  ...d.Dir,
+                  content: d.Dir.content.filter((c) => filterEntity(c)),
+                },
+              };
+            }
+
+            return {
+              Dir: {
+                ...d.Dir,
+                content: recursivelyUpdate(d.Dir.content),
+              },
+            };
+          });
+        };
+
+        return targetId === dir.id
+          ? dir.content.filter((c) => filterEntity(c))
+          : recursivelyUpdate(dir.content);
+      },
+    []
+  );
+
   const pathToDir = useCallback(
     (
       id: string,
@@ -90,11 +137,11 @@ export const Tree = ({ workspace, store, refreshTree }: TreeProps) => {
           },
           { filePath: "", found: false as boolean }
         ),
-    [workspace.tree]
+    [workspace]
   );
 
   const onDocumentCreation = useCallback(
-    (type: "file" | "dir") => async (dirId: string, name: string) => {
+    (type: Document) => async (dirId: string, name: string) => {
       const currentTime = new Date().toISOString();
       const dirPath = pathToDir(dirId)?.filePath;
       const path = `${store}/${workspace.name}${dirPath}`;
@@ -120,7 +167,11 @@ export const Tree = ({ workspace, store, refreshTree }: TreeProps) => {
           hidden: false,
         };
 
-        await createFile({ file, path });
+        if (!(await createFile({ file, path }))) {
+          //@todo: Handle error and show toast message
+          return;
+        }
+
         const tree = computeTree("file", file);
         refreshTree(tree);
       } else {
@@ -130,13 +181,39 @@ export const Tree = ({ workspace, store, refreshTree }: TreeProps) => {
           content: [],
         };
 
-        await createDir({ dir, path });
+        if (!(await createDir({ dir, path }))) {
+          //@todo: Handle error and show toast message
+          return;
+        }
+
         const tree = computeTree("dir", dir);
         refreshTree(tree);
       }
     },
-    [workspace]
+    [workspace, store]
   );
+
+  const onDocumentDelete = useCallback((type: Document) => async (dirId: string, entity: File | Directory) => {
+    const dirPath = pathToDir(dirId)?.filePath;
+    const path = `${store}/${workspace.name}${dirPath}`;
+
+    const { id, name: workspaceName, tree } = workspace;
+
+    const computeTree = deleteFromTree(
+      { id, name: workspaceName, content: tree },
+      dirId
+    );
+
+    const response = type === 'file' ? await deleteFile({ file: entity as File, path }) : deleteDir({ dir: entity as Directory, path })
+
+    if (!response) {
+      //@todo: Handle error and show toast message
+      return;
+    }
+
+    const treee = computeTree(type, entity);
+    refreshTree(treee); 
+  }, []);
 
   const menuRef = useRef<HTMLDivElement>(null);
   useOutsideEvent(menuRef, () => {
@@ -147,6 +224,8 @@ export const Tree = ({ workspace, store, refreshTree }: TreeProps) => {
   const actions = {
     onFileCreation: onDocumentCreation("file"),
     onDirCreation: onDocumentCreation("dir"),
+    onDeleteFile: onDocumentDelete('file'),
+    onDeleteDir: onDocumentDelete('dir')
   };
 
   return (

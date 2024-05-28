@@ -5,15 +5,16 @@ import { InputInPlace } from "../../../components/input";
 import { HiPlus } from "react-icons/hi";
 import { MdKeyboardArrowDown, MdKeyboardArrowRight } from "react-icons/md";
 import { KeyboardEventHandler, forwardRef, useCallback, useState } from "react";
-import { Entity } from "../../../types";
-import { OverflowMenu, MenuOption } from "../../../components/overflow-menu";
+import type { Entity, Document, File, Directory } from "../../../types";
+import { getOverflowMenu, MenuOption } from "../../../components/overflow-menu";
+import { noop } from "../../../utils";
 
 type Actions = {
   onFileCreation: (id: string, name: string) => Promise<void>;
   onDirCreation: (id: string, name: string) => Promise<void>;
+  onDeleteFile: (id: string, entity: File | Directory) => Promise<void>;
+  onDeleteDir: (id: string, entity: File | Directory) => Promise<void>;
 };
-
-type Document = "file" | "dir";
 
 type EntityProps = {
   dirTree: Array<Entity>;
@@ -22,6 +23,7 @@ type EntityProps = {
   actions: Actions;
   dirOptionsState: [string, React.Dispatch<React.SetStateAction<string>>];
   showOptionsState: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
+  parentDirId?: string;
 };
 
 export const Entities = forwardRef<HTMLDivElement, EntityProps>(
@@ -33,6 +35,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
       actions,
       dirOptionsState: [optionsElement, setOptionsElement],
       showOptionsState: [showOptions, setOptions],
+      parentDirId
     }: EntityProps,
     ref
   ) => {
@@ -92,7 +95,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
         name: "Rename",
       },
       {
-        handler: async () => {},
+        handler: useCallback(async (dir: Directory) => parentDirId ? actions.onDeleteDir(parentDirId, dir) : noop(), [parentDirId]),
         id: "delete",
         name: "Delete",
       },
@@ -105,11 +108,14 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
         name: "Rename",
       },
       {
-        handler: async () => {},
+        handler: useCallback(async (file: File) => actions.onDeleteFile(id, file), [id]),
         id: "delete",
         name: "Delete",
       },
     ];
+
+    const FileOverflow = getOverflowMenu<File>();
+    const DirOverflow = getOverflowMenu<Directory>();
 
     return (
       <DirTreeWrapper>
@@ -131,12 +137,13 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
               className={verticallyMiddle}
               onClick={() => setNewDocument("file")}
             />
-            <OverflowMenu
+            <DirOverflow
               options={dirMenuOptions}
               onClick={() => setOptions((opt) => !opt)}
               showMenu={!!showOptions && id === optionsElement}
               onKeyDown={onMenuKeydown}
               ref={ref}
+              rootElement={{ id, name, content: dirTree }}
             />
           </OptionsContainer>
         </NameContainer>
@@ -172,7 +179,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
                           : hide
                       }
                     >
-                      <OverflowMenu
+                      <FileOverflow
                         options={fileMenuOptions}
                         onClick={() => setOptions((opt) => !opt)}
                         showMenu={
@@ -181,6 +188,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
                         }
                         onKeyDown={onMenuKeydown}
                         ref={ref}
+                        rootElement={entity.File}
                       />
                     </OptionsContainer>
                   </NameContainer>
@@ -193,6 +201,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
                   actions={actions}
                   dirOptionsState={[optionsElement, setOptionsElement]}
                   showOptionsState={[showOptions, setOptions]}
+                  parentDirId={id}
                 />
               )
             )}

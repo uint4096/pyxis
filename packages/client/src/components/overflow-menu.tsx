@@ -1,24 +1,24 @@
 import { css } from "@linaria/core";
 import { styled } from "@linaria/react";
-import { KeyboardEventHandler, forwardRef, useCallback } from "react";
+import { ForwardedRef, KeyboardEventHandler, forwardRef, useCallback } from "react";
 import { GoKebabHorizontal } from "react-icons/go";
 import { noop } from "../utils";
 
 export type MenuOption = {
   id: string;
   name: string;
-  handler: () => Promise<void>;
+  handler: (...args: Array<any>) => Promise<void>;
 };
 
-export type MenuProps = {
+export type MenuProps<T> = {
   options: Array<MenuOption>;
   showMenu: boolean;
   onClick: () => void;
   onKeyDown?: KeyboardEventHandler<HTMLDivElement>;
+  rootElement: T
 };
 
-export const OverflowMenu = forwardRef<HTMLDivElement, MenuProps>(
-  ({ onClick, options, showMenu, onKeyDown }: MenuProps, ref) => {
+function OverflowMenuWithRef<T> ({ onClick, options, showMenu, onKeyDown, rootElement }: MenuProps<T>, ref: ForwardedRef<HTMLDivElement>) {
     const onShow = useCallback(
       (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         e.stopPropagation();
@@ -38,7 +38,7 @@ export const OverflowMenu = forwardRef<HTMLDivElement, MenuProps>(
         {showMenu && (
           <Menu>
             {options.map((option) => (
-              <Option key={option.id} onClick={() => option.handler()}>
+              <Option key={option.id} onClick={() => option.handler(rootElement)}>
                 {option.name}
               </Option>
             ))}
@@ -47,7 +47,8 @@ export const OverflowMenu = forwardRef<HTMLDivElement, MenuProps>(
       </div>
     );
   }
-);
+
+export const getOverflowMenu = <T,>() => forwardRef<HTMLDivElement, MenuProps<T>>(OverflowMenuWithRef);
 
 const verticallyMiddle = css`
   vertical-align: middle;

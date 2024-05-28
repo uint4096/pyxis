@@ -6,6 +6,8 @@ export type Entity = FileEntity | DirEntity;
 
 type Link = [string, string];
 
+export type Document = "file" | "dir";
+
 export type File = {
   name: string;
   title?: string;

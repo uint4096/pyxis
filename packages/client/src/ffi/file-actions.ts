@@ -25,4 +25,4 @@ const invokeFileAction =
 
 export const createFile = invokeFileAction("create_file");
 export const renameFile = invokeFileAction("rename_file");
-export const delete_file = invokeFileAction("delete_file");
+export const deleteFile = invokeFileAction("delete_file");
