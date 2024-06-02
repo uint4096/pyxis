@@ -42,6 +42,10 @@ impl File {
 impl<'a> Actions<'a, File> for File {
     fn create(&self, path_to_dir: &str) -> bool {
         let file_path = Path::new(path_to_dir).join(&self.name);
+        if Path::exists(&file_path) {
+            return false;
+        }
+
         let path_str = file_path.to_str();
         if let Some(path) = path_str {
             return write_file(path, "");
