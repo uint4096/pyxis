@@ -12,5 +12,5 @@ type LexerPattern = {
 };
 
 export type Matcher = (
-  captureFunc: ReturnType<typeof iterator>
+  captureFunc: ReturnType<typeof iterator>,
 ) => LexerPattern;

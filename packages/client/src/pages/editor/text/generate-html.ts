@@ -22,7 +22,7 @@ type Content = {
 export const getHTMLContent = (
   start: number,
   end: number,
-  rawText: string
+  rawText: string,
 ): Content =>
   rawText
     .split("\n")
@@ -42,7 +42,7 @@ export const getHTMLContent = (
           const endOverride = getEnd(tokens, lineEnd);
           text = `${transpile(line.slice(0, startOverride))}${line.slice(
             startOverride,
-            endOverride
+            endOverride,
           )}${transpile(line.slice(endOverride))}`;
 
           if (startSelected) {
@@ -82,5 +82,5 @@ export const getHTMLContent = (
           focus: { element: "0", offset: 0 },
           collapsed: start === end,
         },
-      }
+      },
     );

@@ -17,7 +17,7 @@ export const useWebsockets = ({ uri, onMessage }: WebsocketProps) => {
 
     setSocket(socket);
     return () => socket.close();
-  }, []);
+  }, [onMessage, uri]);
 
   return {
     sendMessage: (message: string | Uint8Array) => socket?.send(message),

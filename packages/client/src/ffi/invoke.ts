@@ -45,10 +45,10 @@ export type Response = {
 
 export const invoke = async <
   T extends object,
-  U extends keyof Args<T> | keyof Response
+  U extends keyof Args<T> | keyof Response,
 >(
   command: U,
-  args: Args<T>[U]
+  args: Args<T>[U],
 ): Promise<Response[U]> => {
   try {
     const response: Response[U] = await invokeCommand(command, args);

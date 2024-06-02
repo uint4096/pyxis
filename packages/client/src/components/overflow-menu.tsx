@@ -1,6 +1,11 @@
 import { css } from "@linaria/core";
 import { styled } from "@linaria/react";
-import { ForwardedRef, KeyboardEventHandler, forwardRef, useCallback } from "react";
+import {
+  ForwardedRef,
+  KeyboardEventHandler,
+  forwardRef,
+  useCallback,
+} from "react";
 import { GoKebabHorizontal } from "react-icons/go";
 import { noop } from "../utils";
 
@@ -15,40 +20,39 @@ export type MenuProps<T> = {
   showMenu: boolean;
   onClick: () => void;
   onKeyDown?: KeyboardEventHandler<HTMLDivElement>;
-  rootElement: T
+  rootElement: T;
 };
 
-function OverflowMenuWithRef<T> ({ onClick, options, showMenu, onKeyDown, rootElement }: MenuProps<T>, ref: ForwardedRef<HTMLDivElement>) {
-    const onShow = useCallback(
-      (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-        e.stopPropagation();
-        onClick();
-      },
-      [onClick]
-    );
+function OverflowMenuWithRef<T>(
+  { onClick, options, showMenu, onKeyDown, rootElement }: MenuProps<T>,
+  ref: ForwardedRef<HTMLDivElement>,
+) {
+  const onShow = useCallback(
+    (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+      e.stopPropagation();
+      onClick();
+    },
+    [onClick],
+  );
 
-    return (
-      <div
-        ref={ref}
-        onClick={onShow}
-        onKeyDown={onKeyDown ?? noop}
-        tabIndex={0}
-      >
-        <GoKebabHorizontal className={verticallyMiddle} />
-        {showMenu && (
-          <Menu>
-            {options.map((option) => (
-              <Option key={option.id} onClick={() => option.handler(rootElement)}>
-                {option.name}
-              </Option>
-            ))}
-          </Menu>
-        )}
-      </div>
-    );
-  }
+  return (
+    <div ref={ref} onClick={onShow} onKeyDown={onKeyDown ?? noop} tabIndex={0}>
+      <GoKebabHorizontal className={verticallyMiddle} />
+      {showMenu && (
+        <Menu>
+          {options.map((option) => (
+            <Option key={option.id} onClick={() => option.handler(rootElement)}>
+              {option.name}
+            </Option>
+          ))}
+        </Menu>
+      )}
+    </div>
+  );
+}
 
-export const getOverflowMenu = <T,>() => forwardRef<HTMLDivElement, MenuProps<T>>(OverflowMenuWithRef);
+export const getOverflowMenu = <T,>() =>
+  forwardRef<HTMLDivElement, MenuProps<T>>(OverflowMenuWithRef);
 
 const verticallyMiddle = css`
   vertical-align: middle;

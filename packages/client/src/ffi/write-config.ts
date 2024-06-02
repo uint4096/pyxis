@@ -4,11 +4,11 @@ type AssertProperty<T, U extends string, V> = T & { [key in U]: V };
 const saveConfig =
   <
     T extends Extract<
-      keyof Args<any>,
+      keyof Args<Record<string, unknown>>,
       "write_store_config" | "write_workspace_config" | "write_system_config"
-    >
+    >,
   >(
-    command: T
+    command: T,
   ) =>
   async <U extends object>(args: Args<U>[T]): Promise<boolean> => {
     try {
@@ -21,9 +21,10 @@ const saveConfig =
     } catch (e) {
       console.error(
         `[Config Error] Error while writing to ${
-          (<AssertProperty<{}, "path", string>>args)?.path ?? "system config"
+          (<AssertProperty<object, "path", string>>args)?.path ??
+          "system config"
         }!`,
-        e
+        e,
       );
       return false;
     }

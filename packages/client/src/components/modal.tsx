@@ -1,4 +1,4 @@
-import { styled } from '@linaria/react';
+import { styled } from "@linaria/react";
 
 export type ModalSize = "small" | "medium" | "large";
 export type ModalProps = {
@@ -9,32 +9,25 @@ export type ModalProps = {
   onClose?: () => void;
 };
 
-export const Modal = ({
-  body,
-  footer,
-  header,
-  size,
-  onClose,
-}: ModalProps) => {
-
+export const Modal = ({ body, footer, header, size, onClose }: ModalProps) => {
   return (
-      <>
-        <ModalOverlay />
-        <ModalContainer size={size ?? 'medium'}>
-          {
-            <ModalHeader>
-              {header ?? <></>}
-              {onClose && (
-                <ModalCloseButton>
-                  <button onClick={onClose}>x</button>
-                </ModalCloseButton>
-              )}
-            </ModalHeader>
-          }
-          <ModalBody>{body}</ModalBody>
-          {footer && <div>{footer}</div>}
-        </ModalContainer>
-      </>
+    <>
+      <ModalOverlay />
+      <ModalContainer size={size ?? "medium"}>
+        {
+          <ModalHeader>
+            {header ?? <></>}
+            {onClose && (
+              <ModalCloseButton>
+                <button onClick={onClose}>x</button>
+              </ModalCloseButton>
+            )}
+          </ModalHeader>
+        }
+        <ModalBody>{body}</ModalBody>
+        {footer && <div>{footer}</div>}
+      </ModalContainer>
+    </>
   );
 };
 
@@ -48,7 +41,7 @@ const ModalOverlay = styled.div`
   z-index: 999;
 `;
 
-const ModalContainer = styled.div<{size: ModalSize}>`
+const ModalContainer = styled.div<{ size: ModalSize }>`
   display: flex;
   flex-direction: column;
   border-radius: 3%;
@@ -60,7 +53,8 @@ const ModalContainer = styled.div<{size: ModalSize}>`
   background-color: rgb(17, 19, 25);
   z-index: 1000;
   padding: 2vh 0.5vw;
-  width: ${(props) => ({small: '20vw', medium: '30vw', large: '40vw'})[props.size]};
+  width: ${(props) =>
+    ({ small: "20vw", medium: "30vw", large: "40vw" })[props.size]};
 `;
 
 const ModalHeader = styled.div`

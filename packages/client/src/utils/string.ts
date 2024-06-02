@@ -4,13 +4,13 @@ export const insertTextAtPosition = (
   input: string,
   text: string,
   start: number,
-  end: number
+  end: number,
 ) => `${input.slice(0, start)}${text}${input.slice(end, input.length)}`;
 
 export const wordPositonBackward = (
   text: string,
   position: number,
-  options?: { excludeChars: Array<string> }
+  options?: { excludeChars: Array<string> },
 ) => {
   const { excludeChars } = options ?? {};
 
@@ -36,7 +36,7 @@ export const wordPositonBackward = (
 export const wordPositonForward = (
   text: string,
   position: number,
-  options?: { excludeChars: Array<string> }
+  options?: { excludeChars: Array<string> },
 ) => {
   const { excludeChars } = options ?? {};
 

@@ -25,7 +25,7 @@ export const CreateWorkspace = ({
     async (
       name: string,
       currentStoreConfig: StoreConfig | undefined,
-      pathToStore: string
+      pathToStore: string,
     ) => {
       const workspaceId = nanoid(10);
       const currentWorkspace = { id: workspaceId, name };
@@ -52,12 +52,12 @@ export const CreateWorkspace = ({
         saveWorkspaceConfig<WorkspaceConfig>({
           path: `${pathToStore}/${name}`,
           config: workspaceConfig,
-        })
+        }),
       ]);
 
       onCreate(currentWorkspace);
     },
-    [onCreate]
+    [onCreate],
   );
 
   const body = (

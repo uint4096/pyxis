@@ -30,7 +30,7 @@ export const parser = (tokens: Array<Token>): Array<Node> => {
     } else if (token.position === "start") {
       const tokenEnd = tokens.findIndex(
         (tkn, idx) =>
-          tkn.type === token.type && tkn.position === "end" && idx > pointer
+          tkn.type === token.type && tkn.position === "end" && idx > pointer,
       );
       const tokensToProcess =
         tokenEnd > -1

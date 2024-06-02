@@ -38,8 +38,8 @@ export const toText = (html: string) => {
       text += isLastELem
         ? `${content}`
         : sign.type === "wrap"
-        ? `${sign.value}${content}${sign.value}`
-        : `${content}${sign.value}`;
+          ? `${sign.value}${content}${sign.value}`
+          : `${content}${sign.value}`;
       idx++;
     }
 

@@ -8,7 +8,7 @@ const getNodeContent = (node: Node) => {
     : (token.prefix ? token.value : "") +
         node.params.reduce(
           (text, element): string => text + getNodeContent(element),
-          ""
+          "",
         ) +
         (token.suffix && node.closed ? token.value : "");
 };
@@ -24,5 +24,5 @@ export const mergeUnclosedNodes = (childNodes: Array<Node>) =>
                 : acc
               : [{ type: "text", value: getNodeContent(node) }])(acc[idx - 1])
         : (acc.push(node), acc),
-    []
+    [],
   );

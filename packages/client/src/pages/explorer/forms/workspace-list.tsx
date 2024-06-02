@@ -18,17 +18,20 @@ export const WorkspaceSelection = ({
   workspaces,
   onSelect,
 }: WorkspaceListProps) => {
-  const selectWorkspace = useCallback(async (workspace: WorkspaceElement) => {
-    await saveStoreConfig<StoreConfig>({
-      path: store,
-      config: {
-        workspaces,
-        selected_workspace: workspace,
-      },
-    });
+  const selectWorkspace = useCallback(
+    async (workspace: WorkspaceElement) => {
+      await saveStoreConfig<StoreConfig>({
+        path: store,
+        config: {
+          workspaces,
+          selected_workspace: workspace,
+        },
+      });
 
-    onSelect(workspace);
-  }, [onSelect, store, workspaces]);
+      onSelect(workspace);
+    },
+    [onSelect, store, workspaces],
+  );
 
   const label = (
     <WorkspaceSelectionMessage>Select a workspace</WorkspaceSelectionMessage>

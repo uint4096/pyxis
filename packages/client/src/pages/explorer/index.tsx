@@ -6,7 +6,6 @@ import {
   readSystemConfig,
   readWorkspaceConfig,
   read_dir_tree,
-  saveWorkspaceConfig,
 } from "../../ffi";
 import {
   StoreConfig,
@@ -48,7 +47,7 @@ export const Explorer = () => {
       setWorkspaceForm(false);
       setEditor(true);
     },
-    [noWorkspaces]
+    [noWorkspaces],
   );
 
   const onSaveSystemConfig = useCallback((systemConfig: SystemConfig) => {
@@ -83,26 +82,6 @@ export const Explorer = () => {
     },
     [systemConfig, storeConfig],
   );
-
-  useEffect(() => {
-    // Save workspace config to disk
-    if (
-      !systemConfig ||
-      !workspaceConfig ||
-      !storeConfig ||
-      !storeConfig.selected_workspace
-    ) {
-      return;
-    }
-
-    const workspacePath = `${systemConfig.store}/${storeConfig.selected_workspace.name}`;
-
-    (async () =>
-      await saveWorkspaceConfig({
-        path: workspacePath,
-        config: { ...workspaceConfig },
-      }))();
-  }, [storeConfig, systemConfig, workspaceConfig]);
 
   useEffect(() => {
     (async () => {
@@ -176,13 +155,16 @@ export const Explorer = () => {
 
   return (
     <ExplorerWrapper>
-      {workspaceConfig?.tree && systemConfig && (
-        <Tree
-          workspace={workspaceConfig}
-          store={systemConfig.store}
-          refreshTree={refreshTree}
-        />
-      )}
+      {workspaceConfig?.tree &&
+        systemConfig &&
+        storeConfig?.selected_workspace && (
+          <Tree
+            workspace={workspaceConfig}
+            store={systemConfig.store}
+            refreshTree={refreshTree}
+            workspacePath={`${systemConfig.store}/${storeConfig.selected_workspace.name}`}
+          />
+        )}
       {showEditor && !noWorkspaces && <Editor />}
       {noWorkspaces && (
         <NoWorkspaceMessage onCreate={() => setWorkspaceForm(true)} />

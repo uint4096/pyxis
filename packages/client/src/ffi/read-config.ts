@@ -6,9 +6,9 @@ const readConfig =
     T extends Extract<
       keyof Args<never>,
       "read_store_config" | "read_workspace_config" | "read_system_config"
-    >
+    >,
   >(
-    command: T
+    command: T,
   ) =>
   async <U extends object>(args: Args<never>[T]): Promise<U | null> => {
     try {
@@ -22,7 +22,7 @@ const readConfig =
     } catch (e) {
       console.error(
         `[Config Error] Error while reading from ${args.path ?? "system"}!`,
-        e
+        e,
       );
       return null;
     }

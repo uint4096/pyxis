@@ -8,7 +8,7 @@ const findNodeCharSum = (node: NodeList[0]) => {
     : (token.prefix ? token.value.length : 0) +
         Array.from(node.childNodes).reduce(
           (sum, node): number => sum + findNodeCharSum(node),
-          0
+          0,
         ) +
         (token.suffix && !(<any>node).hasAttribute("unclosed")
           ? token.value.length

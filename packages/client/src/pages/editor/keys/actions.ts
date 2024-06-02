@@ -1,5 +1,9 @@
 import { getKeyContent } from "./content";
-import { insertTextAtPosition, wordPositonBackward, wordPositonForward } from "../../../utils";
+import {
+  insertTextAtPosition,
+  wordPositonBackward,
+  wordPositonForward,
+} from "../../../utils";
 import { Keys } from "./mapping";
 
 export type Caret = {
@@ -22,11 +26,12 @@ type ActionResponse = {
 const actions: ActionKeys = {
   [Keys.BACKSPACE]: (text, caret, ctrl) => {
     const excludeChars = [" ", "\n", "-", "'", "(", ")"];
-    const start = caret.collapsed && caret.start !== 0
-      ? ctrl
-        ? wordPositonBackward(text, caret.start, { excludeChars })
-        : caret.start - 1
-      : caret.start;
+    const start =
+      caret.collapsed && caret.start !== 0
+        ? ctrl
+          ? wordPositonBackward(text, caret.start, { excludeChars })
+          : caret.start - 1
+        : caret.start;
 
     return {
       text: `${text.slice(0, start)}${text.slice(caret.end, text.length)}`,
@@ -53,7 +58,7 @@ const actions: ActionKeys = {
         collapsed: true,
       },
     };
-  }
+  },
 };
 
 const getter: { get: (target: typeof actions, key: string) => Handler } = {

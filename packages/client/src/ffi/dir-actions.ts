@@ -5,9 +5,9 @@ const invokeDirAction =
     T extends Extract<
       keyof Args<never>,
       "create_dir" | "rename_dir" | "delete_dir"
-    >
+    >,
   >(
-    command: T
+    command: T,
   ) =>
   async (args: Args<never>[T]) => {
     try {

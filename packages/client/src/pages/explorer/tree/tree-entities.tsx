@@ -81,6 +81,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
         await (newDocument === "file"
           ? actions.onCreateFile(id, entity as File)
           : actions.onCreateDir(id, entity as Directory));
+
         setDocumentName("");
         setNewDocument(undefined);
       },

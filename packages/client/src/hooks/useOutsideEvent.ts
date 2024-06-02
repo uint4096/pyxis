@@ -2,7 +2,7 @@ import { RefObject, useCallback, useEffect } from "react";
 
 export const useOutsideEvent = <T extends HTMLElement>(
   ref: RefObject<T | undefined>,
-  onClick: () => void
+  onClick: () => void,
 ) => {
   const handleClickOutside = useCallback(
     (e: MouseEvent) => {
@@ -10,7 +10,7 @@ export const useOutsideEvent = <T extends HTMLElement>(
         onClick();
       }
     },
-    [onClick, ref]
+    [onClick, ref],
   );
 
   useEffect(() => {

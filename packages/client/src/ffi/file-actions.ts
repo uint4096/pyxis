@@ -5,9 +5,9 @@ const invokeFileAction =
     T extends Extract<
       keyof Args<never>,
       "create_file" | "rename_file" | "delete_file"
-    >
+    >,
   >(
-    command: T
+    command: T,
   ) =>
   async (args: Args<never>[T]) => {
     try {

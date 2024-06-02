@@ -4,7 +4,7 @@ import { NODE_TEXT_MAP, textLength } from "../../../utils";
 export const getCaretFromDomNodes = (
   base: Node,
   position: string,
-  offset: number
+  offset: number,
 ) => {
   const elem = position ? getDescendant(base, position) : base;
   let foundNode = false;

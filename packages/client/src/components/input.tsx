@@ -55,7 +55,7 @@ export const DirSelection = ({
 
     setVal(selected as string);
     onChange(selected as string);
-  }, []);
+  }, [onChange]);
 
   return (
     <InputWrapper>
@@ -126,9 +126,9 @@ const Input = styled.input<{ variation: InputProps["size"] }>`
   }
 
   width: ${(props) =>
-    ({ small: "60%", medium: "80%", large: "90%" }[props.variation])};
+    ({ small: "60%", medium: "80%", large: "90%" })[props.variation]};
   height: ${(props) =>
-    ({ small: "2.4vh", medium: "2.7vh", large: "2.9vh" }[props.variation])};
+    ({ small: "2.4vh", medium: "2.7vh", large: "2.9vh" })[props.variation]};
 `;
 
 const InputSelection = styled.div`

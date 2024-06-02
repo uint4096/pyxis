@@ -27,7 +27,7 @@ const getTag = (tag: string, content: string, attributeList: Attributes) => {
 
       return attributes;
     },
-    ""
+    "",
   );
 
   return `<${tag}${attr}>${content}</${tag}>`;
@@ -68,7 +68,7 @@ const generateHTML = (type: Tokens, content: string, closed?: boolean) => {
   return getTag(
     tag,
     contentOverride?.(content, attributes) ?? content,
-    attributeOverride?.(content, attributes) ?? attributes
+    attributeOverride?.(content, attributes) ?? attributes,
   );
 };
 
@@ -78,9 +78,9 @@ export const toHtml = (ast: Array<Node>): string =>
       (html += generateHTML(
         node.type,
         node.type === "text" ? node.value : toHtml(node.params),
-        (<Node & { closed?: boolean }>node).closed
+        (<Node & { closed?: boolean }>node).closed,
       )),
       html
     ),
-    ""
+    "",
   );

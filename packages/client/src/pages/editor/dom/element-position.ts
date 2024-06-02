@@ -13,18 +13,18 @@
 export const getRelativeElementPosition = (
   base: Node,
   target: Node,
-  position: string = ""
+  position: string = "",
 ): string =>
   Array.from(base.childNodes).reduce<string | undefined>(
     (acc, node, idx) =>
       acc
         ? acc
         : node === target
-        ? `${position ? `${position}.` : ""}${idx}`
-        : getRelativeElementPosition(
-            node,
-            target,
-            `${position ? `${position}.` : ""}${idx}`
-          ),
-    ""
+          ? `${position ? `${position}.` : ""}${idx}`
+          : getRelativeElementPosition(
+              node,
+              target,
+              `${position ? `${position}.` : ""}${idx}`,
+            ),
+    "",
   ) ?? "";

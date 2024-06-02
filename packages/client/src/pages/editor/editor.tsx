@@ -56,7 +56,7 @@ const Editor = ({ initialContent }: { initialContent?: string }) => {
             text,
             content.replace(new RegExp(ZERO_WIDTH_SPACE_UNICODE, "g"), ""),
             caret.start,
-            caret.end
+            caret.end,
           ),
           caret: {
             start: caret.start + textLength(content),
@@ -66,7 +66,7 @@ const Editor = ({ initialContent }: { initialContent?: string }) => {
         };
       });
     },
-    []
+    [],
   );
 
   const onSelection = useCallback(
@@ -103,7 +103,7 @@ const Editor = ({ initialContent }: { initialContent?: string }) => {
         }));
       }
     },
-    [lastKey, rawText.caret.collapsed]
+    [lastKey, rawText.caret.collapsed],
   );
 
   const onKeyDown = useCallback(
@@ -127,7 +127,7 @@ const Editor = ({ initialContent }: { initialContent?: string }) => {
         return text;
       });
     },
-    [rawText]
+    [rawText],
   );
 
   useEffect(() => {
@@ -135,7 +135,7 @@ const Editor = ({ initialContent }: { initialContent?: string }) => {
     const { html: content, selection } = getHTMLContent(
       caret.start,
       caret.end,
-      text
+      text,
     );
     setHtml(() => ({
       content,

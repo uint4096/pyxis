@@ -31,7 +31,7 @@ const getter = {
 
 export const Keys: typeof MappedKeys & { [k: string]: string } = new Proxy(
   MappedKeys,
-  getter
+  getter,
 );
 
 export const selectionKeys: Array<string> = [
