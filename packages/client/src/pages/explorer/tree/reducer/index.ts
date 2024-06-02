@@ -1,5 +1,5 @@
-import type { WorkspaceConfig } from "../types";
-import type { Directory, File, Document } from "../../../types";
+import type { WorkspaceConfig } from "../../types";
+import type { Directory, File, Document } from "../../../../types";
 import { updateTree } from "./update-tree";
 import { deleteFromTree } from "./delete-from-tree";
 

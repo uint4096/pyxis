@@ -153,6 +153,10 @@ export const Explorer = () => {
     })();
   }, [storeConfig, systemConfig]);
 
+  /*
+   * @todo: Wrap all configs in a Context here. This will prevent a lot
+   * of prop drilling.
+   */
   return (
     <ExplorerWrapper>
       {workspaceConfig?.tree &&

@@ -1,6 +1,6 @@
-import type { DirEntity } from "../../../types";
+import type { DirEntity } from "../../../../types";
 import { isFile } from "../guards";
-import type { WorkspaceConfig } from "../types";
+import type { WorkspaceConfig } from "../../types";
 
 export const pathToDir = (
   id: string,

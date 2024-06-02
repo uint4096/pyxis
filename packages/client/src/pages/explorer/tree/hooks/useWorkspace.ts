@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useReducer } from "react";
 import type { WorkspaceConfig } from "../../types";
-import { type Actions, type ReducerArgs, reducer } from "../../tree-reducer";
+import { type Actions, type ReducerArgs, reducer } from "../reducer";
 import type { Directory, Document, Entity, File } from "../../../../types";
-import { pathToDir } from "../../tree-reducer/path-to-dir";
+import { pathToDir } from "../reducer/path-to-dir";
 import {
   createFile,
   createDir,
@@ -35,6 +35,10 @@ export const useWorkspace = ({
   refreshTree,
   workspacePath,
 }: UseWorkspaceProps) => {
+  /**
+   * @todo: consider moving to React 19 once it's out and using a combination of
+   * useTransition and useOptimistic along with the reducer here.
+   */
   const [wsConfig, dispatch] = useReducer<ReturnType<typeof reducer>>(
     reducer(),
     workspaceConfig,

@@ -19,7 +19,7 @@ export const Tree = ({
   refreshTree,
   workspacePath,
 }: TreeProps) => {
-  /**
+  /*
    * Managed outside of CSS because I need to persist the overflow menu
    * regardless of hover once it's clicked
    */

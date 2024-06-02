@@ -1,6 +1,6 @@
 import { css } from "@linaria/core";
 import { styled } from "@linaria/react";
-import { isFile } from "../guards";
+import { isFile } from "./guards";
 import { InputInPlace } from "../../../components/input";
 import { HiPlus } from "react-icons/hi";
 import { MdKeyboardArrowDown, MdKeyboardArrowRight } from "react-icons/md";
@@ -44,6 +44,13 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
     const [collapased, setCollapsed] = useState(false);
     const [newDocument, setNewDocument] = useState<Document>();
     const [documentName, setDocumentName] = useState("");
+
+    /*
+     * @todo: Both `keydown` actions should be handled natively
+     * within the component instead of being drilled down from an
+     * outer component.
+     * @todo: Can this big JSX below be divided into smaller components?
+     */
 
     const inputKeydown: KeyboardEventHandler<HTMLInputElement> = useCallback(
       async (e) => {

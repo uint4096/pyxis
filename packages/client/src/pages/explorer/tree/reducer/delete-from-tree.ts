@@ -1,4 +1,4 @@
-import type { Directory, Document, File, Entity } from "../../../types";
+import type { Directory, Document, File, Entity } from "../../../../types";
 import { isFile } from "../guards";
 
 export const deleteFromTree =
