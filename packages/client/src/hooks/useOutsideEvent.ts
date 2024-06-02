@@ -10,11 +10,11 @@ export const useOutsideEvent = <T extends HTMLElement>(
         onClick();
       }
     },
-    [ref]
+    [onClick, ref]
   );
 
   useEffect(() => {
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
-  }, [ref]);
+  }, [handleClickOutside, ref]);
 };

@@ -8,12 +8,13 @@ import { KeyboardEventHandler, forwardRef, useCallback, useState } from "react";
 import type { Entity, Document, File, Directory } from "../../../types";
 import { getOverflowMenu, MenuOption } from "../../../components/overflow-menu";
 import { noop } from "../../../utils";
+import { nanoid } from "nanoid";
 
 type Actions = {
-  onFileCreation: (id: string, name: string) => Promise<void>;
-  onDirCreation: (id: string, name: string) => Promise<void>;
-  onDeleteFile: (id: string, entity: File | Directory) => Promise<void>;
-  onDeleteDir: (id: string, entity: File | Directory) => Promise<void>;
+  onCreateFile: (targetId: string, entity: File) => Promise<void>;
+  onCreateDir: (targetId: string, entity: Directory) => Promise<void>;
+  onDeleteFile: (targetId: string, entity: File) => Promise<void>;
+  onDeleteDir: (targetId: string, entity: Directory) => Promise<void>;
 };
 
 type EntityProps = {
@@ -36,9 +37,9 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
       actions,
       dirOptionsState: [optionsElement, setOptionsElement],
       showOptionsState: [showOptions, setOptions],
-      parentDirId
+      parentDirId,
     }: EntityProps,
-    ref
+    ref,
   ) => {
     const [collapased, setCollapsed] = useState(false);
     const [newDocument, setNewDocument] = useState<Document>();
@@ -56,13 +57,34 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
           return;
         }
 
+        const currentTime = new Date().toISOString();
+        const entity =
+          newDocument === "file"
+            ? {
+                name: documentName,
+                title: documentName,
+                updated_at: currentTime,
+                created_at: currentTime,
+                owned_by: "", //@todo: to implement,
+                links: [],
+                tags: [],
+                whitelisted_groups: [],
+                whitelisted_users: [],
+                hidden: false,
+              }
+            : {
+                name: documentName,
+                id: nanoid(10),
+                content: [],
+              };
+
         await (newDocument === "file"
-          ? actions.onFileCreation(id, documentName)
-          : actions.onDirCreation(id, documentName));
+          ? actions.onCreateFile(id, entity as File)
+          : actions.onCreateDir(id, entity as Directory));
         setDocumentName("");
         setNewDocument(undefined);
       },
-      [actions, documentName, id, newDocument]
+      [actions, documentName, id, newDocument],
     );
 
     const setElement = useCallback(
@@ -71,7 +93,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
           setOptionsElement(val);
         }
       },
-      [setOptionsElement, showOptions]
+      [setOptionsElement, showOptions],
     );
 
     const onMenuKeydown: KeyboardEventHandler<HTMLDivElement> = useCallback(
@@ -81,7 +103,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
           setOptions(false);
         }
       },
-      [setOptions, setOptionsElement]
+      [setOptions, setOptionsElement],
     );
 
     const dirMenuOptions: Array<MenuOption> = [
@@ -96,7 +118,11 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
         name: "Rename",
       },
       {
-        handler: useCallback(async (dir: Directory) => parentDirId ? actions.onDeleteDir(parentDirId, dir) : noop(), [actions, parentDirId]),
+        handler: useCallback(
+          async (dir: Directory) =>
+            parentDirId ? actions.onDeleteDir(parentDirId, dir) : noop(),
+          [actions, parentDirId],
+        ),
         id: "delete",
         name: "Delete",
       },
@@ -109,7 +135,10 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
         name: "Rename",
       },
       {
-        handler: useCallback(async (file: File) => actions.onDeleteFile(id, file), [actions, id]),
+        handler: useCallback(
+          async (file: File) => actions.onDeleteFile(id, file),
+          [actions, id],
+        ),
         id: "delete",
         name: "Delete",
       },
@@ -205,13 +234,13 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
                   parentDirId={id}
                   key={entity.Dir.id}
                 />
-              )
+              ),
             )}
           </EntityContainer>
         )}
       </DirTreeWrapper>
     );
-  }
+  },
 );
 
 const verticallyMiddle = css`

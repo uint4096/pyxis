@@ -81,7 +81,7 @@ export const Explorer = () => {
         };
       });
     },
-    [systemConfig, storeConfig]
+    [systemConfig, storeConfig],
   );
 
   useEffect(() => {
