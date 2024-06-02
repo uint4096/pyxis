@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::{
-    fs::{create_dir_all, remove_dir},
+    fs::{create_dir_all, remove_dir_all},
     path::Path,
 };
 
@@ -31,7 +31,7 @@ impl<'a> Actions<'a, Directory> for Directory {
     fn delete(&self, path_to_dir: &str) -> bool {
         let dir_path = Path::new(path_to_dir).join(&self.get_name());
 
-        match remove_dir(dir_path) {
+        match remove_dir_all(dir_path) {
             Ok(_) => true,
             Err(e) => {
                 println!("[Dir] Error while deleting directory. {}", e);

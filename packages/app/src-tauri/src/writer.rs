@@ -10,7 +10,6 @@ pub fn write_file(path: &str, content: &str) -> bool {
     }
 
     if let Some(parent) = file_path.parent() {
-        println!("[Writer] Parent: {}", parent.display());
         match parent.try_exists() {
             Ok(exists) => {
                 if !exists {
@@ -33,7 +32,7 @@ pub fn write_file(path: &str, content: &str) -> bool {
         }
     }
 
-    match OpenOptions::new().write(true).create(true).open(path) {
+    match OpenOptions::new().create(true).write(true).truncate(true).open(path) {
         Ok(file) => {
             let mut writer = BufWriter::new(file);
             match writer.write_all(content.as_bytes()) {
