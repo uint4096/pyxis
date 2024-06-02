@@ -5,6 +5,7 @@ import {
   KeyboardEvent,
   SyntheticEvent,
   useCallback,
+  ClipboardEventHandler,
 } from "react";
 import { getCaretFromDomNodes, getDescendant, getSelection } from "./dom";
 import { getHTMLContent, type Selection } from "./text";
@@ -46,8 +47,8 @@ const Editor = ({ initialContent }: { initialContent?: string }) => {
     return editor;
   };
 
-  const onPaste = useCallback(
-    (event: any) => {
+  const onPaste: ClipboardEventHandler<HTMLDivElement> = useCallback(
+    (event) => {
       setRawText(({ text, caret }) => {
         const content = event.clipboardData.getData("text");
         return {
@@ -65,7 +66,7 @@ const Editor = ({ initialContent }: { initialContent?: string }) => {
         };
       });
     },
-    [rawText.caret]
+    []
   );
 
   const onSelection = useCallback(

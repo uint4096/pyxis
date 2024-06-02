@@ -57,7 +57,7 @@ export const CreateWorkspace = ({
 
       onCreate(currentWorkspace);
     },
-    []
+    [onCreate]
   );
 
   const body = (

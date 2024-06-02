@@ -18,7 +18,7 @@ export const StoreForm = ({ onCreate }: StoreFormProps) => {
     await saveSystemConfig<SystemConfig>({ config: systemConfig });
 
     onCreate(systemConfig);
-  }, [selectedPath]);
+  }, [onCreate, selectedPath]);
 
   const body = (
     <div>

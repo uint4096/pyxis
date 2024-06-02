@@ -29,6 +29,8 @@ export const Tree = ({ workspace, store, refreshTree }: TreeProps) => {
   const [optionsElement, setOptionsElement] = useState<string>("");
   const [showOptions, setOptions] = useState<boolean>(false);
 
+  console.log("WORKSPACE: ", workspace);
+
   const updateTree = useCallback(
     (dir: Directory, targetId: string) =>
       (type: Document, entity: File | Directory): Array<Entity> => {
@@ -137,7 +139,7 @@ export const Tree = ({ workspace, store, refreshTree }: TreeProps) => {
           },
           { filePath: "", found: false as boolean }
         ),
-    [workspace]
+    [workspace.tree]
   );
 
   const onDocumentCreation = useCallback(
@@ -172,8 +174,8 @@ export const Tree = ({ workspace, store, refreshTree }: TreeProps) => {
           return;
         }
 
-        const tree = computeTree("file", file);
-        refreshTree(tree);
+        const newTree = computeTree("file", file);
+        refreshTree(newTree);
       } else {
         const dir = {
           name,
@@ -186,14 +188,14 @@ export const Tree = ({ workspace, store, refreshTree }: TreeProps) => {
           return;
         }
 
-        const tree = computeTree("dir", dir);
-        refreshTree(tree);
+        const newTree = computeTree("dir", dir);
+        refreshTree(newTree);
       }
     },
-    [workspace, store]
+    [pathToDir, refreshTree, store, updateTree, workspace]
   );
 
-  const onDocumentDelete = useCallback((type: Document) => async (dirId: string, entity: File | Directory) => {
+  const onDocumentDelete = (type: Document) => async (dirId: string, entity: File | Directory) => {
     const dirPath = pathToDir(dirId)?.filePath;
     const path = `${store}/${workspace.name}${dirPath}`;
 
@@ -204,7 +206,7 @@ export const Tree = ({ workspace, store, refreshTree }: TreeProps) => {
       dirId
     );
 
-    const response = type === 'file' ? await deleteFile({ file: entity as File, path }) : deleteDir({ dir: entity as Directory, path })
+    const response = type === 'file' ? await deleteFile({ file: entity as File, path }) : await deleteDir({ dir: entity as Directory, path })
 
     if (!response) {
       //@todo: Handle error and show toast message
@@ -213,7 +215,7 @@ export const Tree = ({ workspace, store, refreshTree }: TreeProps) => {
 
     const treee = computeTree(type, entity);
     refreshTree(treee); 
-  }, []);
+  };
 
   const menuRef = useRef<HTMLDivElement>(null);
   useOutsideEvent(menuRef, () => {

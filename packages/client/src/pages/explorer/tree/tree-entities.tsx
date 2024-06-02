@@ -26,6 +26,7 @@ type EntityProps = {
   parentDirId?: string;
 };
 
+// eslint-disable-next-line react/display-name
 export const Entities = forwardRef<HTMLDivElement, EntityProps>(
   (
     {
@@ -61,7 +62,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
         setDocumentName("");
         setNewDocument(undefined);
       },
-      [documentName]
+      [actions, documentName, id, newDocument]
     );
 
     const setElement = useCallback(
@@ -70,7 +71,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
           setOptionsElement(val);
         }
       },
-      [showOptions]
+      [setOptionsElement, showOptions]
     );
 
     const onMenuKeydown: KeyboardEventHandler<HTMLDivElement> = useCallback(
@@ -80,7 +81,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
           setOptions(false);
         }
       },
-      []
+      [setOptions, setOptionsElement]
     );
 
     const dirMenuOptions: Array<MenuOption> = [
@@ -95,7 +96,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
         name: "Rename",
       },
       {
-        handler: useCallback(async (dir: Directory) => parentDirId ? actions.onDeleteDir(parentDirId, dir) : noop(), [parentDirId]),
+        handler: useCallback(async (dir: Directory) => parentDirId ? actions.onDeleteDir(parentDirId, dir) : noop(), [actions, parentDirId]),
         id: "delete",
         name: "Delete",
       },
@@ -108,7 +109,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
         name: "Rename",
       },
       {
-        handler: useCallback(async (file: File) => actions.onDeleteFile(id, file), [id]),
+        handler: useCallback(async (file: File) => actions.onDeleteFile(id, file), [actions, id]),
         id: "delete",
         name: "Delete",
       },
@@ -202,6 +203,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
                   dirOptionsState={[optionsElement, setOptionsElement]}
                   showOptionsState={[showOptions, setOptions]}
                   parentDirId={id}
+                  key={entity.Dir.id}
                 />
               )
             )}

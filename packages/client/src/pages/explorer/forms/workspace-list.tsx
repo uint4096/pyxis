@@ -28,7 +28,7 @@ export const WorkspaceSelection = ({
     });
 
     onSelect(workspace);
-  }, []);
+  }, [onSelect, store, workspaces]);
 
   const label = (
     <WorkspaceSelectionMessage>Select a workspace</WorkspaceSelectionMessage>

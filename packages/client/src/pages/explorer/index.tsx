@@ -102,7 +102,7 @@ export const Explorer = () => {
         path: workspacePath,
         config: { ...workspaceConfig },
       }))();
-  }, [workspaceConfig]);
+  }, [storeConfig, systemConfig, workspaceConfig]);
 
   useEffect(() => {
     (async () => {
