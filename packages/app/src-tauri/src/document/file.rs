@@ -1,6 +1,9 @@
 use serde::{Deserialize, Serialize};
 
-use crate::writer::write_file;
+use crate::{
+    reader::{read_file, FileContent},
+    writer::write_file,
+};
 use std::{fs::remove_file, path::Path};
 
 use super::actions::Actions;
@@ -9,6 +12,10 @@ use super::actions::Actions;
 pub struct Link(String, String);
 
 #[derive(Serialize, Deserialize)]
+/*
+ * @todo: file path relative to the workspace
+ * should also be a propery of the file.
+ */
 pub struct File {
     name: String,
     title: Option<String>,
@@ -23,7 +30,7 @@ pub struct File {
 }
 
 impl File {
-    pub fn new (name: String, hidden: bool) -> Self {
+    pub fn new(name: String, hidden: bool) -> Self {
         File {
             name,
             created_at: None,
@@ -34,14 +41,27 @@ impl File {
             updated_at: None,
             whitelisted_groups: None,
             whitelisted_users: None,
-            hidden
+            hidden,
         }
+    }
+
+    pub fn read(&self, path_to_dir: &str) -> FileContent {
+        let file_path = Path::new(path_to_dir).join(&self.get_name());
+        if !Path::exists(&file_path) {
+            return FileContent::new_failed();
+        }
+
+        read_file(
+            file_path
+                .to_str()
+                .expect("Failed while converting path to string!"),
+        )
     }
 }
 
 impl<'a> Actions<'a, File> for File {
     fn create(&self, path_to_dir: &str) -> bool {
-        let file_path = Path::new(path_to_dir).join(&self.name);
+        let file_path = Path::new(path_to_dir).join(&self.get_name());
         if Path::exists(&file_path) {
             return false;
         }
@@ -55,7 +75,7 @@ impl<'a> Actions<'a, File> for File {
     }
 
     fn delete(&self, path_to_dir: &str) -> bool {
-        let file_path = Path::new(path_to_dir).join(&self.name);
+        let file_path = Path::new(path_to_dir).join(&self.get_name());
 
         match remove_file(file_path) {
             Ok(_) => true,

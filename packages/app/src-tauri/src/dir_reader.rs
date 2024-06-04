@@ -1,8 +1,8 @@
+use crate::document::dir::Directory;
+use crate::document::file::File;
 use nanoid::nanoid;
 use std::fs;
 use std::path::Path;
-use crate::document::dir::Directory;
-use crate::document::file::File;
 
 #[derive(serde::Serialize, serde::Deserialize)]
 pub enum Entity {

@@ -21,10 +21,7 @@ impl FileContent {
 pub fn read_file(path: &str) -> FileContent {
     let file_path = Path::new(path);
     if file_path.is_dir() {
-        return FileContent {
-            read_status: false,
-            content: None,
-        };
+        return FileContent::new_failed();
     }
 
     match File::open(path) {
@@ -49,10 +46,7 @@ pub fn read_file(path: &str) -> FileContent {
         }
         Err(e) => {
             println!("[Reader] Error while opening file! {e}");
-            FileContent {
-                read_status: false,
-                content: None,
-            }
+            FileContent::new_failed()
         }
     }
 }

@@ -32,7 +32,12 @@ pub fn write_file(path: &str, content: &str) -> bool {
         }
     }
 
-    match OpenOptions::new().create(true).write(true).truncate(true).open(path) {
+    match OpenOptions::new()
+        .create(true)
+        .write(true)
+        .truncate(true)
+        .open(path)
+    {
         Ok(file) => {
             let mut writer = BufWriter::new(file);
             match writer.write_all(content.as_bytes()) {
