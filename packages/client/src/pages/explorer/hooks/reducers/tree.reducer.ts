@@ -1,7 +1,7 @@
 import type { WorkspaceConfig } from "../../types";
 import type { Directory, File, Document } from "../../../../types";
-import { updateTree } from "./update-tree";
-import { deleteFromTree } from "./delete-from-tree";
+import { updateTree } from "./utils/update-tree";
+import { deleteFromTree } from "./utils/delete-from-tree";
 
 export type Actions = "create" | "delete";
 type State = WorkspaceConfig | undefined;

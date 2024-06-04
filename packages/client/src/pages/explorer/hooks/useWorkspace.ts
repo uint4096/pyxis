@@ -1,18 +1,21 @@
 import { useCallback, useEffect, useReducer } from "react";
-import type { WorkspaceConfig } from "../../types";
-import { type Actions, type ReducerArgs, reducer } from "../reducer";
-import type { Directory, Document, Entity, File } from "../../../../types";
-import { pathToDir } from "../reducer/path-to-dir";
+import type { WorkspaceConfig } from "../types";
+import {
+  type Actions,
+  type ReducerArgs,
+  reducer,
+} from "./reducers/tree.reducer";
+import type { Directory, Document, Entity, File } from "../../../types";
+import { pathToDir } from "./reducers/utils/path-to-dir";
 import {
   createFile,
   createDir,
   deleteFile,
   deleteDir,
   saveWorkspaceConfig,
-} from "../../../../ffi";
+} from "../../../ffi";
 
 type UseWorkspaceProps = {
-  store: string;
   workspaceConfig: WorkspaceConfig;
   refreshTree: (tree: Array<Entity>) => void;
   workspacePath: string;
@@ -30,13 +33,12 @@ type ActionArgs<T extends Document> = {
 };
 
 export const useWorkspace = ({
-  store,
   workspaceConfig,
   refreshTree,
   workspacePath,
 }: UseWorkspaceProps) => {
   /**
-   * @todo: consider moving to React 19 once it's out and using a combination of
+   * @todo: consider moving to React 19 once it's out and use a combination of
    * useTransition and useOptimistic along with the reducer here.
    */
   const [wsConfig, dispatch] = useReducer<ReturnType<typeof reducer>>(
@@ -60,8 +62,7 @@ export const useWorkspace = ({
           return;
         }
 
-        const dirPath = pathToDir(targetId, wsConfig.tree)?.filePath;
-        const path = `${store}/${wsConfig.name}${dirPath}`;
+        const { path } = pathToDir(targetId, wsConfig.tree, workspacePath);
 
         const response =
           type === "file"
@@ -75,7 +76,7 @@ export const useWorkspace = ({
 
         dispatch({ type: action, args });
       },
-    [wsConfig, store],
+    [wsConfig, workspacePath],
   );
 
   useEffect(() => {

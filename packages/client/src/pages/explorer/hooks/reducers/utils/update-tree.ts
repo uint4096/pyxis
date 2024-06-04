@@ -5,8 +5,8 @@ import type {
   Document,
   FileEntity,
   DirEntity,
-} from "../../../../types";
-import { isFile } from "../guards";
+} from "../../../../../types";
+import { isFile } from "../../../tree/guards";
 
 export const updateTree =
   (dir: Directory, targetId: string) =>

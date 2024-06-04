@@ -4,7 +4,7 @@ import type { WorkspaceConfig } from "../types";
 import type { Entity } from "../../../types";
 import { Entities } from "./tree-entities";
 import { useOutsideEvent } from "../../../hooks/useOutsideEvent";
-import { useWorkspace } from "./hooks/useWorkspace";
+import { useWorkspace } from "../hooks/useWorkspace";
 
 type TreeProps = {
   workspace: WorkspaceConfig;
@@ -27,7 +27,6 @@ export const Tree = ({
   const [showOptions, setOptions] = useState<boolean>(false);
   const { config: wsConfig, handlers } = useWorkspace({
     refreshTree,
-    store,
     workspaceConfig: workspace,
     workspacePath,
   });

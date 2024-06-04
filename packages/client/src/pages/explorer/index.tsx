@@ -170,6 +170,8 @@ export const Explorer = () => {
           />
         )}
       {showEditor && !noWorkspaces && <Editor />}
+
+      {/* Modals and Forms */}
       {noWorkspaces && (
         <NoWorkspaceMessage onCreate={() => setWorkspaceForm(true)} />
       )}

@@ -50,6 +50,8 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
      * within the component instead of being drilled down from an
      * outer component.
      * @todo: Can this big JSX below be divided into smaller components?
+     * @todo: Is there a better way to show menu and handle actions on the
+     * specific element that the user clicks on?
      */
 
     const inputKeydown: KeyboardEventHandler<HTMLInputElement> = useCallback(
@@ -195,6 +197,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
                 onChange={setDocumentName}
               />
             )}
+
             {dirTree.map((entity) =>
               isFile(entity) ? (
                 !entity.File.hidden && (
@@ -216,6 +219,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
                           ? show
                           : hide
                       }
+                      onClick={(e) => e.stopPropagation()}
                     >
                       <FileOverflow
                         options={fileMenuOptions}
