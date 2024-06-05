@@ -17,10 +17,10 @@ export const pathToDir = (
 
         const dir = content as DirEntity;
         if (dir.Dir.id === id) {
-          return { path: `${initalPath}/${dir.Dir.name}`, found: true };
+          return { path: `${path}/${dir.Dir.name}`, found: true };
         }
 
-        return pathToDir(id, dir.Dir.content, `${initalPath}/${dir.Dir.name}`);
+        return pathToDir(id, dir.Dir.content, `${path}/${dir.Dir.name}`);
       },
-      { path: "", found: false as boolean },
+      { path: initalPath, found: false as boolean },
     );

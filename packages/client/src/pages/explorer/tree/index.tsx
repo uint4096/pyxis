@@ -1,23 +1,23 @@
 import { styled } from "@linaria/react";
 import { useRef, useState } from "react";
 import type { WorkspaceConfig } from "../types";
-import type { Entity } from "../../../types";
+import type { Entity, File } from "../../../types";
 import { Entities } from "./tree-entities";
-import { useOutsideEvent } from "../../../hooks/useOutsideEvent";
-import { useWorkspace } from "../hooks/useWorkspace";
+import { useOutsideEvent } from "../../../hooks";
+import { useWorkspace } from "../hooks";
 
 type TreeProps = {
   workspace: WorkspaceConfig;
-  store: string;
   refreshTree: (tree: Array<Entity>) => void;
   workspacePath: string;
+  readFile: (targetId: string, file: File) => Promise<void>;
 };
 
 export const Tree = ({
   workspace,
-  store,
   refreshTree,
   workspacePath,
+  readFile,
 }: TreeProps) => {
   /*
    * Managed outside of CSS because I need to persist the overflow menu
@@ -44,10 +44,11 @@ export const Tree = ({
           dirTree={wsConfig.tree}
           name={wsConfig.name}
           id={wsConfig.id}
-          actions={handlers}
+          workspaceActions={handlers}
           dirOptionsState={[optionsElement, setOptionsElement]}
           showOptionsState={[showOptions, setOptions]}
           ref={menuRef}
+          readFile={readFile}
         />
       )}
     </EntitiesWrapper>

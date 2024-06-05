@@ -21,13 +21,18 @@ import {
   insertTextAtPosition,
   textLength,
 } from "../../utils";
+import { FileWithContent } from "../../types";
 
-const Editor = ({ initialContent }: { initialContent?: string }) => {
+const Editor = ({
+  fileWithContent,
+}: {
+  fileWithContent: Partial<FileWithContent>;
+}) => {
   const [rawText, setRawText] = useState<{
     text: string;
     caret: Caret;
   }>({
-    text: initialContent ?? "",
+    text: fileWithContent?.content ?? "",
     caret: { start: 0, end: 0, collapsed: true },
   });
 
@@ -129,6 +134,22 @@ const Editor = ({ initialContent }: { initialContent?: string }) => {
     },
     [rawText],
   );
+
+  useEffect(() => {
+    const content = fileWithContent?.content;
+    if (!content) {
+      return;
+    }
+
+    setRawText(() => ({
+      text: content,
+      caret: {
+        start: content.length,
+        end: content.length,
+        collapsed: true,
+      },
+    }));
+  }, [fileWithContent?.content]);
 
   useEffect(() => {
     const { caret, text } = rawText;

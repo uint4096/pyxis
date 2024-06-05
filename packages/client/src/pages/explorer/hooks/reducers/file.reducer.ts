@@ -1,4 +1,4 @@
-import type { File } from "../../../../types";
+import type { File, FileWithContent } from "../../../../types";
 
 export type Actions = "save" | "set-metadata";
 
@@ -7,12 +7,10 @@ type ActionWithArgs = {
   "set-metadata": { metadata: Omit<File, "hidden" | "name"> };
 };
 
-type FileWithContent = File & { content: string };
-
 type Args<T extends Actions> = ActionWithArgs[T];
 
 export const reducer = <T extends Actions>(
-  state: FileWithContent,
+  state: Partial<FileWithContent>,
   action: { type: T; args: Args<T> },
 ) => {
   const { type, args } = action;

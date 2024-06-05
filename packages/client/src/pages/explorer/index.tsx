@@ -1,5 +1,5 @@
 import { styled } from "@linaria/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Editor from "../editor/editor";
 import {
   readStoreConfig,
@@ -19,6 +19,7 @@ import { CreateWorkspace } from "./forms/workspace";
 import { WorkspaceSelection } from "./forms/workspace-list";
 import { Tree } from "./tree";
 import { Entity } from "../../types";
+import { useFile } from "./hooks";
 
 export const Explorer = () => {
   const [showStoreForm, setStoreForm] = useState<boolean>(false);
@@ -32,6 +33,19 @@ export const Explorer = () => {
   const [workspaceConfig, setWorkspaceConfig] = useState<WorkspaceConfig>();
 
   const [showEditor, setEditor] = useState<boolean>(false);
+
+  const workspacePath = useMemo(
+    () =>
+      systemConfig && storeConfig?.selected_workspace
+        ? `${systemConfig.store}/${storeConfig.selected_workspace.name}`
+        : "",
+    [storeConfig?.selected_workspace, systemConfig],
+  );
+
+  const { fileWithContent, readFromPath } = useFile({
+    workspacePath,
+    workspaceConfig,
+  });
 
   const onWorkspaceCreation = useCallback(
     (currentWorkspace: WorkspaceBase) => {
@@ -164,12 +178,14 @@ export const Explorer = () => {
         storeConfig?.selected_workspace && (
           <Tree
             workspace={workspaceConfig}
-            store={systemConfig.store}
             refreshTree={refreshTree}
-            workspacePath={`${systemConfig.store}/${storeConfig.selected_workspace.name}`}
+            workspacePath={workspacePath}
+            readFile={readFromPath}
           />
         )}
-      {showEditor && !noWorkspaces && <Editor />}
+      {showEditor && !noWorkspaces && (
+        <Editor fileWithContent={fileWithContent} />
+      )}
 
       {/* Modals and Forms */}
       {noWorkspaces && (

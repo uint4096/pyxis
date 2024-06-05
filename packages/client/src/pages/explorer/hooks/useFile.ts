@@ -6,10 +6,10 @@ import { WorkspaceConfig } from "../types";
 import { readFileContent } from "../../../ffi";
 
 type UseFileProps = {
-  file: File;
-  initialContent: string;
-  workspacePath: string;
-  workspaceConfig: WorkspaceConfig;
+  file?: File;
+  initialContent?: string;
+  workspacePath: string | undefined;
+  workspaceConfig: WorkspaceConfig | undefined;
 };
 
 export const useFile = ({
@@ -19,15 +19,20 @@ export const useFile = ({
   workspaceConfig,
 }: UseFileProps) => {
   const [fileWithContent, dispatch] = useReducer(reducer, {
-    ...file,
+    ...(file && { file }),
     content: initialContent,
   });
 
   const readFromPath = useCallback(
-    async (targetId: string, file: File) => {
+    async (targetId: string, selectedFile: File) => {
+      if (!workspaceConfig) {
+        //@todo: show toast message
+        return;
+      }
+
       const { path } = pathToDir(targetId, workspaceConfig.tree, workspacePath);
       const content = await readFileContent<string>({
-        file,
+        file: selectedFile,
         path,
       });
 
@@ -38,7 +43,7 @@ export const useFile = ({
 
       dispatch({ type: "save", args: { content } });
     },
-    [workspaceConfig.tree, workspacePath],
+    [workspaceConfig, workspacePath],
   );
 
   return {

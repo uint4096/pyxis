@@ -21,4 +21,6 @@ export type File = {
   hidden: boolean;
 };
 
+export type FileWithContent = File & { content: string };
+
 export type Directory = { id: string; name: string; content: Array<Entity> };

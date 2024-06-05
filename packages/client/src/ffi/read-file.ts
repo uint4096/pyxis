@@ -1,6 +1,10 @@
 import { parse } from "../utils";
 import { invoke, type Args } from "./invoke";
 
+type ReadOptions = {
+  parseAsJson?: boolean;
+};
+
 const readFile =
   <
     T extends Extract<
@@ -12,6 +16,7 @@ const readFile =
     >,
   >(
     command: T,
+    { parseAsJson = true }: ReadOptions = {},
   ) =>
   async <U extends object | string>(
     args: Args<never>[T],
@@ -23,7 +28,7 @@ const readFile =
         return null;
       }
 
-      return parse<U>(content);
+      return parseAsJson ? parse<U>(content) : <U>content;
     } catch (e) {
       console.error(
         `[Config Error] Error while reading from ${args.path ?? "system"}!`,
@@ -36,4 +41,4 @@ const readFile =
 export const readStoreConfig = readFile("read_store_config");
 export const readWorkspaceConfig = readFile("read_workspace_config");
 export const readSystemConfig = readFile("read_system_config");
-export const readFileContent = readFile("read_file");
+export const readFileContent = readFile("read_file", { parseAsJson: false });

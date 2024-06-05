@@ -10,7 +10,7 @@ import { getOverflowMenu, MenuOption } from "../../../components/overflow-menu";
 import { noop } from "../../../utils";
 import { nanoid } from "nanoid";
 
-type Actions = {
+type WorkspaceActions = {
   onCreateFile: (targetId: string, entity: File) => Promise<void>;
   onCreateDir: (targetId: string, entity: Directory) => Promise<void>;
   onDeleteFile: (targetId: string, entity: File) => Promise<void>;
@@ -21,10 +21,11 @@ type EntityProps = {
   dirTree: Array<Entity>;
   name: string;
   id: string;
-  actions: Actions;
+  workspaceActions: WorkspaceActions;
   dirOptionsState: [string, React.Dispatch<React.SetStateAction<string>>];
   showOptionsState: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
   parentDirId?: string;
+  readFile: (targetId: string, file: File) => Promise<void>;
 };
 
 // eslint-disable-next-line react/display-name
@@ -34,10 +35,11 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
       dirTree,
       name,
       id,
-      actions,
+      workspaceActions,
       dirOptionsState: [optionsElement, setOptionsElement],
       showOptionsState: [showOptions, setOptions],
       parentDirId,
+      readFile,
     }: EntityProps,
     ref,
   ) => {
@@ -88,13 +90,13 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
               };
 
         await (newDocument === "file"
-          ? actions.onCreateFile(id, entity as File)
-          : actions.onCreateDir(id, entity as Directory));
+          ? workspaceActions.onCreateFile(id, entity as File)
+          : workspaceActions.onCreateDir(id, entity as Directory));
 
         setDocumentName("");
         setNewDocument(undefined);
       },
-      [actions, documentName, id, newDocument],
+      [workspaceActions, documentName, id, newDocument],
     );
 
     const setElement = useCallback(
@@ -130,8 +132,10 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
       {
         handler: useCallback(
           async (dir: Directory) =>
-            parentDirId ? actions.onDeleteDir(parentDirId, dir) : noop(),
-          [actions, parentDirId],
+            parentDirId
+              ? workspaceActions.onDeleteDir(parentDirId, dir)
+              : noop(),
+          [workspaceActions, parentDirId],
         ),
         id: "delete",
         name: "Delete",
@@ -146,8 +150,8 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
       },
       {
         handler: useCallback(
-          async (file: File) => actions.onDeleteFile(id, file),
-          [actions, id],
+          async (file: File) => workspaceActions.onDeleteFile(id, file),
+          [workspaceActions, id],
         ),
         id: "delete",
         name: "Delete",
@@ -187,6 +191,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
             />
           </OptionsContainer>
         </NameContainer>
+
         {!collapased && (
           <EntityContainer>
             {newDocument && (
@@ -204,6 +209,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
                   <NameContainer
                     onMouseEnter={() => setElement(`${id}/${entity.File.name}`)}
                     onMouseLeave={() => setElement("")}
+                    onClick={() => readFile(id, entity.File)}
                     className={
                       optionsElement === `${id}/${entity.File.name}`
                         ? backgroundHighlight
@@ -240,11 +246,12 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
                   dirTree={entity.Dir.content}
                   name={entity.Dir.name}
                   id={entity.Dir.id}
-                  actions={actions}
+                  workspaceActions={workspaceActions}
                   dirOptionsState={[optionsElement, setOptionsElement]}
                   showOptionsState={[showOptions, setOptions]}
                   parentDirId={id}
                   key={entity.Dir.id}
+                  readFile={readFile}
                 />
               ),
             )}
