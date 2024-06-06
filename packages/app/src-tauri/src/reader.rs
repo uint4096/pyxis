@@ -32,7 +32,7 @@ pub fn read_file(path: &str) -> FileContent {
             while let Some(line) = lines.next() {
                 match line {
                     Ok(line) => {
-                        content = content + &line;
+                        content = content + &line + "\n";
                     }
                     Err(e) => {
                         println!("[Reader] Error while parsing lines! {e}");

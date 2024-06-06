@@ -23,12 +23,12 @@ const readFile =
   ): Promise<U | null> => {
     try {
       const { read_status, content } = await invoke(command, args);
-      if (!read_status || !content) {
+      if (!read_status) {
         console.error(`[Config Error] Read failed or no config!`);
         return null;
       }
 
-      return parseAsJson ? parse<U>(content) : <U>content;
+      return parseAsJson ? parse<U>(content ?? "") : <U>content ?? "";
     } catch (e) {
       console.error(
         `[Config Error] Error while reading from ${args.path ?? "system"}!`,

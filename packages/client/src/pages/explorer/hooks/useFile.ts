@@ -36,7 +36,7 @@ export const useFile = ({
         path,
       });
 
-      if (!content) {
+      if (content == null) {
         //@todo: handle error and show toast message
         return;
       }

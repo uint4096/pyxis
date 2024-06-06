@@ -137,7 +137,7 @@ const Editor = ({
 
   useEffect(() => {
     const content = fileWithContent?.content;
-    if (!content) {
+    if (content == null) {
       return;
     }
 
