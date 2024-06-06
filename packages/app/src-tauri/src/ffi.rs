@@ -84,6 +84,11 @@ pub fn read_file(path: &str, file: File) -> FileContent {
 }
 
 #[tauri::command]
+pub fn write_file(path: &str, file: File, content: &str) -> bool {
+    file.write(path, content)
+}
+
+#[tauri::command]
 pub fn rename_file(path: &str, file: File, new_name: &str) -> bool {
     file.rename(path, new_name)
 }

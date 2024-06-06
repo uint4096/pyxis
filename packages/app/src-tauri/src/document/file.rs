@@ -57,6 +57,20 @@ impl File {
                 .expect("Failed while converting path to string!"),
         )
     }
+
+    pub fn write(&self, path_to_dir: &str, content: &str) -> bool {
+        let file_path = Path::new(path_to_dir).join(&self.get_name());
+        if !Path::exists(&file_path) {
+            return false;
+        }
+
+        write_file(
+            file_path
+                .to_str()
+                .expect("Failed while converting path to string!"),
+            content,
+        )
+    }
 }
 
 impl<'a> Actions<'a, File> for File {
