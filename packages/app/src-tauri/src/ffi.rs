@@ -74,41 +74,41 @@ pub fn write_system_config(config: SystemConfig) -> bool {
 }
 
 #[tauri::command]
-pub fn create_file(path: &str, file: File) -> bool {
-    file.create(path)
+pub fn create_file(file: File) -> bool {
+    file.create()
 }
 
 #[tauri::command]
-pub fn read_file(path: &str, file: File) -> FileContent {
-    file.read(path)
+pub fn read_file(file: File) -> FileContent {
+    file.read()
 }
 
 #[tauri::command]
-pub fn write_file(path: &str, file: File, content: &str) -> bool {
-    file.write(path, content)
+pub fn write_file(file: File, content: &str) -> bool {
+    file.write(content)
 }
 
 #[tauri::command]
-pub fn rename_file(path: &str, file: File, new_name: &str) -> bool {
-    file.rename(path, new_name)
+pub fn rename_file(file: File, new_name: &str) -> bool {
+    file.rename(new_name)
 }
 
 #[tauri::command]
-pub fn delete_file(path: &str, file: File) -> bool {
-    file.delete(path)
+pub fn delete_file(file: File) -> bool {
+    file.delete()
 }
 
 #[tauri::command]
-pub fn create_dir(path: &str, dir: Directory) -> bool {
-    dir.create(path)
+pub fn create_dir(dir: Directory) -> bool {
+    dir.create()
 }
 
 #[tauri::command]
-pub fn rename_dir(path: &str, dir: Directory, new_name: &str) -> bool {
-    dir.rename(path, new_name)
+pub fn rename_dir(dir: Directory, new_name: &str) -> bool {
+    dir.rename(new_name)
 }
 
 #[tauri::command]
-pub fn delete_dir(path: &str, dir: Directory) -> bool {
-    dir.delete(path)
+pub fn delete_dir(dir: Directory) -> bool {
+    dir.delete()
 }

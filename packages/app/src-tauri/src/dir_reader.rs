@@ -32,6 +32,9 @@ pub fn read_directory(path: &Path) -> DirContent {
             for elem in res {
                 match elem {
                     Ok(entry) => {
+                        let path = entry.path();
+                        let path = path.to_str().expect("Failed to convert path to str");
+
                         if entry.path().is_dir() {
                             let dir_entries = read_directory(entry.path().as_path());
                             if let Some(content) = dir_entries.entries {
@@ -39,20 +42,28 @@ pub fn read_directory(path: &Path) -> DirContent {
                                     name: entry.file_name().into_string().unwrap(),
                                     id: nanoid!(10),
                                     content,
+                                    path: path.to_string()
                                 }));
                             } else {
                                 return DirContent::new_failed();
                             }
                         } else if entry.path().is_file() {
                             let file_name = entry.file_name().into_string().unwrap();
+
                             /*
                              * @todo: Find a better, platform agnostic way (if possible) for determining if a file is hidden
                              */
-                            if file_name.starts_with('.') {
-                                entries.push(Entity::File(File::new(file_name, true)));
+                            let hidden = if file_name.starts_with('.') {
+                                true
                             } else {
-                                entries.push(Entity::File(File::new(file_name, false)));
-                            }
+                                false
+                            };
+
+                            entries.push(Entity::File(File::new(
+                                file_name,
+                                path.to_string(),
+                                hidden,
+                            )));
                         }
                     }
                     Err(e) => {
