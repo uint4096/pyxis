@@ -23,15 +23,18 @@ import {
 } from "../../utils";
 import { FileWithContent } from "../../types";
 
-const Editor = ({
-  fileWithContent,
-}: {
+type EditorText = {
+  text: string;
+  caret: Caret;
+};
+
+type EditorProps = {
   fileWithContent: Partial<FileWithContent>;
-}) => {
-  const [rawText, setRawText] = useState<{
-    text: string;
-    caret: Caret;
-  }>({
+  writer: (content: string) => Promise<void>;
+};
+
+const Editor = ({ fileWithContent, writer }: EditorProps) => {
+  const [rawText, setRawText] = useState<EditorText>({
     text: fileWithContent?.content ?? "",
     caret: { start: 0, end: 0, collapsed: true },
   });
@@ -162,7 +165,10 @@ const Editor = ({
       content,
       selection,
     }));
-  }, [rawText]);
+
+    // I'm not sure if writing to file should be this decoupled
+    (async () => await writer(text))();
+  }, [rawText, writer]);
 
   useEffect(() => {
     const { selection } = html ?? {};

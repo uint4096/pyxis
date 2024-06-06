@@ -26,6 +26,7 @@ export type Args<T extends object> = {
   create_dir: { dir: Directory; path: string };
   rename_dir: { dir: Directory; path: string; new_name: string };
   delete_dir: { dir: Directory; path: string };
+  write_file: { path: string; file: File; content: string };
 };
 
 export type Response = {
@@ -43,6 +44,7 @@ export type Response = {
   rename_dir: boolean;
   delete_dir: boolean;
   read_file: FileContent;
+  write_file: boolean;
 };
 
 export const invoke = async <

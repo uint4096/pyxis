@@ -3,7 +3,7 @@ import { reducer } from "./reducers/file.reducer";
 import { File } from "../../../types";
 import { pathToDir } from "./reducers/utils/path-to-dir";
 import { WorkspaceConfig } from "../types";
-import { readFileContent } from "../../../ffi";
+import { readFileContent, saveContent } from "../../../ffi";
 
 type UseFileProps = {
   file?: File;
@@ -46,8 +46,27 @@ export const useFile = ({
     [workspaceConfig, workspacePath],
   );
 
+  const writeToFile = useCallback(
+    async (targetId: string, selectedFile: File, content: string) => {
+      if (!workspaceConfig) {
+        //@todo: show toast message
+        return;
+      }
+
+      const { path } = pathToDir(targetId, workspaceConfig.tree, workspacePath);
+      const res = await saveContent({ path, file: selectedFile, content });
+
+      if (!res) {
+        //@todo: handle error and show toast message
+        return;
+      }
+    },
+    [workspaceConfig, workspacePath],
+  );
+
   return {
     fileWithContent,
     readFromPath,
+    writeToFile,
   };
 };

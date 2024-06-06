@@ -5,7 +5,10 @@ const saveConfig =
   <
     T extends Extract<
       keyof Args<Record<string, unknown>>,
-      "write_store_config" | "write_workspace_config" | "write_system_config"
+      | "write_store_config"
+      | "write_workspace_config"
+      | "write_system_config"
+      | "write_file"
     >,
   >(
     command: T,
@@ -33,3 +36,4 @@ const saveConfig =
 export const saveSystemConfig = saveConfig("write_system_config");
 export const saveStoreConfig = saveConfig("write_store_config");
 export const saveWorkspaceConfig = saveConfig("write_workspace_config");
+export const saveContent = saveConfig("write_file");
