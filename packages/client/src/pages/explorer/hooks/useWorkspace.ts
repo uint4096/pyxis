@@ -52,7 +52,10 @@ export const useWorkspace = ({
       type,
       actions: { dir: dirHandler, file: fileHandler },
     }: ActionArgs<T>) =>
-      async (targetId: string, entity: T extends "file" ? File : Directory) => {
+      async (
+        targetId: string,
+        entity: T extends "file" ? Omit<File, "path"> : Omit<Directory, "path">,
+      ) => {
         const args =
           type === "file"
             ? ([targetId, "file", entity] as ReducerArgs<"file">)
@@ -66,8 +69,8 @@ export const useWorkspace = ({
 
         const response =
           type === "file"
-            ? await fileHandler({ file: entity as File, path })
-            : await dirHandler({ dir: entity as Directory, path });
+            ? await fileHandler({ file: { ...entity, path } as File, path })
+            : await dirHandler({ dir: { ...entity, path } as Directory, path });
 
         if (!response) {
           //@todo: Handle error and show toast message

@@ -19,8 +19,14 @@ export type File = {
   updated_at?: string;
   links?: Array<Link>;
   hidden: boolean;
+  path: string;
 };
 
-export type FileWithContent = File & { content: string };
+export type FileWithContent = Omit<File, "path"> & { content: string };
 
-export type Directory = { id: string; name: string; content: Array<Entity> };
+export type Directory = {
+  id: string;
+  name: string;
+  content: Array<Entity>;
+  path: string;
+};
