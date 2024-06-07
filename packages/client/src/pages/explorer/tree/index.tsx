@@ -41,12 +41,9 @@ export const Tree = ({
     <EntitiesWrapper>
       {wsConfig && (
         <Entities
-          dir={{
-            content: wsConfig.tree,
-            id: wsConfig.id,
-            name: wsConfig.name,
-            path: "",
-          }}
+          dirTree={wsConfig.tree}
+          name={wsConfig.name}
+          id={wsConfig.id}
           workspaceActions={handlers}
           dirOptionsState={[optionsElement, setOptionsElement]}
           showOptionsState={[showOptions, setOptions]}

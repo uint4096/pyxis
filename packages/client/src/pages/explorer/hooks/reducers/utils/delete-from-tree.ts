@@ -2,7 +2,7 @@ import type { Directory, Document, File, Entity } from "../../../../../types";
 import { isFile } from "../../../tree/guards";
 
 export const deleteFromTree =
-  (dir: Omit<Directory, "path">, targetId: string) =>
+  (dir: Directory, targetId: string) =>
   (type: Document, entity: File | Directory): Array<Entity> => {
     const filterEntity = (e: Entity) => {
       if (type === "file" && isFile(e) && e.File.name === entity.name) {

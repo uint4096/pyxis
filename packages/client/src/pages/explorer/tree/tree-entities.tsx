@@ -5,26 +5,22 @@ import { InputInPlace } from "../../../components/input";
 import { HiPlus } from "react-icons/hi";
 import { MdKeyboardArrowDown, MdKeyboardArrowRight } from "react-icons/md";
 import { KeyboardEventHandler, forwardRef, useCallback, useState } from "react";
-import type { Document, File, Directory } from "../../../types";
+import type { Entity, Document, File, Directory } from "../../../types";
 import { getOverflowMenu, MenuOption } from "../../../components/overflow-menu";
 import { noop } from "../../../utils";
 import { nanoid } from "nanoid";
 
 type WorkspaceActions = {
-  onCreateFile: (targetId: string, entity: Omit<File, "path">) => Promise<void>;
-  onCreateDir: (
-    targetId: string,
-    entity: Omit<Directory, "path">,
-  ) => Promise<void>;
-  onDeleteFile: (targetId: string, entity: Omit<File, "path">) => Promise<void>;
-  onDeleteDir: (
-    targetId: string,
-    entity: Omit<Directory, "path">,
-  ) => Promise<void>;
+  onCreateFile: (targetId: string, entity: File) => Promise<void>;
+  onCreateDir: (targetId: string, entity: Directory) => Promise<void>;
+  onDeleteFile: (targetId: string, entity: File) => Promise<void>;
+  onDeleteDir: (targetId: string, entity: Directory) => Promise<void>;
 };
 
 type EntityProps = {
-  dir: Directory;
+  dirTree: Array<Entity>;
+  name: string;
+  id: string;
   workspaceActions: WorkspaceActions;
   dirOptionsState: [string, React.Dispatch<React.SetStateAction<string>>];
   showOptionsState: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
@@ -36,7 +32,9 @@ type EntityProps = {
 export const Entities = forwardRef<HTMLDivElement, EntityProps>(
   (
     {
-      dir,
+      dirTree,
+      name,
+      id,
       workspaceActions,
       dirOptionsState: [optionsElement, setOptionsElement],
       showOptionsState: [showOptions, setOptions],
@@ -45,8 +43,6 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
     }: EntityProps,
     ref,
   ) => {
-    const { id, name, content } = dir;
-
     const [collapased, setCollapsed] = useState(false);
     const [newDocument, setNewDocument] = useState<Document>();
     const [documentName, setDocumentName] = useState("");
@@ -94,11 +90,8 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
               };
 
         await (newDocument === "file"
-          ? workspaceActions.onCreateFile(id, entity as Omit<File, "path">)
-          : workspaceActions.onCreateDir(
-              id,
-              entity as Omit<Directory, "path">,
-            ));
+          ? workspaceActions.onCreateFile(id, entity as File)
+          : workspaceActions.onCreateDir(id, entity as Directory));
 
         setDocumentName("");
         setNewDocument(undefined);
@@ -194,7 +187,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
               showMenu={!!showOptions && id === optionsElement}
               onKeyDown={onMenuKeydown}
               ref={ref}
-              rootElement={dir}
+              rootElement={{ id, name, content: dirTree }}
             />
           </OptionsContainer>
         </NameContainer>
@@ -210,7 +203,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
               />
             )}
 
-            {content.map((entity) =>
+            {dirTree.map((entity) =>
               isFile(entity) ? (
                 !entity.File.hidden && (
                   <NameContainer
@@ -250,7 +243,9 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
                 )
               ) : (
                 <Entities
-                  dir={entity.Dir}
+                  dirTree={entity.Dir.content}
+                  name={entity.Dir.name}
+                  id={entity.Dir.id}
                   workspaceActions={workspaceActions}
                   dirOptionsState={[optionsElement, setOptionsElement]}
                   showOptionsState={[showOptions, setOptions]}

@@ -9,7 +9,7 @@ import type {
 import { isFile } from "../../../tree/guards";
 
 export const updateTree =
-  (dir: Omit<Directory, "path">, targetId: string) =>
+  (dir: Directory, targetId: string) =>
   (type: Document, entity: File | Directory): Array<Entity> => {
     const addition =
       type === "file"

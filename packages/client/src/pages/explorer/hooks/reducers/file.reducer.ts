@@ -4,7 +4,7 @@ export type Actions = "save" | "set-metadata";
 
 type ActionWithArgs = {
   save: { content: string };
-  "set-metadata": { metadata: Omit<File, "hidden" | "name" | "path"> };
+  "set-metadata": { metadata: Omit<File, "hidden" | "name"> };
 };
 
 type Args<T extends Actions> = ActionWithArgs[T];
