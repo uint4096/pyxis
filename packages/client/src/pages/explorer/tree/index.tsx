@@ -7,18 +7,11 @@ import { useOutsideEvent } from "../../../hooks";
 import { useWorkspace } from "../hooks";
 
 type TreeProps = {
-  workspace: WorkspaceConfig;
   refreshTree: (tree: Array<Entity>) => void;
-  workspacePath: string;
   readFile: (targetId: string, file: File) => Promise<void>;
 };
 
-export const Tree = ({
-  workspace,
-  refreshTree,
-  workspacePath,
-  readFile,
-}: TreeProps) => {
+export const Tree = ({ refreshTree, readFile }: TreeProps) => {
   /*
    * Managed outside of CSS because I need to persist the overflow menu
    * regardless of hover once it's clicked
@@ -27,8 +20,6 @@ export const Tree = ({
   const [showOptions, setOptions] = useState<boolean>(false);
   const { config: wsConfig, handlers } = useWorkspace({
     refreshTree,
-    workspaceConfig: workspace,
-    workspacePath,
   });
 
   const menuRef = useRef<HTMLDivElement>(null);
@@ -41,9 +32,7 @@ export const Tree = ({
     <EntitiesWrapper>
       {wsConfig && (
         <Entities
-          dirTree={wsConfig.tree}
-          name={wsConfig.name}
-          id={wsConfig.id}
+          dir={{ content: wsConfig.tree, id: wsConfig.id, name: wsConfig.name }}
           workspaceActions={handlers}
           dirOptionsState={[optionsElement, setOptionsElement]}
           showOptionsState={[showOptions, setOptions]}

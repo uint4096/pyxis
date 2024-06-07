@@ -1,9 +1,10 @@
-import { useCallback, useReducer } from "react";
+import { useCallback, useContext, useReducer } from "react";
 import { reducer } from "./reducers/file.reducer";
 import { File } from "../../../types";
 import { pathToDir } from "./reducers/utils/path-to-dir";
 import { WorkspaceConfig } from "../types";
 import { readFileContent, saveContent } from "../../../ffi";
+import { ConfigContext, TConfigContext } from "..";
 
 type UseFileProps = {
   file?: File;
@@ -12,16 +13,14 @@ type UseFileProps = {
   workspaceConfig: WorkspaceConfig | undefined;
 };
 
-export const useFile = ({
-  initialContent,
-  file,
-  workspacePath,
-  workspaceConfig,
-}: UseFileProps) => {
+export const useFile = ({ initialContent, file }: UseFileProps) => {
   const [fileWithContent, dispatch] = useReducer(reducer, {
     ...(file && { file }),
     content: initialContent,
   });
+
+  const { workspaceConfig, workspacePath } =
+    useContext<TConfigContext>(ConfigContext);
 
   const readFromPath = useCallback(
     async (targetId: string, selectedFile: File) => {

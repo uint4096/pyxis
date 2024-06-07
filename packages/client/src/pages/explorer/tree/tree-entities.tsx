@@ -18,9 +18,7 @@ type WorkspaceActions = {
 };
 
 type EntityProps = {
-  dirTree: Array<Entity>;
-  name: string;
-  id: string;
+  dir: Directory;
   workspaceActions: WorkspaceActions;
   dirOptionsState: [string, React.Dispatch<React.SetStateAction<string>>];
   showOptionsState: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
@@ -32,9 +30,7 @@ type EntityProps = {
 export const Entities = forwardRef<HTMLDivElement, EntityProps>(
   (
     {
-      dirTree,
-      name,
-      id,
+      dir,
       workspaceActions,
       dirOptionsState: [optionsElement, setOptionsElement],
       showOptionsState: [showOptions, setOptions],
@@ -46,6 +42,8 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
     const [collapased, setCollapsed] = useState(false);
     const [newDocument, setNewDocument] = useState<Document>();
     const [documentName, setDocumentName] = useState("");
+
+    const { id, name, content: tree } = dir;
 
     /*
      * @todo: Both `keydown` actions should be handled natively
@@ -187,7 +185,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
               showMenu={!!showOptions && id === optionsElement}
               onKeyDown={onMenuKeydown}
               ref={ref}
-              rootElement={{ id, name, content: dirTree }}
+              rootElement={{ id, name, content: tree }}
             />
           </OptionsContainer>
         </NameContainer>
@@ -203,7 +201,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
               />
             )}
 
-            {dirTree.map((entity) =>
+            {tree.map((entity) =>
               isFile(entity) ? (
                 !entity.File.hidden && (
                   <NameContainer
@@ -243,9 +241,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
                 )
               ) : (
                 <Entities
-                  dirTree={entity.Dir.content}
-                  name={entity.Dir.name}
-                  id={entity.Dir.id}
+                  dir={entity.Dir}
                   workspaceActions={workspaceActions}
                   dirOptionsState={[optionsElement, setOptionsElement]}
                   showOptionsState={[showOptions, setOptions]}

@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useReducer } from "react";
-import type { WorkspaceConfig } from "../types";
+import { useCallback, useContext, useEffect, useReducer } from "react";
 import {
   type Actions,
   type ReducerArgs,
@@ -14,11 +13,10 @@ import {
   deleteDir,
   saveWorkspaceConfig,
 } from "../../../ffi";
+import { ConfigContext, TConfigContext } from "../index";
 
 type UseWorkspaceProps = {
-  workspaceConfig: WorkspaceConfig;
   refreshTree: (tree: Array<Entity>) => void;
-  workspacePath: string;
 };
 
 type WorkspaceActions = {
@@ -32,15 +30,14 @@ type ActionArgs<T extends Document> = {
   actions: WorkspaceActions;
 };
 
-export const useWorkspace = ({
-  workspaceConfig,
-  refreshTree,
-  workspacePath,
-}: UseWorkspaceProps) => {
+export const useWorkspace = ({ refreshTree }: UseWorkspaceProps) => {
   /**
    * @todo: consider moving to React 19 once it's out and use a combination of
    * useTransition and useOptimistic along with the reducer here.
    */
+  const { workspaceConfig, workspacePath } =
+    useContext<TConfigContext>(ConfigContext);
+
   const [wsConfig, dispatch] = useReducer<ReturnType<typeof reducer>>(
     reducer(),
     workspaceConfig,

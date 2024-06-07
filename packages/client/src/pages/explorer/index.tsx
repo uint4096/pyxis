@@ -1,5 +1,11 @@
 import { styled } from "@linaria/react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import Editor from "../editor/editor";
 import {
   readStoreConfig,
@@ -21,6 +27,17 @@ import { Tree } from "./tree";
 import { Entity } from "../../types";
 import { useFile } from "./hooks";
 
+export type TConfigContext = {
+  workspaceConfig: WorkspaceConfig;
+  storeConfig: StoreConfig;
+  systemConfig: SystemConfig;
+  workspacePath: string;
+};
+
+export const ConfigContext = createContext<TConfigContext>(
+  {} as TConfigContext,
+);
+
 export const Explorer = () => {
   const [showStoreForm, setStoreForm] = useState<boolean>(false);
   const [showWorkspaceForm, setWorkspaceForm] = useState<boolean>(false);
@@ -31,6 +48,7 @@ export const Explorer = () => {
   const [systemConfig, setSystemConfig] = useState<SystemConfig>();
   const [storeConfig, setStoreConfig] = useState<StoreConfig>();
   const [workspaceConfig, setWorkspaceConfig] = useState<WorkspaceConfig>();
+
 
   const [showEditor, setEditor] = useState<boolean>(false);
 
@@ -173,18 +191,20 @@ export const Explorer = () => {
    */
   return (
     <ExplorerWrapper>
-      {workspaceConfig?.tree &&
-        systemConfig &&
-        storeConfig?.selected_workspace && (
-          <Tree
-            workspace={workspaceConfig}
-            refreshTree={refreshTree}
-            workspacePath={workspacePath}
-            readFile={readFromPath}
-          />
-        )}
-      {showEditor && !noWorkspaces && (
-        <Editor fileWithContent={fileWithContent} />
+      {workspaceConfig && systemConfig && storeConfig?.selected_workspace && (
+        <ConfigContext.Provider
+          value={{
+            workspaceConfig,
+            storeConfig,
+            systemConfig,
+            workspacePath,
+          }}
+        >
+          <Tree refreshTree={refreshTree} readFile={readFromPath} />)
+          {showEditor && !noWorkspaces && (
+            <Editor fileWithContent={fileWithContent} />
+          )}
+        </ConfigContext.Provider>
       )}
 
       {/* Modals and Forms */}
