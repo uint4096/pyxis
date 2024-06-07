@@ -12,6 +12,10 @@ use super::actions::Actions;
 pub struct Link(String, String);
 
 #[derive(Serialize, Deserialize)]
+/*
+ * @todo: file path relative to the workspace
+ * should also be a propery of the file.
+ */
 pub struct File {
     name: String,
     title: Option<String>,
@@ -23,11 +27,10 @@ pub struct File {
     updated_at: Option<String>,
     links: Option<Vec<Link>>,
     hidden: bool,
-    path: String,
 }
 
 impl File {
-    pub fn new(name: String, path: String, hidden: bool) -> Self {
+    pub fn new(name: String, hidden: bool) -> Self {
         File {
             name,
             created_at: None,
@@ -39,38 +42,56 @@ impl File {
             whitelisted_groups: None,
             whitelisted_users: None,
             hidden,
-            path,
         }
     }
 
-    pub fn read(&self) -> FileContent {
-        if !Path::exists(Path::new(&self.path)) {
+    pub fn read(&self, path_to_dir: &str) -> FileContent {
+        let file_path = Path::new(path_to_dir).join(&self.get_name());
+        if !Path::exists(&file_path) {
             return FileContent::new_failed();
         }
 
-        read_file(&self.path)
+        read_file(
+            file_path
+                .to_str()
+                .expect("Failed while converting path to string!"),
+        )
     }
 
-    pub fn write(&self, content: &str) -> bool {
-        if !Path::exists(Path::new(&self.path)) {
+    pub fn write(&self, path_to_dir: &str, content: &str) -> bool {
+        let file_path = Path::new(path_to_dir).join(&self.get_name());
+        if !Path::exists(&file_path) {
             return false;
         }
 
-        write_file(&self.path, content)
+        write_file(
+            file_path
+                .to_str()
+                .expect("Failed while converting path to string!"),
+            content,
+        )
     }
 }
 
 impl<'a> Actions<'a, File> for File {
-    fn create(&self) -> bool {
-        if Path::exists(Path::new(&self.path)) {
+    fn create(&self, path_to_dir: &str) -> bool {
+        let file_path = Path::new(path_to_dir).join(&self.get_name());
+        if Path::exists(&file_path) {
             return false;
         }
 
-        write_file(&self.path, "")
+        let path_str = file_path.to_str();
+        if let Some(path) = path_str {
+            return write_file(path, "");
+        }
+
+        false
     }
 
-    fn delete(&self) -> bool {
-        match remove_file(Path::new(&self.path)) {
+    fn delete(&self, path_to_dir: &str) -> bool {
+        let file_path = Path::new(path_to_dir).join(&self.get_name());
+
+        match remove_file(file_path) {
             Ok(_) => true,
             Err(e) => {
                 println!("[File] Error while deleting file. {}", e);
@@ -79,7 +100,7 @@ impl<'a> Actions<'a, File> for File {
         }
     }
 
-    fn get_path(&self) -> String {
-        self.path.clone()
+    fn get_name(&self) -> String {
+        self.name.clone()
     }
 }

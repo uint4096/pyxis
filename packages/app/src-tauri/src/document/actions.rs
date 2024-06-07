@@ -6,15 +6,15 @@ pub trait Actions<'a, T>
 where
     T: Serialize + Deserialize<'a>,
 {
-    fn get_path(&self) -> String;
-    fn create(&self) -> bool;
-    fn delete(&self) -> bool;
-    fn rename(&self, new_name: &str) -> bool {
-        let file_path = self.get_path();
-        let path = Path::new(&file_path);
-        let new_path = path.join(new_name);
+    fn get_name(&self) -> String;
+    fn create(&self, path_to_dir: &'a str) -> bool;
+    fn delete(&self, path_to_dir: &'a str) -> bool;
+    fn rename(&self, path_to_dir: &str, new_name: &str) -> bool {
+        let path = Path::new(path_to_dir);
+        let old_name = path.join(self.get_name());
+        let new_name = path.join(new_name);
 
-        match rename(path, new_path) {
+        match rename(old_name, new_name) {
             Ok(_) => true,
             Err(e) => {
                 println!("[File/Dir Actions] Error while renaming. {}", e);

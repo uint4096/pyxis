@@ -13,12 +13,13 @@ pub struct Directory {
     pub name: String,
     pub id: String,
     pub content: Vec<Entity>,
-    pub path: String
 }
 
 impl<'a> Actions<'a, Directory> for Directory {
-    fn create(&self) -> bool {
-        match create_dir_all(&self.path) {
+    fn create(&self, path_to_dir: &str) -> bool {
+        let dir_path = Path::new(path_to_dir).join(&self.get_name());
+
+        match create_dir_all(dir_path) {
             Ok(_) => true,
             Err(e) => {
                 println!("[Dir] Error while creating directory. {}", e);
@@ -27,8 +28,10 @@ impl<'a> Actions<'a, Directory> for Directory {
         }
     }
 
-    fn delete(&self) -> bool {
-        match remove_dir_all(&self.path) {
+    fn delete(&self, path_to_dir: &str) -> bool {
+        let dir_path = Path::new(path_to_dir).join(&self.get_name());
+
+        match remove_dir_all(dir_path) {
             Ok(_) => true,
             Err(e) => {
                 println!("[Dir] Error while deleting directory. {}", e);
@@ -37,7 +40,7 @@ impl<'a> Actions<'a, Directory> for Directory {
         }
     }
 
-    fn get_path(&self) -> String {
-        self.path.clone()
+    fn get_name(&self) -> String {
+        self.name.clone()
     }
 }
