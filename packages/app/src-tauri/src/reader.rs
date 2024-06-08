@@ -26,22 +26,18 @@ pub fn read_file(path: &str) -> FileContent {
 
     match File::open(path) {
         Ok(file) => {
-            let reader = BufReader::new(file);
-            let mut lines = reader.lines();
+            let mut reader = BufReader::new(file);
             let mut content = String::new();
-            while let Some(line) = lines.next() {
-                match line {
-                    Ok(line) => {
-                        content = content + &line + "\n";
-                    }
-                    Err(e) => {
-                        println!("[Reader] Error while parsing lines! {e}");
-                    }
+
+            match reader.read_to_string(&mut content) {
+                Ok(_) => FileContent {
+                    read_status: true,
+                    content: Some(content),
+                },
+                Err(e) => {
+                    println!("[Reader] Error while parsing lines! {e}");
+                    FileContent::new_failed()
                 }
-            }
-            FileContent {
-                read_status: true,
-                content: Some(content),
             }
         }
         Err(e) => {
