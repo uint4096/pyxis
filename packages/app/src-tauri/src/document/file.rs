@@ -27,10 +27,11 @@ pub struct File {
     updated_at: Option<String>,
     links: Option<Vec<Link>>,
     hidden: bool,
+    path: String,
 }
 
 impl File {
-    pub fn new(name: String, hidden: bool) -> Self {
+    pub fn new(name: String, path: String, hidden: bool) -> Self {
         File {
             name,
             created_at: None,
@@ -42,56 +43,38 @@ impl File {
             whitelisted_groups: None,
             whitelisted_users: None,
             hidden,
+            path,
         }
     }
 
-    pub fn read(&self, path_to_dir: &str) -> FileContent {
-        let file_path = Path::new(path_to_dir).join(&self.get_name());
-        if !Path::exists(&file_path) {
+    pub fn read(&self, file_path: &str) -> FileContent {
+        if !Path::exists(Path::new(file_path)) {
             return FileContent::new_failed();
         }
 
-        read_file(
-            file_path
-                .to_str()
-                .expect("Failed while converting path to string!"),
-        )
+        read_file(file_path)
     }
 
-    pub fn write(&self, path_to_dir: &str, content: &str) -> bool {
-        let file_path = Path::new(path_to_dir).join(&self.get_name());
-        if !Path::exists(&file_path) {
+    pub fn write(&self, file_path: &str, content: &str) -> bool {
+        if !Path::exists(Path::new(file_path)) {
             return false;
         }
 
-        write_file(
-            file_path
-                .to_str()
-                .expect("Failed while converting path to string!"),
-            content,
-        )
+        write_file(file_path, content)
     }
 }
 
 impl<'a> Actions<'a, File> for File {
-    fn create(&self, path_to_dir: &str) -> bool {
-        let file_path = Path::new(path_to_dir).join(&self.get_name());
-        if Path::exists(&file_path) {
+    fn create(&self, file_path: &str) -> bool {
+        if Path::exists(Path::new(&file_path)) {
             return false;
         }
 
-        let path_str = file_path.to_str();
-        if let Some(path) = path_str {
-            return write_file(path, "");
-        }
-
-        false
+        write_file(file_path, "")
     }
 
-    fn delete(&self, path_to_dir: &str) -> bool {
-        let file_path = Path::new(path_to_dir).join(&self.get_name());
-
-        match remove_file(file_path) {
+    fn delete(&self, file_path: &str) -> bool {
+        match remove_file(Path::new(file_path)) {
             Ok(_) => true,
             Err(e) => {
                 println!("[File] Error while deleting file. {}", e);

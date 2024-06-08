@@ -10,6 +10,9 @@ where
     fn create(&self, path_to_dir: &'a str) -> bool;
     fn delete(&self, path_to_dir: &'a str) -> bool;
     fn rename(&self, path_to_dir: &str, new_name: &str) -> bool {
+        /*
+         * @todo: Won't work currently. Should be fixed when implemented on the client.
+         */
         let path = Path::new(path_to_dir);
         let old_name = path.join(self.get_name());
         let new_name = path.join(new_name);
