@@ -40,7 +40,7 @@ export const useFile = ({
         return;
       }
 
-      dispatch({ type: "save", args: { content } });
+      dispatch({ type: "save", args: { content, file: selectedFile } });
     },
     [workspaceConfig, workspacePath],
   );

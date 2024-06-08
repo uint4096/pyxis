@@ -1,6 +1,7 @@
 import "./editor.css";
 import {
   useState,
+  useRef,
   useEffect,
   KeyboardEvent,
   SyntheticEvent,
@@ -38,6 +39,8 @@ const Editor = ({ fileWithContent, writer }: EditorProps) => {
     text: fileWithContent?.content ?? "",
     caret: { start: 0, end: 0, collapsed: true },
   });
+
+  const renderControl = useRef({ text: false, html: false });
 
   const [html, setHtml] = useState<{
     content: string;
@@ -140,7 +143,8 @@ const Editor = ({ fileWithContent, writer }: EditorProps) => {
 
   useEffect(() => {
     const content = fileWithContent?.content;
-    if (content == null) {
+    if (content == null || !renderControl.current.text) {
+      renderControl.current.text = true;
       return;
     }
 
@@ -155,6 +159,10 @@ const Editor = ({ fileWithContent, writer }: EditorProps) => {
   }, [fileWithContent?.content]);
 
   useEffect(() => {
+    if (!renderControl.current.html) {
+      renderControl.current.html = true;
+      return;
+    }
     const { caret, text } = rawText;
     const { html: content, selection } = getHTMLContent(
       caret.start,
@@ -166,7 +174,10 @@ const Editor = ({ fileWithContent, writer }: EditorProps) => {
       selection,
     }));
 
-    // I'm not sure if writing to file should be this decoupled
+    if (!fileWithContent.name) {
+      return;
+    }
+
     (async () => await writer(fileWithContent as File, text))();
   }, [fileWithContent, rawText, writer]);
 

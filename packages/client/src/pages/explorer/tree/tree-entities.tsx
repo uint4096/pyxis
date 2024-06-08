@@ -14,7 +14,7 @@ import {
 import type { Document, File, Directory } from "../../../types";
 import { getOverflowMenu, MenuOption } from "../../../components/overflow-menu";
 import { nanoid } from "nanoid";
-import { pathToDir } from "../hooks/reducers/utils/path-to-dir";
+import { pathToDir } from "../../../utils";
 import { ConfigContext } from "..";
 
 type WorkspaceActions = {

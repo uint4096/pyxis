@@ -3,7 +3,7 @@ import type { File, FileWithContent } from "../../../../types";
 export type Actions = "save" | "set-metadata";
 
 type ActionWithArgs = {
-  save: { content: string };
+  save: { content: string; file: File };
   "set-metadata": { metadata: Omit<File, "hidden" | "name" | "path"> };
 };
 
@@ -17,9 +17,11 @@ export const reducer = <T extends Actions>(
 
   switch (type) {
     case "save": {
+      const { content, file } = <ActionWithArgs["save"]>args;
       return {
         ...state,
-        content: (<ActionWithArgs["save"]>args).content,
+        ...file,
+        content: content,
       };
     }
     case "set-metadata": {
