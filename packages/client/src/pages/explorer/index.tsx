@@ -49,7 +49,6 @@ export const Explorer = () => {
   const [storeConfig, setStoreConfig] = useState<StoreConfig>();
   const [workspaceConfig, setWorkspaceConfig] = useState<WorkspaceConfig>();
 
-
   const [showEditor, setEditor] = useState<boolean>(false);
 
   const workspacePath = useMemo(
@@ -60,7 +59,7 @@ export const Explorer = () => {
     [storeConfig?.selected_workspace, systemConfig],
   );
 
-  const { fileWithContent, readFromPath } = useFile({
+  const { fileWithContent, readFromPath, writeToFile } = useFile({
     workspacePath,
     workspaceConfig,
   });
@@ -200,9 +199,9 @@ export const Explorer = () => {
             workspacePath,
           }}
         >
-          <Tree refreshTree={refreshTree} readFile={readFromPath} />)
+          <Tree refreshTree={refreshTree} readFile={readFromPath} />
           {showEditor && !noWorkspaces && (
-            <Editor fileWithContent={fileWithContent} />
+            <Editor fileWithContent={fileWithContent} writer={writeToFile} />
           )}
         </ConfigContext.Provider>
       )}

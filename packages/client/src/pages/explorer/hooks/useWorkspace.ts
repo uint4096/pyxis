@@ -59,12 +59,16 @@ export const useWorkspace = ({ refreshTree }: UseWorkspaceProps) => {
           return;
         }
 
-        const { path } = pathToDir(targetId, wsConfig.tree, workspacePath);
-
         const response =
           type === "file"
-            ? await fileHandler({ file: entity as File, path })
-            : await dirHandler({ dir: entity as Directory, path });
+            ? await fileHandler({
+                file: entity as File,
+                path: `${workspacePath}${entity.path}`,
+              })
+            : await dirHandler({
+                dir: entity as Directory,
+                path: `${workspacePath}${entity.path}`,
+              });
 
         if (!response) {
           //@todo: Handle error and show toast message

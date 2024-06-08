@@ -4,11 +4,19 @@ import { isFile } from "./guards";
 import { InputInPlace } from "../../../components/input";
 import { HiPlus } from "react-icons/hi";
 import { MdKeyboardArrowDown, MdKeyboardArrowRight } from "react-icons/md";
-import { KeyboardEventHandler, forwardRef, useCallback, useState } from "react";
-import type { Entity, Document, File, Directory } from "../../../types";
+import {
+  KeyboardEventHandler,
+  forwardRef,
+  useCallback,
+  useContext,
+  useState,
+} from "react";
+import type { Document, File, Directory } from "../../../types";
 import { getOverflowMenu, MenuOption } from "../../../components/overflow-menu";
 import { noop } from "../../../utils";
 import { nanoid } from "nanoid";
+import { pathToDir } from "../hooks/reducers/utils/path-to-dir";
+import { ConfigContext } from "..";
 
 type WorkspaceActions = {
   onCreateFile: (targetId: string, entity: File) => Promise<void>;
@@ -23,7 +31,7 @@ type EntityProps = {
   dirOptionsState: [string, React.Dispatch<React.SetStateAction<string>>];
   showOptionsState: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
   parentDirId?: string;
-  readFile: (targetId: string, file: File) => Promise<void>;
+  readFile: (file: File) => Promise<void>;
 };
 
 // eslint-disable-next-line react/display-name
@@ -42,6 +50,8 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
     const [collapased, setCollapsed] = useState(false);
     const [newDocument, setNewDocument] = useState<Document>();
     const [documentName, setDocumentName] = useState("");
+
+    const { workspaceConfig } = useContext(ConfigContext);
 
     const { id, name, content: tree } = dir;
 
@@ -67,6 +77,9 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
         }
 
         const currentTime = new Date().toISOString();
+        const { path: entityPath } = pathToDir(id, workspaceConfig?.tree);
+        const path = `${entityPath}/${documentName}`;
+
         const entity =
           newDocument === "file"
             ? {
@@ -80,11 +93,13 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
                 whitelisted_groups: [],
                 whitelisted_users: [],
                 hidden: false,
+                path,
               }
             : {
                 name: documentName,
                 id: nanoid(10),
                 content: [],
+                path,
               };
 
         await (newDocument === "file"
@@ -94,7 +109,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
         setDocumentName("");
         setNewDocument(undefined);
       },
-      [workspaceActions, documentName, id, newDocument],
+      [newDocument, documentName, id, workspaceConfig?.tree, workspaceActions],
     );
 
     const setElement = useCallback(
@@ -185,7 +200,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
               showMenu={!!showOptions && id === optionsElement}
               onKeyDown={onMenuKeydown}
               ref={ref}
-              rootElement={{ id, name, content: tree }}
+              rootElement={dir}
             />
           </OptionsContainer>
         </NameContainer>
@@ -207,7 +222,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
                   <NameContainer
                     onMouseEnter={() => setElement(`${id}/${entity.File.name}`)}
                     onMouseLeave={() => setElement("")}
-                    onClick={() => readFile(id, entity.File)}
+                    onClick={() => readFile(entity.File)}
                     className={
                       optionsElement === `${id}/${entity.File.name}`
                         ? backgroundHighlight

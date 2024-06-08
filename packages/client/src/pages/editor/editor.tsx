@@ -21,7 +21,7 @@ import {
   insertTextAtPosition,
   textLength,
 } from "../../utils";
-import { FileWithContent } from "../../types";
+import { File, FileWithContent } from "../../types";
 
 type EditorText = {
   text: string;
@@ -30,7 +30,7 @@ type EditorText = {
 
 type EditorProps = {
   fileWithContent: Partial<FileWithContent>;
-  writer: (content: string) => Promise<void>;
+  writer: (file: File, content: string) => Promise<void>;
 };
 
 const Editor = ({ fileWithContent, writer }: EditorProps) => {
@@ -167,8 +167,8 @@ const Editor = ({ fileWithContent, writer }: EditorProps) => {
     }));
 
     // I'm not sure if writing to file should be this decoupled
-    (async () => await writer(text))();
-  }, [rawText, writer]);
+    (async () => await writer(fileWithContent as File, text))();
+  }, [fileWithContent, rawText, writer]);
 
   useEffect(() => {
     const { selection } = html ?? {};

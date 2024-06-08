@@ -1,6 +1,5 @@
 import { styled } from "@linaria/react";
 import { useRef, useState } from "react";
-import type { WorkspaceConfig } from "../types";
 import type { Entity, File } from "../../../types";
 import { Entities } from "./tree-entities";
 import { useOutsideEvent } from "../../../hooks";
@@ -8,7 +7,7 @@ import { useWorkspace } from "../hooks";
 
 type TreeProps = {
   refreshTree: (tree: Array<Entity>) => void;
-  readFile: (targetId: string, file: File) => Promise<void>;
+  readFile: (file: File) => Promise<void>;
 };
 
 export const Tree = ({ refreshTree, readFile }: TreeProps) => {
@@ -32,7 +31,12 @@ export const Tree = ({ refreshTree, readFile }: TreeProps) => {
     <EntitiesWrapper>
       {wsConfig && (
         <Entities
-          dir={{ content: wsConfig.tree, id: wsConfig.id, name: wsConfig.name }}
+          dir={{
+            content: wsConfig.tree,
+            id: wsConfig.id,
+            name: wsConfig.name,
+            path: "",
+          }}
           workspaceActions={handlers}
           dirOptionsState={[optionsElement, setOptionsElement]}
           showOptionsState={[showOptions, setOptions]}

@@ -24,6 +24,11 @@ type Handlers = {
   ) => WorkspaceConfig;
 };
 
+/*
+ * @todo: both handlers should be rewritten to use the `path` property
+ * within the entity itself instead of using the `targetId`.
+ */
+
 const createHandler: Handlers["create"] = (
   workspace,
   targetId,
@@ -32,7 +37,7 @@ const createHandler: Handlers["create"] = (
 ) => {
   const { id, name: workspaceName, tree } = workspace;
   const computeTree = updateTree(
-    { id, name: workspaceName, content: tree },
+    { id, name: workspaceName, content: tree, path: "" },
     targetId,
   );
 
@@ -50,7 +55,7 @@ const deleteHandler: Handlers["delete"] = (
 ) => {
   const { id, name: workspaceName, tree } = workspace;
   const computeTree = deleteFromTree(
-    { id, name: workspaceName, content: tree },
+    { id, name: workspaceName, content: tree, path: "" },
     targetId,
   );
 

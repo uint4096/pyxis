@@ -1,7 +1,6 @@
 import { useCallback, useContext, useReducer } from "react";
 import { reducer } from "./reducers/file.reducer";
 import { File } from "../../../types";
-import { pathToDir } from "./reducers/utils/path-to-dir";
 import { WorkspaceConfig } from "../types";
 import { readFileContent, saveContent } from "../../../ffi";
 import { ConfigContext, TConfigContext } from "..";
@@ -23,16 +22,15 @@ export const useFile = ({ initialContent, file }: UseFileProps) => {
     useContext<TConfigContext>(ConfigContext);
 
   const readFromPath = useCallback(
-    async (targetId: string, selectedFile: File) => {
+    async (selectedFile: File) => {
       if (!workspaceConfig) {
         //@todo: show toast message
         return;
       }
 
-      const { path } = pathToDir(targetId, workspaceConfig.tree, workspacePath);
       const content = await readFileContent<string>({
         file: selectedFile,
-        path,
+        path: `${workspacePath}/${selectedFile.path}`,
       });
 
       if (content == null) {
@@ -46,14 +44,17 @@ export const useFile = ({ initialContent, file }: UseFileProps) => {
   );
 
   const writeToFile = useCallback(
-    async (targetId: string, selectedFile: File, content: string) => {
+    async (selectedFile: File, content: string) => {
       if (!workspaceConfig) {
         //@todo: show toast message
         return;
       }
 
-      const { path } = pathToDir(targetId, workspaceConfig.tree, workspacePath);
-      const res = await saveContent({ path, file: selectedFile, content });
+      const res = await saveContent({
+        path: `${workspacePath}/${selectedFile.path}`,
+        file: selectedFile,
+        content,
+      });
 
       if (!res) {
         //@todo: handle error and show toast message
