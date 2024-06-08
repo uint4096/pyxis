@@ -5,7 +5,6 @@ import {
   reducer,
 } from "./reducers/tree.reducer";
 import type { Directory, Document, Entity, File } from "../../../types";
-import { pathToDir } from "./reducers/utils/path-to-dir";
 import {
   createFile,
   createDir,
@@ -49,11 +48,11 @@ export const useWorkspace = ({ refreshTree }: UseWorkspaceProps) => {
       type,
       actions: { dir: dirHandler, file: fileHandler },
     }: ActionArgs<T>) =>
-      async (targetId: string, entity: T extends "file" ? File : Directory) => {
+      async (entity: T extends "file" ? File : Directory) => {
         const args =
           type === "file"
-            ? ([targetId, "file", entity] as ReducerArgs<"file">)
-            : ([targetId, "dir", entity] as ReducerArgs<"dir">);
+            ? (["file", entity] as ReducerArgs<"file">)
+            : (["dir", entity] as ReducerArgs<"dir">);
 
         if (!wsConfig) {
           return;

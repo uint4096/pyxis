@@ -6,41 +6,48 @@ import type {
   FileEntity,
   DirEntity,
 } from "../../../../../types";
+import { PATH_SEPARATOR } from "../../../../../utils";
 import { isFile } from "../../../tree/guards";
+import type { WorkspaceConfig } from "../../../types";
 
 export const updateTree =
-  (dir: Directory, targetId: string) =>
+  (workspaceConfig: WorkspaceConfig) =>
   (type: Document, entity: File | Directory): Array<Entity> => {
     const addition =
       type === "file"
         ? ({ File: entity } as FileEntity)
         : ({ Dir: entity } as DirEntity);
 
-    const recursivelyUpdate = (tree: Array<Entity>): Array<Entity> => {
-      return tree.map((d) => {
-        if (isFile(d)) {
-          return d;
+    const recursivelyUpdate = (
+      tree: Array<Entity>,
+      path: Array<string>,
+    ): Array<Entity> => {
+      return tree.map((e) => {
+        if (isFile(e) || e.Dir.name !== path[0]) {
+          return e;
         }
 
-        if (d.Dir.id === targetId) {
+        if (path.length === 1) {
           return {
             Dir: {
-              ...d.Dir,
-              content: [addition, ...d.Dir.content],
+              ...e.Dir,
+              content: [addition, ...e.Dir.content],
             },
           };
         }
 
         return {
           Dir: {
-            ...d.Dir,
-            content: recursivelyUpdate(d.Dir.content),
+            ...e.Dir,
+            content: recursivelyUpdate(e.Dir.content, path.slice(1)),
           },
         };
       });
     };
 
-    return targetId === dir.id
-      ? [...dir.content, addition]
-      : recursivelyUpdate(dir.content);
+    const pathToEntity = entity.path.split(PATH_SEPARATOR).slice(1, -1);
+
+    return pathToEntity.length === 0
+      ? [addition, ...workspaceConfig.tree]
+      : recursivelyUpdate(workspaceConfig.tree, pathToEntity);
   };

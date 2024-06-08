@@ -7,7 +7,6 @@ export type Actions = "create" | "delete";
 type State = WorkspaceConfig | undefined;
 
 export type ReducerArgs<T extends Document> = [
-  targetId: string,
   entityType: T,
   entity: T extends "file" ? File : Directory,
 ];
@@ -29,17 +28,8 @@ type Handlers = {
  * within the entity itself instead of using the `targetId`.
  */
 
-const createHandler: Handlers["create"] = (
-  workspace,
-  targetId,
-  entityType,
-  entity,
-) => {
-  const { id, name: workspaceName, tree } = workspace;
-  const computeTree = updateTree(
-    { id, name: workspaceName, content: tree, path: "" },
-    targetId,
-  );
+const createHandler: Handlers["create"] = (workspace, entityType, entity) => {
+  const computeTree = updateTree(workspace);
 
   return {
     ...workspace,
@@ -47,17 +37,8 @@ const createHandler: Handlers["create"] = (
   };
 };
 
-const deleteHandler: Handlers["delete"] = (
-  workspace,
-  targetId,
-  entityType,
-  entity,
-) => {
-  const { id, name: workspaceName, tree } = workspace;
-  const computeTree = deleteFromTree(
-    { id, name: workspaceName, content: tree, path: "" },
-    targetId,
-  );
+const deleteHandler: Handlers["delete"] = (workspace, entityType, entity) => {
+  const computeTree = deleteFromTree(workspace);
 
   return {
     ...workspace,

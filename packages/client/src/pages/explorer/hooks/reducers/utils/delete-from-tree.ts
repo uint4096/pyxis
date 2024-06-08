@@ -1,8 +1,10 @@
 import type { Directory, Document, File, Entity } from "../../../../../types";
+import { PATH_SEPARATOR } from "../../../../../utils";
 import { isFile } from "../../../tree/guards";
+import { WorkspaceConfig } from "../../../types";
 
 export const deleteFromTree =
-  (dir: Directory, targetId: string) =>
+  (workspaceConfig: WorkspaceConfig) =>
   (type: Document, entity: File | Directory): Array<Entity> => {
     const filterEntity = (e: Entity) => {
       if (type === "file" && isFile(e) && e.File.name === entity.name) {
@@ -20,31 +22,36 @@ export const deleteFromTree =
       return true;
     };
 
-    const recursivelyUpdate = (tree: Array<Entity>): Array<Entity> => {
-      return tree.map((d) => {
-        if (isFile(d)) {
-          return d;
+    const recursivelyUpdate = (
+      tree: Array<Entity>,
+      path: Array<string>,
+    ): Array<Entity> => {
+      return tree.map((e) => {
+        if (isFile(e) || e.Dir.name !== path[0]) {
+          return e;
         }
 
-        if (d.Dir.id === targetId) {
+        if (path.length === 1) {
           return {
             Dir: {
-              ...d.Dir,
-              content: d.Dir.content.filter((c) => filterEntity(c)),
+              ...e.Dir,
+              content: e.Dir.content.filter((c) => filterEntity(c)),
             },
           };
         }
 
         return {
           Dir: {
-            ...d.Dir,
-            content: recursivelyUpdate(d.Dir.content),
+            ...e.Dir,
+            content: recursivelyUpdate(e.Dir.content, path.slice(1)),
           },
         };
       });
     };
 
-    return targetId === dir.id
-      ? dir.content.filter((c) => filterEntity(c))
-      : recursivelyUpdate(dir.content);
+    const pathToEntity = entity.path.split(PATH_SEPARATOR).slice(1, -1);
+
+    return pathToEntity.length === 0
+      ? workspaceConfig.tree.filter((c) => filterEntity(c))
+      : recursivelyUpdate(workspaceConfig.tree, pathToEntity);
   };

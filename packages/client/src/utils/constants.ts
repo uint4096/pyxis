@@ -35,3 +35,6 @@ export const TOKEN_TEXT_MAP = {
   strikethrough: { prefix: true, suffix: true, value: "~~" },
   text: { prefix: false, suffix: false, value: "" },
 };
+
+// @todo: make it smarter
+export const PATH_SEPARATOR = "/";
