@@ -23,6 +23,7 @@ import {
   textLength,
 } from "../../utils";
 import { File, FileWithContent } from "../../types";
+import { useDebounce } from "../../hooks";
 
 type EditorText = {
   text: string;
@@ -39,6 +40,8 @@ const Editor = ({ fileWithContent, writer }: EditorProps) => {
     text: fileWithContent?.content ?? "",
     caret: { start: 0, end: 0, collapsed: true },
   });
+
+  const debouncedText = useDebounce(rawText.text, 0.5);
 
   const renderControl = useRef({ text: false, html: false });
 
@@ -173,13 +176,15 @@ const Editor = ({ fileWithContent, writer }: EditorProps) => {
       content,
       selection,
     }));
+  }, [fileWithContent, rawText, writer]);
 
+  useEffect(() => {
     if (!fileWithContent.name) {
       return;
     }
 
-    (async () => await writer(fileWithContent as File, text))();
-  }, [fileWithContent, rawText, writer]);
+    (async () => await writer(fileWithContent as File, debouncedText ?? ""))();
+  }, [fileWithContent, debouncedText, writer]);
 
   useEffect(() => {
     const { selection } = html ?? {};
