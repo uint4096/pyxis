@@ -1,9 +1,11 @@
 import { styled } from "@linaria/react";
-import { useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import type { Entity, File } from "../../../types";
 import { Entities } from "./tree-entities";
 import { useOutsideEvent } from "../../../hooks";
 import { useWorkspace } from "../hooks";
+import { watchWorkspace } from "../../../ffi";
+import { ConfigContext } from "..";
 
 type TreeProps = {
   refreshTree: (tree: Array<Entity>) => void;
@@ -20,6 +22,12 @@ export const Tree = ({ refreshTree, readFile }: TreeProps) => {
   const { config: wsConfig, handlers } = useWorkspace({
     refreshTree,
   });
+
+  const { workspacePath } = useContext(ConfigContext);
+
+  useEffect(() => {
+    (async () => watchWorkspace({ path: workspacePath }))();
+  }, [workspacePath]);
 
   const menuRef = useRef<HTMLDivElement>(null);
   useOutsideEvent(menuRef, () => {
@@ -50,11 +58,11 @@ export const Tree = ({ refreshTree, readFile }: TreeProps) => {
 
 const EntitiesWrapper = styled.div`
   padding: 3vh 0.5vw;
-  height: 70vh;
+  height: 100%;
   background-color: #1a1a1a;
   display: flex;
   flex-direction: column;
   border-radius: 5px;
-  width: 13vw;
+  width: 15vw;
   overflow: auto;
 `;

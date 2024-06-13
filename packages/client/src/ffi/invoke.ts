@@ -15,6 +15,7 @@ export type Args<T extends object> = {
   read_system_config: never;
   write_system_config: { config: T };
   read_workspace_config: { path: string };
+  watch_workspace: { path: string };
   write_workspace_config: { path: string; config: T };
   read_store_config: { path: string };
   write_store_config: { path: string; config: T };
@@ -33,6 +34,7 @@ export type Response = {
   read_system_config: FileContent;
   write_system_config: boolean;
   read_workspace_config: FileContent;
+  watch_workspace: void;
   write_workspace_config: boolean;
   read_store_config: FileContent;
   write_store_config: boolean;

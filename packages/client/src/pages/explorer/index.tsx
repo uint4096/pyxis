@@ -200,7 +200,7 @@ export const Explorer = () => {
           }}
         >
           <Tree refreshTree={refreshTree} readFile={readFromPath} />
-          {showEditor && !noWorkspaces && (
+          {showEditor && !noWorkspaces && fileWithContent.name && (
             <Editor fileWithContent={fileWithContent} writer={writeToFile} />
           )}
         </ConfigContext.Provider>
@@ -239,5 +239,5 @@ const ExplorerWrapper = styled.div`
   padding: 7vh 5vw;
   height: 100%;
   flex-grow: 1;
-  gap: 10vw;
+  gap: 5vw;
 `;

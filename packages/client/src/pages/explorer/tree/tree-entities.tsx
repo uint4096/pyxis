@@ -290,6 +290,7 @@ const DirTreeWrapper = styled.div`
   display: flex;
   flex-direction: column;
   text-align: left;
+  margin-top: 0.5vh;
 `;
 
 const EntityContainer = styled.div`
@@ -299,11 +300,11 @@ const EntityContainer = styled.div`
 `;
 
 const FileName = styled.div`
-  padding: 0.2vh 1vw;
+  padding: 0.2vh 0vw;
+  margin-left: 1vw;
   opacity: 0.5;
   &:hover {
     background-color: #080808;
-    opacity: 0.9;
   }
 `;
 
@@ -324,6 +325,10 @@ const NameContainer = styled.div`
 
   &:hover {
     background-color: #080808;
+  }
+
+  &:hover ${FileName} {
+    opacity: 0.9;
   }
 `;
 
