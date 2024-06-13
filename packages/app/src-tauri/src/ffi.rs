@@ -37,6 +37,12 @@ pub fn read_workspace_tree(path: String) -> DirContent {
 }
 
 #[tauri::command]
+pub fn watch_workspace(path: &str) -> () {
+    let workspace = Workspace(&path);
+    workspace.watch();
+}
+
+#[tauri::command]
 pub fn write_workspace_config(path: String, config: WorkspaceConfig) -> bool {
     let workspace = Workspace(&path);
     workspace.save_config(config)

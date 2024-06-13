@@ -10,7 +10,7 @@ mod writer;
 use crate::ffi::{
     create_dir, create_file, delete_dir, delete_file, read_file, read_store_config,
     read_system_config, read_workspace_config, read_workspace_tree, rename_dir, rename_file,
-    write_file, write_store_config, write_system_config, write_workspace_config,
+    write_file, write_store_config, write_system_config, write_workspace_config, watch_workspace
 };
 use tauri::{App, Manager};
 
@@ -31,7 +31,8 @@ fn main() {
             rename_dir,
             delete_dir,
             read_file,
-            write_file
+            write_file,
+            watch_workspace
         ])
         .setup(|app: &mut App| {
             let window = app.get_window("main").expect("Failed to get main window!");
