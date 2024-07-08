@@ -1,11 +1,11 @@
 import { styled } from "@linaria/react";
 import { useContext, useEffect, useRef, useState } from "react";
-import type { Entity, File } from "../../../types";
+import type { Entity, File } from "../../types";
 import { Entities } from "./tree-entities";
-import { useOutsideEvent } from "../../../hooks";
-import { useWorkspace } from "../hooks";
-import { watchWorkspace } from "../../../ffi";
-import { ConfigContext } from "..";
+import { useOutsideEvent } from "../../hooks";
+import { useWorkspace } from "../explorer/hooks";
+import { watchWorkspace } from "../../ffi";
+import { ConfigContext } from "../explorer";
 
 type TreeProps = {
   refreshTree: (tree: Array<Entity>) => void;

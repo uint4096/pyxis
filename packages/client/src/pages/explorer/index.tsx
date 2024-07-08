@@ -23,7 +23,7 @@ import { StoreForm } from "./forms/store";
 import { NoWorkspaceMessage } from "./forms/no-workspace";
 import { CreateWorkspace } from "./forms/workspace";
 import { WorkspaceSelection } from "./forms/workspace-list";
-import { Tree } from "./tree";
+import { Tree } from "../tree";
 import { Entity } from "../../types";
 import { useFile } from "./hooks";
 
@@ -47,7 +47,7 @@ export const Explorer = () => {
 
   const [systemConfig, setSystemConfig] = useState<SystemConfig>();
   const [storeConfig, setStoreConfig] = useState<StoreConfig>();
-  const [workspaceConfig, setWorkspaceConfig] = useState<WorkspaceConfig>();
+  const [workspaceConfig] = useState<WorkspaceConfig>();
 
   const [showEditor, setEditor] = useState<boolean>(false);
 

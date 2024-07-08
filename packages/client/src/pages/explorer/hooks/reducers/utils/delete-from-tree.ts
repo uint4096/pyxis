@@ -1,6 +1,6 @@
 import type { Directory, Document, File, Entity } from "../../../../../types";
 import { PATH_SEPARATOR } from "../../../../../utils";
-import { isFile } from "../../../tree/guards";
+import { isFile } from "../../../../tree/guards";
 import { WorkspaceConfig } from "../../../types";
 
 export const deleteFromTree =

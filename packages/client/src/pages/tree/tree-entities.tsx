@@ -1,7 +1,7 @@
 import { css } from "@linaria/core";
 import { styled } from "@linaria/react";
 import { isFile } from "./guards";
-import { InputInPlace } from "../../../components/input";
+import { InputInPlace } from "../../components/input";
 import { HiPlus } from "react-icons/hi";
 import { MdKeyboardArrowDown, MdKeyboardArrowRight } from "react-icons/md";
 import {
@@ -11,11 +11,11 @@ import {
   useContext,
   useState,
 } from "react";
-import type { Document, File, Directory } from "../../../types";
-import { getOverflowMenu, MenuOption } from "../../../components/overflow-menu";
+import type { Document, File, Directory } from "../../types";
+import { getOverflowMenu, MenuOption } from "../../components/overflow-menu";
 import { nanoid } from "nanoid";
-import { pathToDir } from "../../../utils";
-import { ConfigContext } from "..";
+import { pathToDir } from "../../utils";
+import { ConfigContext } from "../explorer";
 
 type WorkspaceActions = {
   onCreateFile: (entity: File) => Promise<void>;

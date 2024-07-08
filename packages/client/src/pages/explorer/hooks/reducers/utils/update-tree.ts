@@ -7,7 +7,7 @@ import type {
   DirEntity,
 } from "../../../../../types";
 import { PATH_SEPARATOR } from "../../../../../utils";
-import { isFile } from "../../../tree/guards";
+import { isFile } from "../../../../tree/guards";
 import type { WorkspaceConfig } from "../../../types";
 
 export const updateTree =

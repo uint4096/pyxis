@@ -1,5 +1,5 @@
 import type { DirEntity } from "../types";
-import { isFile } from "../pages/explorer/tree/guards";
+import { isFile } from "../pages/tree/guards";
 import type { WorkspaceConfig } from "../pages/explorer/types";
 
 export const pathToDir = (
