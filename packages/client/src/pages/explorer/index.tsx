@@ -18,17 +18,16 @@ import {
   SystemConfig,
   WorkspaceBase,
   WorkspaceConfig,
-} from "./types";
+} from "../../store/types";
 import { StoreForm } from "./forms/store";
 import { NoWorkspaceMessage } from "./forms/no-workspace";
 import { CreateWorkspace } from "./forms/workspace";
 import { WorkspaceSelection } from "./forms/workspace-list";
 import { Tree } from "../tree";
 import { Entity } from "../../types";
-import { useFile } from "./hooks";
+import { useFile, useWorkspace } from "./hooks";
 
 export type TConfigContext = {
-  workspaceConfig: WorkspaceConfig;
   storeConfig: StoreConfig;
   systemConfig: SystemConfig;
   workspacePath: string;
@@ -39,6 +38,8 @@ export const ConfigContext = createContext<TConfigContext>(
 );
 
 export const Explorer = () => {
+  const { config: workspaceConfig, initConfig } = useWorkspace();
+
   const [showStoreForm, setStoreForm] = useState<boolean>(false);
   const [showWorkspaceForm, setWorkspaceForm] = useState<boolean>(false);
   const [showWorkspaceSelectionForm, setWorkspaceSelectionForm] =
@@ -47,7 +48,6 @@ export const Explorer = () => {
 
   const [systemConfig, setSystemConfig] = useState<SystemConfig>();
   const [storeConfig, setStoreConfig] = useState<StoreConfig>();
-  const [workspaceConfig, setWorkspaceConfig] = useState<WorkspaceConfig>();
 
   const [showEditor, setEditor] = useState<boolean>(false);
 
@@ -93,26 +93,6 @@ export const Explorer = () => {
     }));
     setWorkspaceSelectionForm(false);
   }, []);
-
-  const refreshTree = useCallback(
-    (tree: Array<Entity>) => {
-      if (!systemConfig || !storeConfig || !storeConfig.selected_workspace) {
-        return;
-      }
-
-      setWorkspaceConfig((config) => {
-        if (!config) {
-          return undefined;
-        }
-
-        return {
-          ...config,
-          tree,
-        };
-      });
-    },
-    [systemConfig, storeConfig],
-  );
 
   useEffect(() => {
     (async () => {
@@ -175,14 +155,14 @@ export const Explorer = () => {
 
       if (!workspaceConfig.tree || workspaceConfig.tree.length === 0) {
         const tree = (await read_dir_tree(workspacePath)) ?? [];
-        setWorkspaceConfig({ ...workspaceConfig, tree });
+        initConfig({ ...workspaceConfig, tree });
       } else {
-        setWorkspaceConfig({ ...workspaceConfig });
+        initConfig({ ...workspaceConfig });
       }
 
       setEditor(true);
     })();
-  }, [storeConfig, systemConfig]);
+  }, [initConfig, storeConfig, systemConfig]);
 
   /*
    * @todo: Wrap all configs in a Context here. This will prevent a lot
@@ -193,13 +173,12 @@ export const Explorer = () => {
       {workspaceConfig && systemConfig && storeConfig?.selected_workspace && (
         <ConfigContext.Provider
           value={{
-            workspaceConfig,
             storeConfig,
             systemConfig,
             workspacePath,
           }}
         >
-          <Tree refreshTree={refreshTree} readFile={readFromPath} />
+          <Tree readFile={readFromPath} />
           {showEditor && !noWorkspaces && fileWithContent.name && (
             <Editor fileWithContent={fileWithContent} writer={writeToFile} />
           )}

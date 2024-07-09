@@ -1,10 +1,10 @@
 import type { DirEntity } from "../types";
-import { isFileEntity } from "../pages/tree/guards";
-import type { WorkspaceConfig } from "../pages/explorer/types";
+import { isFileEntity } from "./guards";
+import type { WorkspaceConfig } from "../store/types";
 
 export const pathToDir = (
   id: string,
-  tree: WorkspaceConfig["tree"],
+  tree: WorkspaceConfig["tree"] = [],
   initalPath = "",
 ): { path: string; found: boolean } =>
   tree

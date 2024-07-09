@@ -1,7 +1,7 @@
 import { useCallback, useReducer } from "react";
 import { reducer } from "./reducers/file.reducer";
 import { File } from "../../../types";
-import { WorkspaceConfig } from "../types";
+import { WorkspaceConfig } from "../../../store/types";
 import { readFileContent, saveContent } from "../../../ffi";
 import { PATH_SEPARATOR } from "../../../utils";
 
@@ -9,7 +9,7 @@ type UseFileProps = {
   file?: File;
   initialContent?: string;
   workspacePath: string | undefined;
-  workspaceConfig: WorkspaceConfig | undefined;
+  workspaceConfig: Partial<WorkspaceConfig> | undefined;
 };
 
 export const useFile = ({

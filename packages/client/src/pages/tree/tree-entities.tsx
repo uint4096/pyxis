@@ -1,21 +1,14 @@
 import { css } from "@linaria/core";
 import { styled } from "@linaria/react";
-import { isFileEntity } from "./guards";
+import { isFileEntity } from "../../utils/guards";
 import { InputInPlace } from "../../components/input";
 import { HiPlus } from "react-icons/hi";
 import { MdKeyboardArrowDown, MdKeyboardArrowRight } from "react-icons/md";
-import {
-  KeyboardEventHandler,
-  forwardRef,
-  useCallback,
-  useContext,
-  useState,
-} from "react";
+import { KeyboardEventHandler, forwardRef, useCallback, useState } from "react";
 import type { Document, File, Directory } from "../../types";
 import { getOverflowMenu, MenuOption } from "../../components/overflow-menu";
 import { nanoid } from "nanoid";
 import { pathToDir } from "../../utils";
-import { ConfigContext } from "../explorer";
 import { useWorkspace } from "../explorer/hooks";
 
 type EntityProps = {
@@ -42,7 +35,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
     const [newDocument, setNewDocument] = useState<Document>();
     const [documentName, setDocumentName] = useState("");
 
-    const { workspaceConfig } = useContext(ConfigContext);
+    const { config: workspaceConfig } = useWorkspace();
 
     const { id, name, content: tree } = dir;
 

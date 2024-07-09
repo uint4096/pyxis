@@ -1,4 +1,4 @@
-import type { File, Directory, Entity, FileEntity } from "../../types";
+import type { File, Directory, Entity, FileEntity } from "../types";
 
 export const isFileEntity = (entity: Entity): entity is FileEntity =>
   !!(<FileEntity>entity).File;

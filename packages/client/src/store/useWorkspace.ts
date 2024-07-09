@@ -1,10 +1,10 @@
-import type { Directory, File } from "../../../types";
-import { createFile, createDir, deleteFile, deleteDir } from "../../../ffi";
+import type { Directory, File } from "../types";
+import { createFile, createDir, deleteFile, deleteDir } from "../ffi";
 import { create } from "zustand";
-import { WorkspaceConfig } from "../types";
-import { updateTree } from "./reducers/utils/update-tree";
-import { deleteFromTree } from "./reducers/utils/delete-from-tree";
-import { isFile } from "../../tree/guards";
+import { WorkspaceConfig } from "./types";
+import { updateTree } from "./helpers/update-tree";
+import { deleteFromTree } from "./helpers/delete-from-tree";
+import { isFile } from "../utils/guards";
 
 interface WorkspaceState {
   config: Partial<WorkspaceConfig>;

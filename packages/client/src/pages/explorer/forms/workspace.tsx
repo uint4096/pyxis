@@ -4,7 +4,11 @@ import { useCallback, useState } from "react";
 import { TextInput } from "../../../components/input";
 import { Modal } from "../../../components/modal";
 import { saveStoreConfig, saveWorkspaceConfig } from "../../../ffi";
-import { StoreConfig, WorkspaceBase, WorkspaceConfig } from "../types";
+import {
+  StoreConfig,
+  WorkspaceBase,
+  WorkspaceConfig,
+} from "../../../store/types";
 import { nanoid } from "nanoid";
 import { FormWrapper } from "./common";
 

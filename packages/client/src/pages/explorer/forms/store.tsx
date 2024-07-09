@@ -3,7 +3,7 @@ import { useCallback, useState } from "react";
 import { DirSelection } from "../../../components/input";
 import { Modal } from "../../../components/modal";
 import { saveSystemConfig } from "../../../ffi";
-import { SystemConfig } from "../types";
+import { SystemConfig } from "../../../store/types";
 import { FormWrapper } from "./common";
 
 type StoreFormProps = {

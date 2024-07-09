@@ -1,26 +1,20 @@
-import type { Directory, File, Entity } from "../../../../../types";
-import { PATH_SEPARATOR } from "../../../../../utils";
-import { isFile, isFileEntity } from "../../../../tree/guards";
-import { WorkspaceConfig } from "../../../types";
+import type {
+  Directory,
+  File,
+  Entity,
+  FileEntity,
+  DirEntity,
+} from "../../types";
+import { PATH_SEPARATOR } from "../../utils";
+import { isFile, isFileEntity } from "../../utils/guards";
+import type { WorkspaceConfig } from "../types";
 
-export const deleteFromTree =
+export const updateTree =
   (workspaceConfig: Partial<WorkspaceConfig>) =>
   (entity: File | Directory): Array<Entity> => {
-    const filterEntity = (e: Entity) => {
-      if (isFile(entity) && isFileEntity(e) && e.File.name === entity.name) {
-        return false;
-      }
-
-      if (
-        !isFile(entity) &&
-        !isFileEntity(e) &&
-        e.Dir.id === (entity as Directory).id
-      ) {
-        return false;
-      }
-
-      return true;
-    };
+    const addition = isFile(entity)
+      ? ({ File: entity } as FileEntity)
+      : ({ Dir: entity } as DirEntity);
 
     const recursivelyUpdate = (
       tree: Array<Entity>,
@@ -35,7 +29,7 @@ export const deleteFromTree =
           return {
             Dir: {
               ...e.Dir,
-              content: e.Dir.content.filter((c) => filterEntity(c)),
+              content: [addition, ...e.Dir.content],
             },
           };
         }
@@ -52,6 +46,6 @@ export const deleteFromTree =
     const pathToEntity = entity.path.split(PATH_SEPARATOR).slice(1, -1);
 
     return pathToEntity.length === 0
-      ? (workspaceConfig.tree ?? []).filter((c) => filterEntity(c))
+      ? [addition, ...(workspaceConfig.tree ?? [])]
       : recursivelyUpdate(workspaceConfig.tree ?? [], pathToEntity);
   };

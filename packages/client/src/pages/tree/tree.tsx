@@ -8,7 +8,6 @@ import { watchWorkspace } from "../../ffi";
 import { ConfigContext } from "../explorer";
 
 type TreeProps = {
-  refreshTree: (tree: Array<Entity>) => void;
   readFile: (file: File) => Promise<void>;
 };
 

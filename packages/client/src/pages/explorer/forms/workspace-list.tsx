@@ -1,7 +1,7 @@
 import { styled } from "@linaria/react";
 import { useCallback } from "react";
 import { Modal } from "../../../components/modal";
-import type { ArrayElement, StoreConfig, SystemConfig } from "../types";
+import type { ArrayElement, StoreConfig, SystemConfig } from "../../../store/types";
 import { saveStoreConfig } from "../../../ffi";
 import { FormWrapper } from "./common";
 
