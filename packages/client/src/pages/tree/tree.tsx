@@ -12,16 +12,14 @@ type TreeProps = {
   readFile: (file: File) => Promise<void>;
 };
 
-export const Tree = ({ refreshTree, readFile }: TreeProps) => {
+export const Tree = ({ readFile }: TreeProps) => {
   /*
    * Managed outside of CSS because I need to persist the overflow menu
    * regardless of hover once it's clicked
    */
   const [optionsElement, setOptionsElement] = useState<string>("");
   const [showOptions, setOptions] = useState<boolean>(false);
-  const { config: wsConfig, handlers } = useWorkspace({
-    refreshTree,
-  });
+  const { config: wsConfig } = useWorkspace();
 
   const { workspacePath } = useContext(ConfigContext);
 
@@ -37,7 +35,7 @@ export const Tree = ({ refreshTree, readFile }: TreeProps) => {
 
   return (
     <EntitiesWrapper>
-      {wsConfig && (
+      {wsConfig.tree && wsConfig.id && wsConfig.name && (
         <Entities
           dir={{
             content: wsConfig.tree,
@@ -45,7 +43,6 @@ export const Tree = ({ refreshTree, readFile }: TreeProps) => {
             name: wsConfig.name,
             path: "",
           }}
-          workspaceActions={handlers}
           dirOptionsState={[optionsElement, setOptionsElement]}
           showOptionsState={[showOptions, setOptions]}
           ref={menuRef}

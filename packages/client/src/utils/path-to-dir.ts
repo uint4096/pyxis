@@ -1,5 +1,5 @@
 import type { DirEntity } from "../types";
-import { isFile } from "../pages/tree/guards";
+import { isFileEntity } from "../pages/tree/guards";
 import type { WorkspaceConfig } from "../pages/explorer/types";
 
 export const pathToDir = (
@@ -8,7 +8,7 @@ export const pathToDir = (
   initalPath = "",
 ): { path: string; found: boolean } =>
   tree
-    .filter((t) => !isFile(t))
+    .filter((t) => !isFileEntity(t))
     .reduce(
       ({ path, found }, content) => {
         if (found) {

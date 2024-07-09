@@ -1,19 +1,19 @@
-import type { Directory, Document, File, Entity } from "../../../../../types";
+import type { Directory, File, Entity } from "../../../../../types";
 import { PATH_SEPARATOR } from "../../../../../utils";
-import { isFile } from "../../../../tree/guards";
+import { isFile, isFileEntity } from "../../../../tree/guards";
 import { WorkspaceConfig } from "../../../types";
 
 export const deleteFromTree =
-  (workspaceConfig: WorkspaceConfig) =>
-  (type: Document, entity: File | Directory): Array<Entity> => {
+  (workspaceConfig: Partial<WorkspaceConfig>) =>
+  (entity: File | Directory): Array<Entity> => {
     const filterEntity = (e: Entity) => {
-      if (type === "file" && isFile(e) && e.File.name === entity.name) {
+      if (isFile(entity) && isFileEntity(e) && e.File.name === entity.name) {
         return false;
       }
 
       if (
-        type === "dir" &&
-        !isFile(e) &&
+        !isFile(entity) &&
+        !isFileEntity(e) &&
         e.Dir.id === (entity as Directory).id
       ) {
         return false;
@@ -27,7 +27,7 @@ export const deleteFromTree =
       path: Array<string>,
     ): Array<Entity> => {
       return tree.map((e) => {
-        if (isFile(e) || e.Dir.name !== path[0]) {
+        if (isFileEntity(e) || e.Dir.name !== path[0]) {
           return e;
         }
 
@@ -52,6 +52,6 @@ export const deleteFromTree =
     const pathToEntity = entity.path.split(PATH_SEPARATOR).slice(1, -1);
 
     return pathToEntity.length === 0
-      ? workspaceConfig.tree.filter((c) => filterEntity(c))
-      : recursivelyUpdate(workspaceConfig.tree, pathToEntity);
+      ? (workspaceConfig.tree ?? []).filter((c) => filterEntity(c))
+      : recursivelyUpdate(workspaceConfig.tree ?? [], pathToEntity);
   };

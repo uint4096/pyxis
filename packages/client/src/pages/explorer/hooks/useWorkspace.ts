@@ -1,135 +1,57 @@
-import { useCallback, useContext, useEffect, useReducer } from "react";
-import {
-  type Actions,
-  type ReducerArgs,
-  reducer,
-} from "./reducers/tree.reducer";
-import type { Directory, Document, Entity, File } from "../../../types";
-import {
-  createFile,
-  createDir,
-  deleteFile,
-  deleteDir,
-  saveWorkspaceConfig,
-} from "../../../ffi";
-import { ConfigContext, TConfigContext } from "../index";
+import type { Directory, File } from "../../../types";
+import { createFile, createDir, deleteFile, deleteDir } from "../../../ffi";
+import { create } from "zustand";
+import { WorkspaceConfig } from "../types";
+import { updateTree } from "./reducers/utils/update-tree";
+import { deleteFromTree } from "./reducers/utils/delete-from-tree";
+import { isFile } from "../../tree/guards";
 
-type UseWorkspaceProps = {
-  refreshTree: (tree: Array<Entity>) => void;
-};
+interface WorkspaceState {
+  config: Partial<WorkspaceConfig>;
+  initConfig: (config: WorkspaceConfig) => void;
+  attachTree: (tree: WorkspaceConfig["tree"]) => void;
+  addEntity: (entity: File | Directory) => Promise<void>;
+  removeEntity: (entity: File | Directory) => Promise<void>;
+}
 
-type WorkspaceActions = {
-  file: (arg: { file: File; path: string }) => Promise<boolean>;
-  dir: (arg: { dir: Directory; path: string }) => Promise<boolean>;
-};
+export const useWorkspace = create<WorkspaceState>((set, get) => ({
+  config: {},
+  initConfig: (config: WorkspaceConfig) => set({ config }),
 
-type ActionArgs<T extends Document> = {
-  action: Actions;
-  type: T;
-  actions: WorkspaceActions;
-};
+  attachTree: (tree: WorkspaceConfig["tree"]) =>
+    set({ config: { ...get().config, tree } }),
 
-export const useWorkspace = ({ refreshTree }: UseWorkspaceProps) => {
-  /**
-   * @todo: consider moving to React 19 once it's out and use a combination of
-   * useTransition and useOptimistic along with the reducer here.
-   */
-  const { workspaceConfig, workspacePath } =
-    useContext<TConfigContext>(ConfigContext);
+  addEntity: async (entity: File | Directory) => {
+    const wsConfig = get().config;
 
-  const [wsConfig, dispatch] = useReducer<ReturnType<typeof reducer>>(
-    reducer(),
-    workspaceConfig,
-  );
+    const response = await (isFile(entity)
+      ? createFile({ file: entity, path: entity.path })
+      : createDir({ dir: entity, path: entity.path }));
 
-  const actionHandler = useCallback(
-    <T extends Document>({
-      action,
-      type,
-      actions: { dir: dirHandler, file: fileHandler },
-    }: ActionArgs<T>) =>
-      async (entity: T extends "file" ? File : Directory) => {
-        const args =
-          type === "file"
-            ? (["file", entity] as ReducerArgs<"file">)
-            : (["dir", entity] as ReducerArgs<"dir">);
+    if (!response) {
+      //@todo: Handle error and show toast message
+      return;
+    }
 
-        if (!wsConfig) {
-          return;
-        }
+    const tree = updateTree(wsConfig)(entity);
 
-        const response =
-          type === "file"
-            ? await fileHandler({
-                file: entity as File,
-                path: `${workspacePath}${entity.path}`,
-              })
-            : await dirHandler({
-                dir: entity as Directory,
-                path: `${workspacePath}${entity.path}`,
-              });
+    get().attachTree(tree);
+  },
 
-        if (!response) {
-          //@todo: Handle error and show toast message
-          return;
-        }
+  removeEntity: async (entity: File | Directory) => {
+    const wsConfig = get().config;
 
-        dispatch({ type: action, args });
-      },
-    [wsConfig, workspacePath],
-  );
+    const response = await (isFile(entity)
+      ? deleteFile({ file: entity, path: entity.path })
+      : deleteDir({ dir: entity, path: entity.path }));
 
-  useEffect(() => {
-    (async () => {
-      if (!wsConfig) {
-        return;
-      }
+    if (!response) {
+      //@todo: Handle error and show toast message
+      return;
+    }
 
-      if (
-        !(await saveWorkspaceConfig({
-          path: workspacePath,
-          config: { ...wsConfig },
-        }))
-      ) {
-        //@todo: Handle error and show toast message
-        return;
-      }
+    const tree = deleteFromTree(wsConfig)(entity);
 
-      refreshTree(wsConfig.tree);
-    })();
-  }, [refreshTree, workspacePath, wsConfig]);
-
-  const onCreateFile = actionHandler({
-    action: "create",
-    type: "file",
-    actions: { dir: createDir, file: createFile },
-  });
-
-  const onCreateDir = actionHandler({
-    action: "create",
-    type: "dir",
-    actions: { dir: createDir, file: createFile },
-  });
-
-  const onDeleteFile = actionHandler({
-    action: "delete",
-    type: "file",
-    actions: { dir: deleteDir, file: deleteFile },
-  });
-
-  const onDeleteDir = actionHandler({
-    action: "delete",
-    type: "dir",
-    actions: { dir: deleteDir, file: deleteFile },
-  });
-
-  return {
-    config: wsConfig,
-    handlers: {
-      onCreateFile,
-      onCreateDir,
-      onDeleteFile,
-      onDeleteDir,
-    },
-  };
-};
+    get().attachTree(tree);
+  },
+}));

@@ -47,7 +47,7 @@ export const Explorer = () => {
 
   const [systemConfig, setSystemConfig] = useState<SystemConfig>();
   const [storeConfig, setStoreConfig] = useState<StoreConfig>();
-  const [workspaceConfig] = useState<WorkspaceConfig>();
+  const [workspaceConfig, setWorkspaceConfig] = useState<WorkspaceConfig>();
 
   const [showEditor, setEditor] = useState<boolean>(false);
 

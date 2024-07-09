@@ -1,6 +1,6 @@
 import { css } from "@linaria/core";
 import { styled } from "@linaria/react";
-import { isFile } from "./guards";
+import { isFileEntity } from "./guards";
 import { InputInPlace } from "../../components/input";
 import { HiPlus } from "react-icons/hi";
 import { MdKeyboardArrowDown, MdKeyboardArrowRight } from "react-icons/md";
@@ -16,17 +16,10 @@ import { getOverflowMenu, MenuOption } from "../../components/overflow-menu";
 import { nanoid } from "nanoid";
 import { pathToDir } from "../../utils";
 import { ConfigContext } from "../explorer";
-
-type WorkspaceActions = {
-  onCreateFile: (entity: File) => Promise<void>;
-  onCreateDir: (entity: Directory) => Promise<void>;
-  onDeleteFile: (entity: File) => Promise<void>;
-  onDeleteDir: (entity: Directory) => Promise<void>;
-};
+import { useWorkspace } from "../explorer/hooks";
 
 type EntityProps = {
   dir: Directory;
-  workspaceActions: WorkspaceActions;
   dirOptionsState: [string, React.Dispatch<React.SetStateAction<string>>];
   showOptionsState: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
   readFile: (file: File) => Promise<void>;
@@ -37,13 +30,14 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
   (
     {
       dir,
-      workspaceActions,
       dirOptionsState: [optionsElement, setOptionsElement],
       showOptionsState: [showOptions, setOptions],
       readFile,
     }: EntityProps,
     ref,
   ) => {
+    const { addEntity, removeEntity } = useWorkspace();
+
     const [collapased, setCollapsed] = useState(false);
     const [newDocument, setNewDocument] = useState<Document>();
     const [documentName, setDocumentName] = useState("");
@@ -100,13 +94,13 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
               };
 
         await (newDocument === "file"
-          ? workspaceActions.onCreateFile(entity as File)
-          : workspaceActions.onCreateDir(entity as Directory));
+          ? addEntity(entity as File)
+          : addEntity(entity as Directory));
 
         setDocumentName("");
         setNewDocument(undefined);
       },
-      [newDocument, documentName, id, workspaceConfig?.tree, workspaceActions],
+      [id, workspaceConfig?.tree, documentName, newDocument, addEntity],
     );
 
     const setElement = useCallback(
@@ -141,8 +135,8 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
       },
       {
         handler: useCallback(
-          async (dir: Directory) => workspaceActions.onDeleteDir(dir),
-          [workspaceActions],
+          async (dir: Directory) => removeEntity(dir),
+          [removeEntity],
         ),
         id: "delete",
         name: "Delete",
@@ -157,8 +151,8 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
       },
       {
         handler: useCallback(
-          async (file: File) => workspaceActions.onDeleteFile(file),
-          [workspaceActions],
+          async (file: File) => removeEntity(file),
+          [removeEntity],
         ),
         id: "delete",
         name: "Delete",
@@ -211,7 +205,7 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
             )}
 
             {tree.map((entity) =>
-              isFile(entity) ? (
+              isFileEntity(entity) ? (
                 !entity.File.hidden && (
                   <NameContainer
                     onMouseEnter={() => setElement(`${id}/${entity.File.name}`)}
@@ -251,7 +245,6 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
               ) : (
                 <Entities
                   dir={entity.Dir}
-                  workspaceActions={workspaceActions}
                   dirOptionsState={[optionsElement, setOptionsElement]}
                   showOptionsState={[showOptions, setOptions]}
                   key={entity.Dir.id}
