@@ -3,7 +3,6 @@ import { useCallback, useState } from "react";
 
 import { TextInput } from "../../../components/input";
 import { Modal } from "../../../components/modal";
-import { saveStoreConfig, saveWorkspaceConfig } from "../../../ffi";
 import {
   StoreConfig,
   WorkspaceBase,
@@ -11,26 +10,21 @@ import {
 } from "../../../store/types";
 import { nanoid } from "nanoid";
 import { FormWrapper } from "./common";
+import { useWorkspace } from "../../../store/useWorkspace";
+import { useStore } from "../../../store/useStore";
 
 type WorkspaceSelectionProps = {
-  storeConfig: StoreConfig | undefined;
-  pathToStore: string;
+  storeConfig: Partial<StoreConfig> | undefined;
   onCreate: (createdWorkspace: WorkspaceBase) => void;
 };
 
-export const CreateWorkspace = ({
-  storeConfig,
-  pathToStore,
-  onCreate,
-}: WorkspaceSelectionProps) => {
+export const CreateWorkspace = ({ onCreate }: WorkspaceSelectionProps) => {
   const [name, setName] = useState("");
+  const { saveToDisk: saveWorkspaceConfig } = useWorkspace();
+  const { updateWorkspace } = useStore();
 
   const onWorkspaceCreation = useCallback(
-    async (
-      name: string,
-      currentStoreConfig: StoreConfig | undefined,
-      pathToStore: string,
-    ) => {
+    async (name: string) => {
       const workspaceId = nanoid(10);
       const currentWorkspace = { id: workspaceId, name };
       const workspaceConfig: WorkspaceConfig = {
@@ -40,28 +34,14 @@ export const CreateWorkspace = ({
         users_allowed_write: [],
       };
 
-      const storeConfig: StoreConfig = {
-        workspaces: [
-          ...(currentStoreConfig?.workspaces ?? []),
-          currentWorkspace,
-        ],
-        selected_workspace: currentWorkspace,
-      };
-
       await Promise.all([
-        saveStoreConfig<StoreConfig>({
-          path: pathToStore,
-          config: storeConfig,
-        }),
-        saveWorkspaceConfig<WorkspaceConfig>({
-          path: `${pathToStore}/${name}`,
-          config: workspaceConfig,
-        }),
+        updateWorkspace(currentWorkspace),
+        saveWorkspaceConfig(workspaceConfig),
       ]);
 
       onCreate(currentWorkspace);
     },
-    [onCreate],
+    [onCreate, saveWorkspaceConfig, updateWorkspace],
   );
 
   const body = (
@@ -78,11 +58,7 @@ export const CreateWorkspace = ({
 
   const footer = (
     <FormFooter>
-      <button
-        onClick={() => onWorkspaceCreation(name, storeConfig, pathToStore)}
-      >
-        Create
-      </button>
+      <button onClick={() => onWorkspaceCreation(name)}>Create</button>
     </FormFooter>
   );
 

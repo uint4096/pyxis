@@ -1,11 +1,11 @@
 import { styled } from "@linaria/react";
 import { useContext, useEffect, useRef, useState } from "react";
-import type { Entity, File } from "../../types";
+import type { File } from "../../types";
 import { Entities } from "./tree-entities";
 import { useOutsideEvent } from "../../hooks";
-import { useWorkspace } from "../explorer/hooks";
 import { watchWorkspace } from "../../ffi";
 import { ConfigContext } from "../explorer";
+import { useWorkspace } from "../../store/useWorkspace";
 
 type TreeProps = {
   readFile: (file: File) => Promise<void>;

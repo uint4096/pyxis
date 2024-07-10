@@ -9,7 +9,7 @@ import type { Document, File, Directory } from "../../types";
 import { getOverflowMenu, MenuOption } from "../../components/overflow-menu";
 import { nanoid } from "nanoid";
 import { pathToDir } from "../../utils";
-import { useWorkspace } from "../explorer/hooks";
+import { useWorkspace } from "../../store/useWorkspace";
 
 type EntityProps = {
   dir: Directory;

@@ -1,36 +1,30 @@
 import { styled } from "@linaria/react";
 import { useCallback } from "react";
 import { Modal } from "../../../components/modal";
-import type { ArrayElement, StoreConfig, SystemConfig } from "../../../store/types";
-import { saveStoreConfig } from "../../../ffi";
+import type { ArrayElement, StoreConfig } from "../../../store/types";
 import { FormWrapper } from "./common";
+import { useStore } from "../../../store/useStore";
 
 type WorkspaceElement = ArrayElement<StoreConfig["workspaces"]>;
 
 type WorkspaceListProps = {
-  store: SystemConfig["store"];
   workspaces: StoreConfig["workspaces"];
-  onSelect: (workspace: WorkspaceElement) => void;
+  setVisibility: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export const WorkspaceSelection = ({
-  store,
   workspaces,
-  onSelect,
+  setVisibility,
 }: WorkspaceListProps) => {
+  const { updateWorkspace } = useStore();
+
   const selectWorkspace = useCallback(
     async (workspace: WorkspaceElement) => {
-      await saveStoreConfig<StoreConfig>({
-        path: store,
-        config: {
-          workspaces,
-          selected_workspace: workspace,
-        },
-      });
+      await updateWorkspace(workspace);
 
-      onSelect(workspace);
+      setVisibility(false);
     },
-    [onSelect, store, workspaces],
+    [setVisibility, updateWorkspace],
   );
 
   const label = (

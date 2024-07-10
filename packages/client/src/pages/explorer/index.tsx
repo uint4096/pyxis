@@ -1,11 +1,5 @@
 import { styled } from "@linaria/react";
-import {
-  createContext,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { createContext, useCallback, useEffect, useState } from "react";
 import Editor from "../editor/editor";
 import {
   readStoreConfig,
@@ -13,19 +7,16 @@ import {
   readWorkspaceConfig,
   read_dir_tree,
 } from "../../ffi";
-import {
-  StoreConfig,
-  SystemConfig,
-  WorkspaceBase,
-  WorkspaceConfig,
-} from "../../store/types";
+import { StoreConfig, SystemConfig, WorkspaceConfig } from "../../store/types";
 import { StoreForm } from "./forms/store";
 import { NoWorkspaceMessage } from "./forms/no-workspace";
 import { CreateWorkspace } from "./forms/workspace";
 import { WorkspaceSelection } from "./forms/workspace-list";
 import { Tree } from "../tree";
-import { Entity } from "../../types";
-import { useFile, useWorkspace } from "./hooks";
+import { useFile } from "./hooks";
+import { useWorkspace } from "../../store/useWorkspace";
+import { useStore } from "../../store/useStore";
+import { useSystem } from "../../store/useSystem";
 
 export type TConfigContext = {
   storeConfig: StoreConfig;
@@ -38,7 +29,10 @@ export const ConfigContext = createContext<TConfigContext>(
 );
 
 export const Explorer = () => {
-  const { config: workspaceConfig, initConfig } = useWorkspace();
+  const { config: workspaceConfig, initConfig: initWorkspaceConfig } =
+    useWorkspace();
+  const { config: storeConfig, initConfig: initStoreConfig } = useStore();
+  const { config: systemConfig, initConfig: initSystemConfig } = useSystem();
 
   const [showStoreForm, setStoreForm] = useState<boolean>(false);
   const [showWorkspaceForm, setWorkspaceForm] = useState<boolean>(false);
@@ -46,53 +40,20 @@ export const Explorer = () => {
     useState<boolean>(false);
   const [noWorkspaces, setNoWorkspaces] = useState<boolean>(false);
 
-  const [systemConfig, setSystemConfig] = useState<SystemConfig>();
-  const [storeConfig, setStoreConfig] = useState<StoreConfig>();
-
   const [showEditor, setEditor] = useState<boolean>(false);
 
-  const workspacePath = useMemo(
-    () =>
-      systemConfig && storeConfig?.selected_workspace
-        ? `${systemConfig.store}/${storeConfig.selected_workspace.name}`
-        : "",
-    [storeConfig?.selected_workspace, systemConfig],
-  );
-
   const { fileWithContent, readFromPath, writeToFile } = useFile({
-    workspacePath,
     workspaceConfig,
   });
 
-  const onWorkspaceCreation = useCallback(
-    (currentWorkspace: WorkspaceBase) => {
-      if (noWorkspaces) {
-        setNoWorkspaces(false);
-      }
+  const onWorkspaceCreation = useCallback(() => {
+    if (noWorkspaces) {
+      setNoWorkspaces(false);
+    }
 
-      setStoreConfig((storeConfig) => ({
-        workspaces: [...(storeConfig?.workspaces ?? []), currentWorkspace],
-        selected_workspace: currentWorkspace,
-      }));
-
-      setWorkspaceForm(false);
-      setEditor(true);
-    },
-    [noWorkspaces],
-  );
-
-  const onSaveSystemConfig = useCallback((systemConfig: SystemConfig) => {
-    setSystemConfig(systemConfig);
-    setStoreForm(false);
-  }, []);
-
-  const onWorkspaceSelection = useCallback((workspace: WorkspaceBase) => {
-    setStoreConfig((storeConfig) => ({
-      workspaces: [...(storeConfig?.workspaces ?? [])],
-      selected_workspace: workspace,
-    }));
-    setWorkspaceSelectionForm(false);
-  }, []);
+    setWorkspaceForm(false);
+    setEditor(true);
+  }, [noWorkspaces]);
 
   useEffect(() => {
     (async () => {
@@ -103,13 +64,13 @@ export const Explorer = () => {
         return;
       }
 
-      setSystemConfig(systemConfig);
+      initSystemConfig(systemConfig);
     })();
-  }, []);
+  }, [initSystemConfig]);
 
   useEffect(() => {
     (async () => {
-      if (!systemConfig) {
+      if (!systemConfig || !systemConfig.store) {
         return;
       }
 
@@ -126,9 +87,9 @@ export const Explorer = () => {
         return;
       }
 
-      setStoreConfig(storeConfig);
+      initStoreConfig(storeConfig, systemConfig.store);
     })();
-  }, [systemConfig]);
+  }, [initStoreConfig, systemConfig]);
 
   useEffect(() => {
     (async () => {
@@ -155,14 +116,14 @@ export const Explorer = () => {
 
       if (!workspaceConfig.tree || workspaceConfig.tree.length === 0) {
         const tree = (await read_dir_tree(workspacePath)) ?? [];
-        initConfig({ ...workspaceConfig, tree });
+        initWorkspaceConfig({ ...workspaceConfig, tree }, workspacePath);
       } else {
-        initConfig({ ...workspaceConfig });
+        initWorkspaceConfig({ ...workspaceConfig }, workspacePath);
       }
 
       setEditor(true);
     })();
-  }, [initConfig, storeConfig, systemConfig]);
+  }, [initWorkspaceConfig, storeConfig, systemConfig]);
 
   /*
    * @todo: Wrap all configs in a Context here. This will prevent a lot
@@ -171,40 +132,32 @@ export const Explorer = () => {
   return (
     <ExplorerWrapper>
       {workspaceConfig && systemConfig && storeConfig?.selected_workspace && (
-        <ConfigContext.Provider
-          value={{
-            storeConfig,
-            systemConfig,
-            workspacePath,
-          }}
-        >
-          <Tree readFile={readFromPath} />
-          {showEditor && !noWorkspaces && fileWithContent.name && (
-            <Editor fileWithContent={fileWithContent} writer={writeToFile} />
-          )}
-        </ConfigContext.Provider>
+        <Tree readFile={readFromPath} />
+      )}
+
+      {showEditor && !noWorkspaces && fileWithContent.name && (
+        <Editor fileWithContent={fileWithContent} writer={writeToFile} />
       )}
 
       {/* Modals and Forms */}
       {noWorkspaces && (
         <NoWorkspaceMessage onCreate={() => setWorkspaceForm(true)} />
       )}
-      {showStoreForm && <StoreForm onCreate={onSaveSystemConfig} />}
+      {showStoreForm && <StoreForm setVisibility={setStoreForm} />}
       {systemConfig && showWorkspaceForm && (
         <CreateWorkspace
           onCreate={onWorkspaceCreation}
-          pathToStore={systemConfig.store}
           storeConfig={storeConfig}
         />
       )}
       {showWorkspaceSelectionForm &&
         storeConfig &&
+        storeConfig.workspaces &&
         systemConfig?.store &&
         storeConfig.workspaces.length > 0 && (
           <WorkspaceSelection
-            store={systemConfig.store}
             workspaces={storeConfig.workspaces}
-            onSelect={onWorkspaceSelection}
+            setVisibility={setWorkspaceSelectionForm}
           />
         )}
     </ExplorerWrapper>

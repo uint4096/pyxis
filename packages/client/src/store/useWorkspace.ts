@@ -1,5 +1,11 @@
 import type { Directory, File } from "../types";
-import { createFile, createDir, deleteFile, deleteDir } from "../ffi";
+import {
+  createFile,
+  createDir,
+  deleteFile,
+  deleteDir,
+  saveWorkspaceConfig,
+} from "../ffi";
 import { create } from "zustand";
 import { WorkspaceConfig } from "./types";
 import { updateTree } from "./helpers/update-tree";
@@ -8,25 +14,44 @@ import { isFile } from "../utils/guards";
 
 interface WorkspaceState {
   config: Partial<WorkspaceConfig>;
-  initConfig: (config: WorkspaceConfig) => void;
-  attachTree: (tree: WorkspaceConfig["tree"]) => void;
+  path: string | undefined;
+  initConfig: (config: WorkspaceConfig, workspacePath: string) => void;
+  attachTree: (tree: WorkspaceConfig["tree"]) => Promise<void>;
   addEntity: (entity: File | Directory) => Promise<void>;
   removeEntity: (entity: File | Directory) => Promise<void>;
+  saveToDisk: (config: WorkspaceConfig) => Promise<void>;
 }
 
 export const useWorkspace = create<WorkspaceState>((set, get) => ({
   config: {},
-  initConfig: (config: WorkspaceConfig) => set({ config }),
 
-  attachTree: (tree: WorkspaceConfig["tree"]) =>
-    set({ config: { ...get().config, tree } }),
+  path: undefined,
 
-  addEntity: async (entity: File | Directory) => {
+  initConfig: (config, workspacePath) => set({ config, path: workspacePath }),
+
+  saveToDisk: async (config) => {
+    await saveWorkspaceConfig<WorkspaceConfig>({
+      path: get().path ?? "",
+      config,
+    });
+
+    set({ config });
+  },
+
+  attachTree: async (tree) => {
+    const config = { ...get().config, tree };
+    await get().saveToDisk(<WorkspaceConfig>config);
+    set({ config: { ...get().config, tree } });
+  },
+
+  addEntity: async (entity) => {
     const wsConfig = get().config;
 
+    const entityPath = `${get().path ?? ""}/${entity.path}`;
+
     const response = await (isFile(entity)
-      ? createFile({ file: entity, path: entity.path })
-      : createDir({ dir: entity, path: entity.path }));
+      ? createFile({ file: entity, path: entityPath })
+      : createDir({ dir: entity, path: entityPath }));
 
     if (!response) {
       //@todo: Handle error and show toast message
@@ -35,10 +60,10 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
 
     const tree = updateTree(wsConfig)(entity);
 
-    get().attachTree(tree);
+    await get().attachTree(tree);
   },
 
-  removeEntity: async (entity: File | Directory) => {
+  removeEntity: async (entity) => {
     const wsConfig = get().config;
 
     const response = await (isFile(entity)
@@ -52,6 +77,6 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
 
     const tree = deleteFromTree(wsConfig)(entity);
 
-    get().attachTree(tree);
+    await get().attachTree(tree);
   },
 }));

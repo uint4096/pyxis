@@ -4,20 +4,20 @@ import { File } from "../../../types";
 import { WorkspaceConfig } from "../../../store/types";
 import { readFileContent, saveContent } from "../../../ffi";
 import { PATH_SEPARATOR } from "../../../utils";
+import { useWorkspace } from "../../../store/useWorkspace";
 
 type UseFileProps = {
   file?: File;
   initialContent?: string;
-  workspacePath: string | undefined;
   workspaceConfig: Partial<WorkspaceConfig> | undefined;
 };
 
 export const useFile = ({
   initialContent,
   file,
-  workspacePath,
   workspaceConfig,
 }: UseFileProps) => {
+  const { path } = useWorkspace();
   const [fileWithContent, dispatch] = useReducer(reducer, {
     ...(file && { file }),
     content: initialContent,
@@ -32,7 +32,7 @@ export const useFile = ({
 
       const content = await readFileContent<string>({
         file: selectedFile,
-        path: `${workspacePath}${PATH_SEPARATOR}${selectedFile.path}`,
+        path: `${path}${PATH_SEPARATOR}${selectedFile.path}`,
       });
 
       if (content == null) {
@@ -42,7 +42,7 @@ export const useFile = ({
 
       dispatch({ type: "save", args: { content, file: selectedFile } });
     },
-    [workspaceConfig, workspacePath],
+    [path, workspaceConfig],
   );
 
   const writeToFile = useCallback(
@@ -53,7 +53,7 @@ export const useFile = ({
       }
 
       const res = await saveContent({
-        path: `${workspacePath}${PATH_SEPARATOR}${selectedFile.path}`,
+        path: `${path}${PATH_SEPARATOR}${selectedFile.path}`,
         file: selectedFile,
         content,
       });
@@ -63,7 +63,7 @@ export const useFile = ({
         return;
       }
     },
-    [workspaceConfig, workspacePath],
+    [path, workspaceConfig],
   );
 
   return {

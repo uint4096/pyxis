@@ -2,23 +2,23 @@ import { styled } from "@linaria/react";
 import { useCallback, useState } from "react";
 import { DirSelection } from "../../../components/input";
 import { Modal } from "../../../components/modal";
-import { saveSystemConfig } from "../../../ffi";
-import { SystemConfig } from "../../../store/types";
 import { FormWrapper } from "./common";
+import { useSystem } from "../../../store/useSystem";
 
 type StoreFormProps = {
-  onCreate: (config: SystemConfig) => void;
+  setVisibility: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export const StoreForm = ({ onCreate }: StoreFormProps) => {
+export const StoreForm = ({ setVisibility }: StoreFormProps) => {
   const [selectedPath, setSelectedPath] = useState("");
+  const { saveToDisk: saveSystemConfig } = useSystem();
+
   const onSave = useCallback(async () => {
     const systemConfig = { store: selectedPath };
+    await saveSystemConfig(systemConfig);
 
-    await saveSystemConfig<SystemConfig>({ config: systemConfig });
-
-    onCreate(systemConfig);
-  }, [onCreate, selectedPath]);
+    setVisibility(false);
+  }, [saveSystemConfig, selectedPath, setVisibility]);
 
   const body = (
     <div>
