@@ -32,7 +32,7 @@ type EditorText = {
 
 type EditorProps = {
   fileWithContent: Partial<FileWithContent>;
-  writer: (file: File, content: string) => Promise<void>;
+  writer: (content: string) => Promise<void>;
 };
 
 const Editor = ({ fileWithContent, writer }: EditorProps) => {
@@ -183,7 +183,7 @@ const Editor = ({ fileWithContent, writer }: EditorProps) => {
       return;
     }
 
-    (async () => await writer(fileWithContent as File, debouncedText ?? ""))();
+    (async () => await writer(debouncedText ?? ""))();
   }, [fileWithContent, debouncedText, writer]);
 
   useEffect(() => {

@@ -9,13 +9,12 @@ import type { Document, File, Directory } from "../../types";
 import { getOverflowMenu, MenuOption } from "../../components/overflow-menu";
 import { nanoid } from "nanoid";
 import { pathToDir } from "../../utils";
-import { useWorkspace } from "../../store/useWorkspace";
+import { useWorkspace, useFile } from "../../store";
 
 type EntityProps = {
   dir: Directory;
   dirOptionsState: [string, React.Dispatch<React.SetStateAction<string>>];
   showOptionsState: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
-  readFile: (file: File) => Promise<void>;
 };
 
 // eslint-disable-next-line react/display-name
@@ -25,17 +24,21 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
       dir,
       dirOptionsState: [optionsElement, setOptionsElement],
       showOptionsState: [showOptions, setOptions],
-      readFile,
     }: EntityProps,
     ref,
   ) => {
-    const { addEntity, removeEntity } = useWorkspace();
+    const {
+      config: workspaceConfig,
+      path: workspacePath,
+      addEntity,
+      removeEntity,
+    } = useWorkspace();
+
+    const { select, readFromDisk } = useFile();
 
     const [collapased, setCollapsed] = useState(false);
     const [newDocument, setNewDocument] = useState<Document>();
     const [documentName, setDocumentName] = useState("");
-
-    const { config: workspaceConfig } = useWorkspace();
 
     const { id, name, content: tree } = dir;
 
@@ -199,11 +202,14 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
 
             {tree.map((entity) =>
               isFileEntity(entity) ? (
-                !entity.File.hidden && (
+                !entity.File.hidden &&
+                workspacePath && (
                   <NameContainer
                     onMouseEnter={() => setElement(`${id}/${entity.File.name}`)}
                     onMouseLeave={() => setElement("")}
-                    onClick={() => readFile(entity.File)}
+                    onClick={() => (
+                      select(entity.File), readFromDisk(workspacePath)
+                    )}
                     className={
                       optionsElement === `${id}/${entity.File.name}`
                         ? backgroundHighlight
@@ -241,7 +247,6 @@ export const Entities = forwardRef<HTMLDivElement, EntityProps>(
                   dirOptionsState={[optionsElement, setOptionsElement]}
                   showOptionsState={[showOptions, setOptions]}
                   key={entity.Dir.id}
-                  readFile={readFile}
                 />
               ),
             )}

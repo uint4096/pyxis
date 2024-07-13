@@ -1,17 +1,12 @@
 import { styled } from "@linaria/react";
 import { useContext, useEffect, useRef, useState } from "react";
-import type { File } from "../../types";
 import { Entities } from "./tree-entities";
 import { useOutsideEvent } from "../../hooks";
 import { watchWorkspace } from "../../ffi";
 import { ConfigContext } from "../explorer";
 import { useWorkspace } from "../../store/useWorkspace";
 
-type TreeProps = {
-  readFile: (file: File) => Promise<void>;
-};
-
-export const Tree = ({ readFile }: TreeProps) => {
+export const Tree = () => {
   /*
    * Managed outside of CSS because I need to persist the overflow menu
    * regardless of hover once it's clicked
@@ -45,7 +40,6 @@ export const Tree = ({ readFile }: TreeProps) => {
           dirOptionsState={[optionsElement, setOptionsElement]}
           showOptionsState={[showOptions, setOptions]}
           ref={menuRef}
-          readFile={readFile}
         />
       )}
     </EntitiesWrapper>

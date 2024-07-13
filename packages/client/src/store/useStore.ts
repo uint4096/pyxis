@@ -1,4 +1,4 @@
-import { saveStoreConfig } from "../ffi";
+import { readStoreConfig, saveStoreConfig } from "../ffi";
 import { create } from "zustand";
 import { StoreConfig } from "./types";
 
@@ -7,6 +7,7 @@ interface StoreState {
   path: string | undefined;
   initConfig: (config: StoreConfig, path: string) => void;
   saveToDisk: (config: StoreConfig) => Promise<void>;
+  readFromDisk: (path: string) => Promise<Partial<StoreConfig>>;
   updateWorkspace: (w: StoreConfig["selected_workspace"]) => Promise<void>;
 }
 
@@ -23,6 +24,17 @@ export const useStore = create<StoreState>((set, get) => ({
     const config = { ...get().config, selected_workspace: selectedWorkspace };
     await get().saveToDisk(<StoreConfig>config);
     set({ config });
+  },
+
+  readFromDisk: async (path: string) => {
+    const config: Partial<StoreConfig> =
+      (await readStoreConfig<StoreConfig>({
+        path,
+      })) ?? {};
+
+    set({ config, path });
+
+    return config;
   },
 
   saveToDisk: async (config) =>

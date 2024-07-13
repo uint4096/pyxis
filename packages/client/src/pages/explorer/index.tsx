@@ -1,22 +1,18 @@
 import { styled } from "@linaria/react";
 import { createContext, useCallback, useEffect, useState } from "react";
 import Editor from "../editor/editor";
-import {
-  readStoreConfig,
-  readSystemConfig,
-  readWorkspaceConfig,
-  read_dir_tree,
-} from "../../ffi";
-import { StoreConfig, SystemConfig, WorkspaceConfig } from "../../store/types";
+import { readWorkspaceConfig, read_dir_tree } from "../../ffi";
+import type {
+  StoreConfig,
+  SystemConfig,
+  WorkspaceConfig,
+} from "../../store/types";
 import { StoreForm } from "./forms/store";
 import { NoWorkspaceMessage } from "./forms/no-workspace";
 import { CreateWorkspace } from "./forms/workspace";
 import { WorkspaceSelection } from "./forms/workspace-list";
 import { Tree } from "../tree";
-import { useFile } from "./hooks";
-import { useWorkspace } from "../../store/useWorkspace";
-import { useStore } from "../../store/useStore";
-import { useSystem } from "../../store/useSystem";
+import { useWorkspace, useFile, useStore, useSystem } from "../../store";
 
 export type TConfigContext = {
   storeConfig: StoreConfig;
@@ -29,10 +25,18 @@ export const ConfigContext = createContext<TConfigContext>(
 );
 
 export const Explorer = () => {
-  const { config: workspaceConfig, initConfig: initWorkspaceConfig } =
-    useWorkspace();
-  const { config: storeConfig, initConfig: initStoreConfig } = useStore();
-  const { config: systemConfig, initConfig: initSystemConfig } = useSystem();
+  const {
+    config: workspaceConfig,
+    path: workspacePath,
+    initConfig: initWorkspaceConfig,
+  } = useWorkspace();
+  const {
+    config: storeConfig,
+    readFromDisk: readStoreConfig,
+    path: storePath,
+  } = useStore();
+  const { config: systemConfig, readFromDisk: readSystemConfig } = useSystem();
+  const { file, content, saveToDisk: saveFileContent } = useFile();
 
   const [showStoreForm, setStoreForm] = useState<boolean>(false);
   const [showWorkspaceForm, setWorkspaceForm] = useState<boolean>(false);
@@ -41,10 +45,6 @@ export const Explorer = () => {
   const [noWorkspaces, setNoWorkspaces] = useState<boolean>(false);
 
   const [showEditor, setEditor] = useState<boolean>(false);
-
-  const { fileWithContent, readFromPath, writeToFile } = useFile({
-    workspaceConfig,
-  });
 
   const onWorkspaceCreation = useCallback(() => {
     if (noWorkspaces) {
@@ -57,16 +57,14 @@ export const Explorer = () => {
 
   useEffect(() => {
     (async () => {
-      const systemConfig = await readSystemConfig<SystemConfig>({} as never);
+      const systemConfig = await readSystemConfig();
 
       if (!systemConfig || !systemConfig.store) {
         setStoreForm(true);
         return;
       }
-
-      initSystemConfig(systemConfig);
     })();
-  }, [initSystemConfig]);
+  }, [readSystemConfig]);
 
   useEffect(() => {
     (async () => {
@@ -74,9 +72,7 @@ export const Explorer = () => {
         return;
       }
 
-      const storeConfig = await readStoreConfig<StoreConfig>({
-        path: systemConfig.store,
-      });
+      const storeConfig = await readStoreConfig(systemConfig.store);
 
       if (
         !storeConfig ||
@@ -86,10 +82,8 @@ export const Explorer = () => {
         setNoWorkspaces(true);
         return;
       }
-
-      initStoreConfig(storeConfig, systemConfig.store);
     })();
-  }, [initStoreConfig, systemConfig]);
+  }, [readStoreConfig, systemConfig]);
 
   useEffect(() => {
     (async () => {
@@ -104,7 +98,7 @@ export const Explorer = () => {
         return;
       }
 
-      const workspacePath = `${systemConfig.store}/${storeConfig.selected_workspace.name}`;
+      const workspacePath = `${storePath}/${storeConfig.selected_workspace.name}`;
       const workspaceConfig = await readWorkspaceConfig<WorkspaceConfig>({
         path: workspacePath,
       });
@@ -123,20 +117,19 @@ export const Explorer = () => {
 
       setEditor(true);
     })();
-  }, [initWorkspaceConfig, storeConfig, systemConfig]);
+  }, [initWorkspaceConfig, storeConfig, storePath, systemConfig]);
 
-  /*
-   * @todo: Wrap all configs in a Context here. This will prevent a lot
-   * of prop drilling.
-   */
   return (
     <ExplorerWrapper>
       {workspaceConfig && systemConfig && storeConfig?.selected_workspace && (
-        <Tree readFile={readFromPath} />
+        <Tree />
       )}
 
-      {showEditor && !noWorkspaces && fileWithContent.name && (
-        <Editor fileWithContent={fileWithContent} writer={writeToFile} />
+      {showEditor && !noWorkspaces && file.name && workspacePath && (
+        <Editor
+          fileWithContent={{ ...file, content }}
+          writer={saveFileContent(workspacePath)}
+        />
       )}
 
       {/* Modals and Forms */}

@@ -9,6 +9,8 @@ export type ModalProps = {
   onClose?: () => void;
 };
 
+//@todo: supposed to accept children instead of having so many different elements
+
 export const Modal = ({ body, footer, header, size, onClose }: ModalProps) => {
   return (
     <>
