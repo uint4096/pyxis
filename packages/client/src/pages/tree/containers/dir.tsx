@@ -7,6 +7,12 @@ import { noop } from "../../../utils";
 import { useCallback, useRef } from "react";
 import type { Directory } from "../../../types";
 import { useWorkspace } from "../../../store";
+import {
+  flexDisplay,
+  NameContainer,
+  noDisplay,
+  OptionsContainer,
+} from "./styles";
 
 export type DirContainerProps = {
   collapsed: boolean;
@@ -41,10 +47,7 @@ export const DirContainer = ({
       name: "Rename",
     },
     {
-      handler: useCallback(
-        async (dir: Directory) => removeEntity(dir),
-        [removeEntity],
-      ),
+      handler: useCallback(async () => removeEntity(dir), [dir, removeEntity]),
       id: "delete",
       name: "Delete",
     },
@@ -60,7 +63,9 @@ export const DirContainer = ({
         )}
       </Collapsable>
       <Name>{dir.name}</Name>
-      <OptionsContainer>
+      <OptionsContainer
+        className={overflowPopup === dir.id ? flexDisplay : noDisplay}
+      >
         <HiPlus className={verticallyMiddle} />
         <DirOverflow
           options={dirMenuOptions}
@@ -81,26 +86,6 @@ const verticallyMiddle = css`
   border-radius: 50%;
   &:hover {
     opacity: 0.7;
-  }
-`;
-
-const OptionsContainer = styled.div`
-  height: 100%;
-  align-items: center;
-  gap: 0.5vw;
-`;
-
-const NameContainer = styled.div`
-  padding: 0.2vh 0.3vw;
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  gap: 0.1vw;
-  border-radius: 5px;
-  opacity: 0.9;
-
-  &:hover {
-    background-color: #080808;
   }
 `;
 

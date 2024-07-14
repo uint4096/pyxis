@@ -1,10 +1,16 @@
-import { styled } from "@linaria/react";
 import { useFile, useWorkspace } from "../../../store";
 import type { File } from "../../../types";
 import { getOverflowMenu, type MenuOption } from "../../../components";
-import { useCallback, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { noop } from "../../../utils";
 import { useOutsideEvent } from "../../../hooks";
+import {
+  flexDisplay,
+  NameContainer,
+  noDisplay,
+  OptionsContainer,
+} from "./styles";
+import { styled } from "@linaria/react";
 
 type FileContainerProps = {
   file: Partial<File>;
@@ -50,16 +56,20 @@ export const FileContainer = ({
     },
   ];
 
+  const id = useMemo(() => `${dirId}/${file.name}`, [dirId, file.name]);
+
   return (
     <NameContainer
       onClick={() => (select(file as File), readFromDisk(workspacePath))}
     >
       <FileName>{file.name}</FileName>
-      <OptionsContainer>
+      <OptionsContainer
+        className={overflowPopup === id ? flexDisplay : noDisplay}
+      >
         <FileOverflow
           options={fileMenuOptions}
-          onClick={() => setOverflowPopup(`${dirId}/${file.name}`)}
-          showMenu={`${dirId}/${file.name}` === overflowPopup}
+          onClick={() => setOverflowPopup(id)}
+          showMenu={id === overflowPopup}
           onKeyDown={(e) =>
             e.key === "Escape" ? setOverflowPopup("") : noop()
           }
@@ -76,29 +86,5 @@ const FileName = styled.div`
   opacity: 0.5;
   &:hover {
     background-color: #080808;
-  }
-`;
-
-const OptionsContainer = styled.div`
-  height: 100%;
-  align-items: center;
-  gap: 0.5vw;
-`;
-
-const NameContainer = styled.div`
-  padding: 0.2vh 0.3vw;
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  gap: 0.1vw;
-  border-radius: 5px;
-  opacity: 0.9;
-
-  &:hover {
-    background-color: #080808;
-  }
-
-  &:hover ${FileName} {
-    opacity: 0.9;
   }
 `;

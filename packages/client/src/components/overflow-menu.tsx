@@ -12,7 +12,7 @@ import { noop } from "../utils";
 export type MenuOption = {
   id: string;
   name: string;
-  handler: (...args: Array<any>) => Promise<void>;
+  handler: () => Promise<void>;
 };
 
 export type MenuProps = {
@@ -65,6 +65,7 @@ const Menu = styled.div`
   position: absolute;
   padding: 0.5vh 0.5vw;
   background-color: #111;
+  opacity: 1;
   display: flex;
   flex-direction: column;
   gap: 0.2vh;

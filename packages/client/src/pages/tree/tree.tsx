@@ -1,7 +1,6 @@
 import { styled } from "@linaria/react";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Entities } from "./tree-entities";
-import { useOutsideEvent } from "../../hooks";
 import { watchWorkspace } from "../../ffi";
 import { ConfigContext } from "../explorer";
 import { useWorkspace } from "../../store/useWorkspace";
