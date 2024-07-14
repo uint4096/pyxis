@@ -66,9 +66,11 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
   removeEntity: async (entity) => {
     const wsConfig = get().config;
 
+    const entityPath = `${get().path ?? ""}${entity.path}`;
+
     const response = await (isFile(entity)
-      ? deleteFile({ file: entity, path: entity.path })
-      : deleteDir({ dir: entity, path: entity.path }));
+      ? deleteFile({ file: entity, path: entityPath })
+      : deleteDir({ dir: entity, path: entityPath }));
 
     if (!response) {
       //@todo: Handle error and show toast message

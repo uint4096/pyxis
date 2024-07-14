@@ -1,5 +1,5 @@
 import { styled } from "@linaria/react";
-import { createContext, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Editor from "../editor/editor";
 import { readWorkspaceConfig, read_dir_tree } from "../../ffi";
 import type {
@@ -19,10 +19,6 @@ export type TConfigContext = {
   systemConfig: SystemConfig;
   workspacePath: string;
 };
-
-export const ConfigContext = createContext<TConfigContext>(
-  {} as TConfigContext,
-);
 
 export const Explorer = () => {
   const {

@@ -10,15 +10,9 @@ import { DirContainer } from "./containers/dir";
 
 type EntityProps = {
   dir: Directory;
-  dirOptionsState: [string, React.Dispatch<React.SetStateAction<string>>];
-  showOptionsState: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
 };
 
-export const Entities = ({
-  dir,
-  dirOptionsState: [optionsElement, setOptionsElement],
-  showOptionsState: [showOptions, setOptions],
-}: EntityProps) => {
+export const Entities = ({ dir }: EntityProps) => {
   const {
     config: workspaceConfig,
     path: workspacePath,
@@ -32,12 +26,6 @@ export const Entities = ({
   const [overflowPopup, setOverflowPopup] = useState("");
 
   const { id, content: tree } = dir;
-
-  /*
-   * @todo: Both `keydown` actions should be handled natively
-   * within the component instead of being drilled down from an
-   * outer component.
-   */
 
   const inputKeydown: KeyboardEventHandler<HTMLInputElement> = useCallback(
     async (e) => {
@@ -95,6 +83,7 @@ export const Entities = ({
         dir={dir}
         overflowPopup={overflowPopup}
         setOverflowPopup={setOverflowPopup}
+        setNewDocument={setNewDocument}
       />
 
       {!collapased && (
@@ -107,7 +96,6 @@ export const Entities = ({
               onChange={setDocumentName}
             />
           )}
-
           {tree.map((entity) =>
             isFileEntity(entity) ? (
               !entity.File.hidden &&
@@ -120,12 +108,7 @@ export const Entities = ({
                 />
               )
             ) : (
-              <Entities
-                dir={entity.Dir}
-                dirOptionsState={[optionsElement, setOptionsElement]}
-                showOptionsState={[showOptions, setOptions]}
-                key={entity.Dir.id}
-              />
+              <Entities dir={entity.Dir} key={entity.Dir.id} />
             ),
           )}
         </EntityContainer>

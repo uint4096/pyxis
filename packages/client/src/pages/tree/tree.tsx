@@ -1,23 +1,18 @@
 import { styled } from "@linaria/react";
-import { useContext, useEffect, useState } from "react";
 import { Entities } from "./tree-entities";
 import { watchWorkspace } from "../../ffi";
-import { ConfigContext } from "../explorer";
 import { useWorkspace } from "../../store/useWorkspace";
+import { useEffect } from "react";
 
 export const Tree = () => {
-  /*
-   * Managed outside of CSS because I need to persist the overflow menu
-   * regardless of hover once it's clicked
-   */
-  const [optionsElement, setOptionsElement] = useState<string>("");
-  const [showOptions, setOptions] = useState<boolean>(false);
-  const { config: wsConfig } = useWorkspace();
-
-  const { workspacePath } = useContext(ConfigContext);
+  const { config: wsConfig, path: workspacePath } = useWorkspace();
 
   useEffect(() => {
-    (async () => watchWorkspace({ path: workspacePath }))();
+    if (!workspacePath) {
+      return;
+    }
+
+    (async () => await watchWorkspace({ path: workspacePath }))();
   }, [workspacePath]);
 
   return (
@@ -30,8 +25,6 @@ export const Tree = () => {
             name: wsConfig.name,
             path: "",
           }}
-          dirOptionsState={[optionsElement, setOptionsElement]}
-          showOptionsState={[showOptions, setOptions]}
         />
       )}
     </EntitiesWrapper>

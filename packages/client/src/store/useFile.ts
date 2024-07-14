@@ -6,6 +6,7 @@ import { PATH_SEPARATOR } from "../utils";
 export type FileStore = {
   file: Partial<File>;
   content: string;
+  unselect: () => void;
   select: (file: File) => void;
   readFromDisk: (workspacePath: string) => Promise<void>;
   saveToDisk: (workspacePath: string) => (content: string) => Promise<void>;
@@ -18,6 +19,8 @@ export const useFile = create<FileStore>((set, get) => ({
 
   select: (file: File) => set({ file }),
 
+  unselect: () => set({ file: {} }),
+
   readFromDisk: async (workspacePath) => {
     const { file } = get();
     if (!file.name) {
@@ -27,7 +30,7 @@ export const useFile = create<FileStore>((set, get) => ({
 
     const content = await readFileContent<string>({
       file: <File>file,
-      path: `${workspacePath}${PATH_SEPARATOR}${file.path}`,
+      path: `${workspacePath}${file.path}`,
     });
 
     if (content == null) {

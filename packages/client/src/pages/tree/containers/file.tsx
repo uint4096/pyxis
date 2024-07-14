@@ -26,7 +26,7 @@ export const FileContainer = ({
   overflowPopup,
 }: FileContainerProps) => {
   const { path: workspacePath, removeEntity } = useWorkspace();
-  const { select, readFromDisk } = useFile();
+  const { select, readFromDisk, file: selectedFile, unselect } = useFile();
 
   const optionsRef = useRef<HTMLDivElement>(null);
 
@@ -47,10 +47,13 @@ export const FileContainer = ({
       name: "Rename",
     },
     {
-      handler: useCallback(
-        async () => void removeEntity(file as File),
-        [file, removeEntity],
-      ),
+      handler: useCallback(async () => {
+        if (selectedFile.path === file.path) {
+          unselect();
+        }
+
+        removeEntity(file as File);
+      }, [file, removeEntity, selectedFile.path, unselect]),
       id: "delete",
       name: "Delete",
     },
@@ -60,7 +63,9 @@ export const FileContainer = ({
 
   return (
     <NameContainer
-      onClick={() => (select(file as File), readFromDisk(workspacePath))}
+      onClick={() => (
+        unselect(), select(file as File), readFromDisk(workspacePath)
+      )}
     >
       <FileName>{file.name}</FileName>
       <OptionsContainer
