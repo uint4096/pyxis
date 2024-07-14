@@ -15,16 +15,15 @@ export type MenuOption = {
   handler: (...args: Array<any>) => Promise<void>;
 };
 
-export type MenuProps<T> = {
+export type MenuProps = {
   options: Array<MenuOption>;
   showMenu: boolean;
   onClick: () => void;
   onKeyDown?: KeyboardEventHandler<HTMLDivElement>;
-  rootElement: T;
 };
 
-function OverflowMenuWithRef<T>(
-  { onClick, options, showMenu, onKeyDown, rootElement }: MenuProps<T>,
+function OverflowMenuWithRef(
+  { onClick, options, showMenu, onKeyDown }: MenuProps,
   ref: ForwardedRef<HTMLDivElement>,
 ) {
   const onShow = useCallback(
@@ -41,7 +40,7 @@ function OverflowMenuWithRef<T>(
       {showMenu && (
         <Menu>
           {options.map((option) => (
-            <Option key={option.id} onClick={() => option.handler(rootElement)}>
+            <Option key={option.id} onClick={() => option.handler()}>
               {option.name}
             </Option>
           ))}
@@ -51,8 +50,8 @@ function OverflowMenuWithRef<T>(
   );
 }
 
-export const getOverflowMenu = <T,>() =>
-  forwardRef<HTMLDivElement, MenuProps<T>>(OverflowMenuWithRef);
+export const getOverflowMenu = () =>
+  forwardRef<HTMLDivElement, MenuProps>(OverflowMenuWithRef);
 
 const verticallyMiddle = css`
   vertical-align: middle;

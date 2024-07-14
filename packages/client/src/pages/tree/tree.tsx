@@ -21,12 +21,6 @@ export const Tree = () => {
     (async () => watchWorkspace({ path: workspacePath }))();
   }, [workspacePath]);
 
-  const menuRef = useRef<HTMLDivElement>(null);
-  useOutsideEvent(menuRef, () => {
-    setOptionsElement("");
-    setOptions(false);
-  });
-
   return (
     <EntitiesWrapper>
       {wsConfig.tree && wsConfig.id && wsConfig.name && (
@@ -39,7 +33,6 @@ export const Tree = () => {
           }}
           dirOptionsState={[optionsElement, setOptionsElement]}
           showOptionsState={[showOptions, setOptions]}
-          ref={menuRef}
         />
       )}
     </EntitiesWrapper>
