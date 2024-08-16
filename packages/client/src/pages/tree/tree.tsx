@@ -1,19 +1,9 @@
 import { styled } from "@linaria/react";
 import { Entities } from "./tree-entities";
-import { watchWorkspace } from "../../ffi";
 import { useWorkspace } from "../../store/useWorkspace";
-import { useEffect } from "react";
 
 export const Tree = () => {
-  const { config: wsConfig, path: workspacePath } = useWorkspace();
-
-  useEffect(() => {
-    if (!workspacePath) {
-      return;
-    }
-
-    (async () => await watchWorkspace({ path: workspacePath }))();
-  }, [workspacePath]);
+  const { config: wsConfig } = useWorkspace();
 
   return (
     <EntitiesWrapper>

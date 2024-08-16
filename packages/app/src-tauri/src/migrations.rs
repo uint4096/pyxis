@@ -64,8 +64,6 @@ impl Migration {
             .collect::<Vec<String>>()
             .join(",");
 
-        println!("Migrations Query: {}", str_names);
-
         let query = format!("SELECT name FROM migrations WHERE name IN ({})", str_names);
 
         let mut sql = database

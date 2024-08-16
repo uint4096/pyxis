@@ -22,7 +22,7 @@ import {
   insertTextAtPosition,
   textLength,
 } from "../../utils";
-import { File, FileWithContent } from "../../types";
+import { FileWithContent } from "../../types";
 import { useDebounce } from "../../hooks";
 
 type EditorText = {
