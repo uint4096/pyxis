@@ -47,7 +47,6 @@ impl Migration {
         Ok(name)
     }
 
-
     fn init(&self, database: &Database) -> Result<usize, Error> {
         let sql = "CREATE TABLE IF NOT EXISTS migrations (
             id   INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -67,10 +66,7 @@ impl Migration {
 
         println!("Migrations Query: {}", str_names);
 
-        let query = format!(
-            "SELECT name FROM migrations WHERE name IN ({})",
-            str_names
-        );
+        let query = format!("SELECT name FROM migrations WHERE name IN ({})", str_names);
 
         let mut sql = database
             .conn
@@ -100,11 +96,7 @@ impl Migration {
         }
     }
 
-    fn run(
-        &self,
-        entity: &Box<dyn MigrationsTrait>,
-        database: &mut Database,
-    ) -> Result<(), Error> {
+    fn run(&self, entity: &Box<dyn MigrationsTrait>, database: &mut Database) -> Result<(), Error> {
         database.conn.execute(
             "INSERT INTO migrations (name, status) VALUES (?1, ?2)",
             (entity, MigrationStatus::InProgress),
@@ -139,3 +131,23 @@ impl Migration {
     }
 }
 
+pub fn run_migrations(database: &mut Database) -> Result<(), Error> {
+    //List new migrations here
+    let migration = Migration {
+        entites: Rc::new(vec![Box::new(WorkspaceMigration {
+            name: String::from("workspace_migration"),
+        })]),
+    };
+
+    migration.init(database)?;
+    println!("Migration init successful");
+
+    let migrations_to_run = migration.list_migrations_to_run(database);
+    println!("Migrations to run: {:?}", migrations_to_run.entites);
+
+    for entity in migrations_to_run.entites.iter() {
+        migration.run(entity, database)?;
+    }
+
+    Ok(())
+}
