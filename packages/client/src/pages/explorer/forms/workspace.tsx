@@ -5,14 +5,15 @@ import { TextInput } from "../../../components/input";
 import { Modal } from "../../../components/modal";
 import { FormWrapper } from "./common";
 import { useWorkspace } from "../../../store/use-workspace";
-import { Workspace } from "../../../ffi";
 
 type WorkspaceSelectionProps = {
-  onCreate: (createdWorkspace: Workspace) => void;
+  setVisibility: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export const CreateWorkspace = ({ onCreate }: WorkspaceSelectionProps) => {
+export const CreateWorkspace = ({ setVisibility }: WorkspaceSelectionProps) => {
   const [name, setName] = useState("");
+  const [showForm, setForm] = useState(false);
+
   const { create } = useWorkspace();
 
   const onWorkspaceCreation = useCallback(
@@ -23,9 +24,9 @@ export const CreateWorkspace = ({ onCreate }: WorkspaceSelectionProps) => {
         return;
       }
 
-      onCreate(workspace);
+      setVisibility(false);
     },
-    [create, onCreate],
+    [create, setVisibility],
   );
 
   const body = (
@@ -47,11 +48,23 @@ export const CreateWorkspace = ({ onCreate }: WorkspaceSelectionProps) => {
   );
 
   return (
-    <FormWrapper>
-      <FormContainer>
-        <Modal body={body} size="small" footer={footer} />
-      </FormContainer>
-    </FormWrapper>
+    <>
+      {!showForm && (
+        <FormWrapper>
+          <MessageWrapper>
+            <WorkspaceMessage>You have no workspaces!</WorkspaceMessage>
+            <button onClick={() => setForm(true)}>Create a Workspace</button>
+          </MessageWrapper>
+        </FormWrapper>
+      )}
+      {showForm && (
+        <FormWrapper>
+          <FormContainer>
+            <Modal body={body} size="small" footer={footer} />
+          </FormContainer>
+        </FormWrapper>
+      )}
+    </>
   );
 };
 
@@ -64,4 +77,16 @@ const FormContainer = styled.div`
 const FormFooter = styled.div`
   display: flex;
   justify-content: flex-end;
+`;
+
+const MessageWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1vh;
+`;
+
+const WorkspaceMessage = styled.span`
+  font-weight: 600;
 `;

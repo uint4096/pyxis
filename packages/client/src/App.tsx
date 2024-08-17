@@ -102,8 +102,9 @@ function App() {
       <Explorer />
       <ToastContainer
         position={"bottom-right"}
-        autoClose={5000}
+        autoClose={3000}
         theme={"dark"}
+        hideProgressBar
       />
       {/* <div>
         <button onClick={() => setOnline((online) => !online)}>

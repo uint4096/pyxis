@@ -1,7 +1,6 @@
 import { styled } from "@linaria/react";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type { StoreConfig, SystemConfig } from "../../store/types";
-import { NoWorkspaceMessage } from "./forms/no-workspace";
 import { WorkspaceSelection } from "./forms/workspace-list";
 
 import { useWorkspace } from "../../store/use-workspace";
@@ -14,23 +13,13 @@ export type TConfigContext = {
 };
 
 export const Explorer = () => {
-  const { workspaces, list } = useWorkspace();
+  const { workspaces, list, current_workspace } = useWorkspace();
 
   const [showWorkspaceForm, setWorkspaceForm] = useState<boolean>(false);
   const [showWorkspaceSelectionForm, setWorkspaceSelectionForm] =
     useState<boolean>(false);
-  const [noWorkspaces, setNoWorkspaces] = useState<boolean>(false);
 
   const [showEditor, setEditor] = useState<boolean>(false);
-
-  const onWorkspaceCreation = useCallback(() => {
-    if (noWorkspaces) {
-      setNoWorkspaces(false);
-    }
-
-    setWorkspaceForm(false);
-    setEditor(true);
-  }, [noWorkspaces]);
 
   useEffect(() => {
     (async () => await list())();
@@ -38,17 +27,18 @@ export const Explorer = () => {
 
   useEffect(() => {
     if (!workspaces || !workspaces.length) {
-      setNoWorkspaces(true);
+      setWorkspaceForm(true);
     } else {
-      setNoWorkspaces(false);
+      setWorkspaceForm(false);
     }
 
-    if (!workspaces.some((w) => w.selected)) {
+    if (!current_workspace) {
       setWorkspaceSelectionForm(true);
     } else {
       setWorkspaceSelectionForm(false);
+      setEditor(true);
     }
-  }, [workspaces]);
+  }, [current_workspace, workspaces]);
 
   return (
     <>
@@ -65,11 +55,8 @@ export const Explorer = () => {
       )} */}
 
         {/* Modals and Forms */}
-        {noWorkspaces && (
-          <NoWorkspaceMessage onCreate={() => setWorkspaceForm(true)} />
-        )}
         {showWorkspaceForm && (
-          <CreateWorkspace onCreate={onWorkspaceCreation} />
+          <CreateWorkspace setVisibility={setWorkspaceForm} />
         )}
         {showWorkspaceSelectionForm && workspaces.length > 0 && (
           <WorkspaceSelection
