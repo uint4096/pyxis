@@ -4,6 +4,7 @@ mod config;
 mod database;
 mod dir_reader;
 mod document;
+mod entities;
 mod ffi;
 mod migrations;
 mod reader;
@@ -11,6 +12,7 @@ mod writer;
 
 use database::Database;
 use migrations::run_migrations;
+use entities::workspaces::{create_workspace, list_workspaces, delete_workspace, update_workspace};
 
 use crate::ffi::{
     create_dir, create_file, delete_dir, delete_file, read_file, read_store_config,
@@ -44,6 +46,10 @@ fn main() {
             delete_dir,
             read_file,
             write_file,
+            create_workspace,
+            list_workspaces,
+            delete_workspace,
+            update_workspace
         ])
         .setup(|app: &mut App| {
             let window = app.get_window("main").expect("Failed to get main window!");
