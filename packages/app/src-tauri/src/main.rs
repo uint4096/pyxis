@@ -23,10 +23,11 @@ fn main() {
     let mut database = Database::create_connection();
     match run_migrations(&mut database) {
         Ok(_) => println!("Migration successful!"),
-        Err(e) => println!("Migration failed! Error: {}", e),
+        Err(e) => eprintln!("Migration failed! Error: {}", e),
     }
 
     tauri::Builder::default()
+        .manage(database)
         .invoke_handler(tauri::generate_handler![
             read_store_config,
             write_store_config,

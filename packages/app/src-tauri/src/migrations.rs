@@ -1,6 +1,6 @@
 mod workspaces;
 
-use std::{fmt::Debug, rc::Rc};
+use std::{collections::HashMap, fmt::Debug, rc::Rc};
 
 use rusqlite::{types::ToSqlOutput, Error, Row, ToSql, Transaction};
 use workspaces::WorkspaceMigration;
@@ -47,14 +47,30 @@ impl Migration {
         Ok(name)
     }
 
+    fn dup_check(&self) -> bool {
+        let map: HashMap<String, bool> = HashMap::new();
+
+        for entity in self.entites.iter() {
+            if map.contains_key(&entity.get_name()) {
+                return false;
+            }
+        }
+
+        true
+    }
+
     fn init(&self, database: &Database) -> Result<usize, Error> {
         let sql = "CREATE TABLE IF NOT EXISTS migrations (
             id   INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
+            name TEXT NOT NULL UNIQUE,
             status TEXT NOT NULL
         )";
 
-        database.conn.execute(sql, ())
+        if !self.dup_check() {
+            panic!("Migration names must be unique!");
+        }
+
+        database.get_connection().execute(sql, ())
     }
 
     fn list_migrations_to_run(&self, database: &Database) -> Self {
@@ -64,12 +80,10 @@ impl Migration {
             .collect::<Vec<String>>()
             .join(",");
 
-        let query = format!("SELECT name FROM migrations WHERE name IN ({})", str_names);
+        let conn = database.get_connection();
 
-        let mut sql = database
-            .conn
-            .prepare(&query)
-            .expect("Failed to prepare statement!");
+        let query = format!("SELECT name FROM migrations WHERE name IN ({})", str_names);
+        let mut sql = conn.prepare(&query).expect("Failed to prepare statement!");
 
         let migrations_iter = sql
             .query_map([], |row| Migration::from_row(row))
@@ -95,20 +109,29 @@ impl Migration {
     }
 
     fn run(&self, entity: &Box<dyn MigrationsTrait>, database: &mut Database) -> Result<(), Error> {
-        database.conn.execute(
+        database.get_connection().execute(
             "INSERT INTO migrations (name, status) VALUES (?1, ?2)",
             (entity, MigrationStatus::InProgress),
         )?;
 
-        let transaction = database.conn.transaction()?;
+        let mut conn = database.get_connection();
+        let transaction = conn.transaction()?;
         match entity.run(&transaction) {
             Ok(_) => {
                 println!(
                     "Migration ran for entity: {:?}. Attempting to commit!",
                     entity
                 );
-                transaction.commit().expect("Commit failed!");
-                database.conn.execute(
+                match transaction.commit() {
+                    Ok(_) => {
+                        println!("Transaction committed!")
+                    },
+                    Err(e) => {
+                        panic!("Failed to commit! {e}. Aborting...");
+                    }
+                }
+
+                conn.execute(
                     "UPDATE migrations SET status = (?1) WHERE name = (?2)",
                     (MigrationStatus::Success, entity),
                 )?;
@@ -118,7 +141,7 @@ impl Migration {
             Err(_) => {
                 println!("Migration failed for entity: {:?}", entity);
                 transaction.rollback()?;
-                database.conn.execute(
+                database.get_connection().execute(
                     "UPDATE migrations SET status = (?1) WHERE name = (?2)",
                     (MigrationStatus::Failed, entity),
                 )?;

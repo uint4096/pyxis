@@ -1,9 +1,12 @@
-use std::path::PathBuf;
+use std::{
+    path::PathBuf,
+    sync::{Mutex, MutexGuard},
+};
 
 use rusqlite::Connection;
 
 pub struct Database {
-    pub conn: Connection,
+    conn: Mutex<Connection>,
 }
 
 impl Database {
@@ -17,13 +20,26 @@ impl Database {
     }
 
     pub fn create_connection() -> Self {
-        let connection = match Connection::open(Database::get_db_path()) {
-            Ok(conn) => Database { conn },
+        let database = match Connection::open(Database::get_db_path()) {
+            Ok(conn) => Database {
+                conn: Mutex::new(conn),
+            },
             Err(e) => {
                 panic!("Connection failed. Error: {}", e)
             }
         };
 
-        connection
+        database
+    }
+
+    pub fn get_connection(&self) -> MutexGuard<Connection> {
+        match self.conn.lock() {
+            Ok(conn) => conn,
+            Err(e) => {
+                eprintln!("Failed to acquire lock on DB connection. {}", e);
+                println!("Attempting to recover,,,");
+                e.into_inner()
+            }
+        }
     }
 }
