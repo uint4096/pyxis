@@ -3,45 +3,29 @@ import { useCallback, useState } from "react";
 
 import { TextInput } from "../../../components/input";
 import { Modal } from "../../../components/modal";
-import {
-  StoreConfig,
-  WorkspaceBase,
-  WorkspaceConfig,
-} from "../../../store/types";
-import { nanoid } from "nanoid";
 import { FormWrapper } from "./common";
-import { useWorkspace } from "../../../store/useWorkspace";
-import { useStore } from "../../../store/useStore";
+import { useWorkspace } from "../../../store/use-workspace";
+import { Workspace } from "../../../ffi";
 
 type WorkspaceSelectionProps = {
-  storeConfig: Partial<StoreConfig> | undefined;
-  onCreate: (createdWorkspace: WorkspaceBase) => void;
+  onCreate: (createdWorkspace: Workspace) => void;
 };
 
 export const CreateWorkspace = ({ onCreate }: WorkspaceSelectionProps) => {
   const [name, setName] = useState("");
-  const { saveToDisk: saveWorkspaceConfig } = useWorkspace();
-  const { updateWorkspace } = useStore();
+  const { create } = useWorkspace();
 
   const onWorkspaceCreation = useCallback(
     async (name: string) => {
-      const workspaceId = nanoid(10);
-      const currentWorkspace = { id: workspaceId, name };
-      const workspaceConfig: WorkspaceConfig = {
-        ...currentWorkspace,
-        tree: [],
-        users_allowed_read: [],
-        users_allowed_write: [],
-      };
+      const workspace = await create(name);
 
-      await Promise.all([
-        updateWorkspace(currentWorkspace),
-        saveWorkspaceConfig(workspaceConfig),
-      ]);
+      if (!workspace) {
+        return;
+      }
 
-      onCreate(currentWorkspace);
+      onCreate(workspace);
     },
-    [onCreate, saveWorkspaceConfig, updateWorkspace],
+    [create, onCreate],
   );
 
   const body = (

@@ -1,14 +1,12 @@
 import { styled } from "@linaria/react";
 import { useCallback } from "react";
 import { Modal } from "../../../components/modal";
-import type { ArrayElement, StoreConfig } from "../../../store/types";
 import { FormWrapper } from "./common";
-import { useStore } from "../../../store/useStore";
-
-type WorkspaceElement = ArrayElement<StoreConfig["workspaces"]>;
+import { Workspace } from "../../../ffi";
+import { useWorkspace } from "../../../store/use-workspace";
 
 type WorkspaceListProps = {
-  workspaces: StoreConfig["workspaces"];
+  workspaces: Array<Partial<Workspace>>;
   setVisibility: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
@@ -16,15 +14,15 @@ export const WorkspaceSelection = ({
   workspaces,
   setVisibility,
 }: WorkspaceListProps) => {
-  const { updateWorkspace } = useStore();
+  const { updateSelection } = useWorkspace();
 
   const selectWorkspace = useCallback(
-    async (workspace: WorkspaceElement) => {
-      await updateWorkspace(workspace);
+    async (workspace: Workspace) => {
+      await updateSelection(workspace);
 
       setVisibility(false);
     },
-    [setVisibility, updateWorkspace],
+    [setVisibility, updateSelection],
   );
 
   const label = (
@@ -36,7 +34,7 @@ export const WorkspaceSelection = ({
       {workspaces.map((workspace) => {
         return (
           <WorkspaceListElement
-            onClick={() => selectWorkspace(workspace)}
+            onClick={() => selectWorkspace(workspace as Workspace)}
             key={workspace.id}
           >
             {workspace.name}

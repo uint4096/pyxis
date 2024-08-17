@@ -1,3 +1,4 @@
+import { ToastContainer } from "react-toastify";
 import "./App.css";
 // import {
 //   useCallback,
@@ -10,7 +11,8 @@ import "./App.css";
 // import { getStepsForTransformation } from "string-differ";
 // import { useWebsockets } from "./hooks/useWebsockets";
 // import Editor from "./pages/editor/editor";
-import { Explorer } from "./pages/explorer";
+import { Explorer } from "./pages/explorer/_index";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   // const [loroText, setLoroText] = useState<LoroText>();
@@ -98,6 +100,11 @@ function App() {
   return (
     <>
       <Explorer />
+      <ToastContainer
+        position={"bottom-right"}
+        autoClose={5000}
+        theme={"dark"}
+      />
       {/* <div>
         <button onClick={() => setOnline((online) => !online)}>
           {online ? "Go Offline" : "Go Online"}

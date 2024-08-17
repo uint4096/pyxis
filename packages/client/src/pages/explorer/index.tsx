@@ -136,7 +136,7 @@ export const Explorer = () => {
       {systemConfig && showWorkspaceForm && (
         <CreateWorkspace
           onCreate={onWorkspaceCreation}
-          storeConfig={storeConfig}
+          // storeConfig={storeConfig}
         />
       )}
       {showWorkspaceSelectionForm &&
