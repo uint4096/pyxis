@@ -1,7 +1,9 @@
+mod directories;
 mod workspaces;
 
 use std::{collections::HashMap, fmt::Debug, rc::Rc};
 
+use directories::DirectoriesMigration;
 use rusqlite::{types::ToSqlOutput, Error, Row, ToSql, Transaction};
 use workspaces::WorkspaceMigration;
 
@@ -125,7 +127,7 @@ impl Migration {
                 match transaction.commit() {
                     Ok(_) => {
                         println!("Transaction committed!")
-                    },
+                    }
                     Err(e) => {
                         panic!("Failed to commit! {e}. Aborting...");
                     }
@@ -138,15 +140,15 @@ impl Migration {
 
                 Ok(())
             }
-            Err(_) => {
-                println!("Migration failed for entity: {:?}", entity);
+            Err(e) => {
+                eprintln!("Migration failed for entity: {:?}. Error: {e}", entity);
                 transaction.rollback()?;
-                database.get_connection().execute(
+                conn.execute(
                     "UPDATE migrations SET status = (?1) WHERE name = (?2)",
                     (MigrationStatus::Failed, entity),
                 )?;
 
-                Ok(())
+                Err(e)
             }
         }
     }
@@ -155,9 +157,14 @@ impl Migration {
 pub fn run_migrations(database: &mut Database) -> Result<(), Error> {
     //List new migrations here
     let migration = Migration {
-        entites: Rc::new(vec![Box::new(WorkspaceMigration {
-            name: String::from("workspace_migration"),
-        })]),
+        entites: Rc::new(vec![
+            Box::new(WorkspaceMigration {
+                name: String::from("workspace_migration"),
+            }),
+            Box::new(DirectoriesMigration {
+                name: String::from("directories_migration"),
+            }),
+        ]),
     };
 
     migration.init(database)?;

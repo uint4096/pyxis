@@ -21,9 +21,14 @@ impl Database {
 
     pub fn create_connection() -> Self {
         let database = match Connection::open(Database::get_db_path()) {
-            Ok(conn) => Database {
-                conn: Mutex::new(conn),
-            },
+            Ok(conn) => {
+                conn.execute("PRAGMA foreign_keys = ON", [])
+                    .unwrap_or_default();
+
+                Database {
+                    conn: Mutex::new(conn),
+                }
+            }
             Err(e) => {
                 panic!("Connection failed. Error: {}", e)
             }
