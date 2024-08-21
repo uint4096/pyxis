@@ -99,7 +99,7 @@ pub fn delete_file(path: &str, file: File) -> bool {
 }
 
 #[tauri::command]
-pub fn create_dir(path: &str, dir: Directory) -> bool {
+pub fn create_directory(path: &str, dir: Directory) -> bool {
     dir.create(path)
 }
 
@@ -109,6 +109,6 @@ pub fn rename_dir(path: &str, dir: Directory, new_name: &str) -> bool {
 }
 
 #[tauri::command]
-pub fn delete_dir(path: &str, dir: Directory) -> bool {
+pub fn delete_directory(path: &str, dir: Directory) -> bool {
     dir.delete(path)
 }

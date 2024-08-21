@@ -75,11 +75,17 @@ impl Workspace {
             conn.execute(&update_sql, ())?;
         }
 
-        let sql = "UPDATE workspaces SET name = (?1), selected = (?2), updated_at = (?3) WHERE id = (?4)";
+        let sql =
+            "UPDATE workspaces SET name = (?1), selected = (?2), updated_at = (?3) WHERE id = (?4)";
 
         conn.execute(
             sql,
-            (&self.name, &(self.selected as i32), &self.updated_at, &self.id),
+            (
+                &self.name,
+                &(self.selected as i32),
+                &self.updated_at,
+                &self.id,
+            ),
         )?;
 
         Ok(())
@@ -130,14 +136,17 @@ pub fn delete_workspace(id: String, database: State<Database>) -> bool {
 }
 
 #[tauri::command]
-pub fn update_workspace(id: i32, name: String, selected: bool, database: State<Database>) -> Option<Workspace> {
+pub fn update_workspace(
+    id: i32,
+    name: String,
+    selected: bool,
+    database: State<Database>,
+) -> Option<Workspace> {
     let conn = &database.get_connection();
-    let workspace = match Workspace::list(conn){
-        Ok(w) => w.into_iter().find(|w| {
-            w.id == Some(id)
-        }),
+    let workspace = match Workspace::list(conn) {
+        Ok(w) => w.into_iter().find(|w| w.id == Some(id)),
         Err(e) => {
-            eprintln!("[Workspaces] Failed to get ! {}", e);
+            eprintln!("[Workspaces] Failed to get for update! {}", e);
             None
         }
     };
@@ -150,9 +159,9 @@ pub fn update_workspace(id: i32, name: String, selected: bool, database: State<D
         match workspace.update(conn) {
             Ok(_) => {
                 return Some(workspace);
-            },
+            }
             Err(e) => {
-                eprintln!("[Workspaces] Failed to delete! {}", e);
+                eprintln!("[Workspaces] Failed to update! {}", e);
                 return None;
             }
         }
