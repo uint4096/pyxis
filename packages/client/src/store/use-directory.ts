@@ -8,58 +8,58 @@ interface DirectoryState {
   directories: Array<DirWithChildren>;
   create: (
     name: string,
-    workspaceId: number,
+    workspaceUid: string,
     path: string,
-    parentId?: number,
+    parentUid?: string,
   ) => Promise<Directory | undefined>;
-  find: (id: number) => DirWithChildren | undefined;
+  find: (uid: string) => DirWithChildren | undefined;
   build: (
-    workspaceId: number,
-    parentId?: number,
+    workspaceUid: string,
+    parentUid?: string,
   ) => Promise<Array<DirWithChildren>>;
-  list: (workspaceId: number, parentId?: number) => Promise<Array<Directory>>;
+  list: (workspaceUid: string, parentUid?: string) => Promise<Array<Directory>>;
   delete: (directory: DirWithChildren) => Promise<void>;
   update: (directory: DirWithChildren) => Promise<void>;
 }
 
 const findDir = (
   directories: Array<DirWithChildren>,
-  id: number,
+  uid: string,
 ): DirWithChildren | undefined => {
   return directories.find((directory) => {
-    if (directory.id === id) {
+    if (directory.uid === uid) {
       return true;
     }
 
-    return findDir(directory.children, id);
+    return findDir(directory.children, uid);
   });
 };
 
 export const useDirectory = create<DirectoryState>((set, get) => ({
   directories: [],
-  find: (id: number): DirWithChildren | undefined =>
+  find: (uid: string): DirWithChildren | undefined =>
     get().directories.find((directory) => {
-      if (directory.id === id) {
+      if (directory.uid === uid) {
         return true;
       }
 
-      return findDir(directory.children, id);
+      return findDir(directory.children, uid);
     }),
 
-  create: async (name, workspaceId, path, parentId) => {
-    const dirs = await createDir(name, workspaceId, path, parentId);
+  create: async (name, workspaceUid, path, parentUid) => {
+    const dirs = await createDir(name, workspaceUid, path, parentUid);
     if (!dirs) {
       return;
     }
 
     const { list } = get();
-    await list(workspaceId);
+    await list(workspaceUid);
 
     return dirs;
   },
 
-  build: async (workspaceId, parentId) => {
-    const dirs = await getDirs(workspaceId, parentId);
+  build: async (workspaceUid, parentUid) => {
+    const dirs = await getDirs(workspaceUid, parentUid);
 
     if (!dirs) {
       return [];
@@ -69,7 +69,7 @@ export const useDirectory = create<DirectoryState>((set, get) => ({
 
     return await Promise.all([
       ...dirs.map(async (dir) => {
-        const children = await build(dir.workspace_id, dir.id);
+        const children = await build(dir.workspace_uid, dir.uid);
         return {
           ...dir,
           children,
@@ -78,11 +78,11 @@ export const useDirectory = create<DirectoryState>((set, get) => ({
     ]);
   },
 
-  list: async (workspaceId) => {
+  list: async (workspaceUid) => {
     const { build } = get();
 
     try {
-      const dirs = await build(workspaceId);
+      const dirs = await build(workspaceUid);
       set({
         directories: dirs,
       });
@@ -95,14 +95,14 @@ export const useDirectory = create<DirectoryState>((set, get) => ({
   },
 
   delete: async (directory: DirWithChildren) => {
-    if (!directory.id) {
+    if (!directory.uid) {
       return;
     }
 
-    await deleteDir(directory.id);
+    await deleteDir(directory.uid);
 
     const { list } = get();
-    await list(directory.workspace_id);
+    await list(directory.workspace_uid);
   },
 
   update: async (directory: DirWithChildren) => {
@@ -110,10 +110,10 @@ export const useDirectory = create<DirectoryState>((set, get) => ({
       return;
     }
 
-    const { id, name, workspace_id, path, parent_id } = directory;
-    await updateDir(id, name, workspace_id, path, parent_id);
+    const { uid, name, workspace_uid, path, parent_uid } = directory;
+    await updateDir(uid, name, workspace_uid, path, parent_uid);
 
     const { list } = get();
-    await list(directory.workspace_id);
+    await list(directory.workspace_uid);
   },
 }));

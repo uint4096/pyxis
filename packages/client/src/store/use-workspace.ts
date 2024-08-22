@@ -12,7 +12,7 @@ interface WorkspaceState {
   currentWorkspace: Partial<Workspace>;
   init: (workspaces: Array<Workspace>) => void;
   create: (name: string) => Promise<Workspace | undefined>;
-  delete: (id: number) => Promise<void>;
+  delete: (uid: string) => Promise<void>;
   list: () => Promise<Array<Workspace>>;
   updateSelection: (workspace: Workspace) => Promise<void>;
 }
@@ -36,11 +36,11 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
     return workspace;
   },
 
-  delete: async (id) => {
-    await deleteWorkspace(id);
+  delete: async (uid) => {
+    await deleteWorkspace(uid);
 
     set({
-      workspaces: get().workspaces.filter((w) => w.id !== id),
+      workspaces: get().workspaces.filter((w) => w.uid !== uid),
     });
   },
 
@@ -60,11 +60,11 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
   },
 
   updateSelection: async (workspace) => {
-    if (!workspace.id) {
+    if (!workspace.uid) {
       return;
     }
 
-    await updateWorkspace(workspace.id, workspace.name, true);
+    await updateWorkspace(workspace.uid, workspace.name, true);
     const { list } = get();
     await list();
   },

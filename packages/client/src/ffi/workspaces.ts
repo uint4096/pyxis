@@ -3,6 +3,7 @@ import { invoke } from "./invoke_v2";
 
 export type Workspace = {
   id?: number;
+  uid: string;
   name: string;
   selected: boolean;
   created_at: string;
@@ -12,8 +13,8 @@ export type Workspace = {
 type Args = {
   list_workspaces: never;
   create_workspace: { name: string; selected: boolean };
-  delete_workspace: { id: number };
-  update_workspace: { id: number; name: string; selected: boolean };
+  delete_workspace: { uid: string };
+  update_workspace: { uid: string; name: string; selected: boolean };
 };
 
 export const createWorkspace = async (name: string, selected: boolean) => {
@@ -22,6 +23,11 @@ export const createWorkspace = async (name: string, selected: boolean) => {
       name,
       selected,
     });
+
+    if (!workspace) {
+      toast("Failed to create workspace!");
+      return;
+    }
 
     toast("Workspace created!");
 
@@ -39,6 +45,10 @@ export const getWorkspaces = async () => {
       {} as never,
     );
 
+    if (!workspaces) {
+      throw "Unknown failure!";
+    }
+
     return workspaces;
   } catch (e) {
     console.error("[Workspace] Failed to fetch!", e);
@@ -46,11 +56,11 @@ export const getWorkspaces = async () => {
   }
 };
 
-export const deleteWorkspace = async (id: number) => {
+export const deleteWorkspace = async (uid: string) => {
   try {
     if (
       !(await invoke<Args, boolean>()("delete_workspace", {
-        id,
+        uid,
       }))
     ) {
       toast("Failed to delete workspace!", "error");
@@ -64,13 +74,13 @@ export const deleteWorkspace = async (id: number) => {
 };
 
 export const updateWorkspace = async (
-  id: number,
+  uid: string,
   name: string,
   selected: boolean,
 ) => {
   try {
     const workspace = await invoke<Args, Workspace>()("update_workspace", {
-      id,
+      uid,
       name,
       selected,
     });

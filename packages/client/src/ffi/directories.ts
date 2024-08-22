@@ -3,44 +3,45 @@ import { invoke } from "./invoke_v2";
 
 export type Directory = {
   id?: number;
+  uid: string;
   name: string;
   path: string;
-  workspace_id: number;
-  parent_id?: number;
+  workspace_uid: string;
+  parent_uid?: string;
   created_at: string;
   updated_at: string;
 };
 
 type Args = {
-  list_dirs: { workspaceId: number; parentId?: number };
+  list_dirs: { workspaceUid: string; parentUid?: string };
   create_dir: {
     name: string;
-    workspaceId: number;
+    workspaceUid: string;
     path: string;
-    parentId?: number;
+    parentUid?: string;
   };
-  delete_dir: { id: number };
+  delete_dir: { uid: string };
   update_dir: {
-    id: number;
+    uid: string;
     name: string;
-    workspaceId: number;
+    workspaceUid: string;
     path: string;
-    parentId?: number;
+    parentUid?: string;
   };
 };
 
 export const createDir = async (
   name: string,
-  workspaceId: number,
+  workspaceUid: string,
   path: string,
-  parentId?: number,
+  parentUid?: string,
 ) => {
   try {
     const directory = await invoke<Args, Directory | null>()("create_dir", {
       name,
       path,
-      workspaceId,
-      parentId,
+      workspaceUid,
+      parentUid,
     });
 
     if (!directory) {
@@ -57,12 +58,16 @@ export const createDir = async (
   }
 };
 
-export const getDirs = async (workspaceId: number, parentId?: number) => {
+export const getDirs = async (workspaceUid: string, parentUid?: string) => {
   try {
     const directories = await invoke<Args, Array<Directory>>()("list_dirs", {
-      workspaceId,
-      parentId,
+      workspaceUid,
+      parentUid,
     });
+
+    if (!directories) {
+      throw "Unknown failure!";
+    }
 
     return directories;
   } catch (e) {
@@ -70,11 +75,11 @@ export const getDirs = async (workspaceId: number, parentId?: number) => {
   }
 };
 
-export const deleteDir = async (id: number) => {
+export const deleteDir = async (uid: string) => {
   try {
     if (
       !(await invoke<Args, boolean>()("delete_dir", {
-        id,
+        uid,
       }))
     ) {
       toast("Failed to delete directory!", "error");
@@ -88,19 +93,19 @@ export const deleteDir = async (id: number) => {
 };
 
 export const updateDir = async (
-  id: number,
+  uid: string,
   name: string,
-  workspaceId: number,
+  workspaceUid: string,
   path: string,
-  parentId?: number,
+  parentUid?: string,
 ) => {
   try {
     const directory = await invoke<Args, Directory | null>()("update_dir", {
-      id,
+      uid,
       name,
-      workspaceId,
+      workspaceUid,
       path,
-      parentId,
+      parentUid,
     });
 
     if (!directory) {
