@@ -9,7 +9,7 @@ import { create } from "zustand";
 
 interface WorkspaceState {
   workspaces: Array<Partial<Workspace>>;
-  current_workspace: Partial<Workspace>;
+  currentWorkspace: Partial<Workspace>;
   init: (workspaces: Array<Workspace>) => void;
   create: (name: string) => Promise<Workspace | undefined>;
   delete: (id: number) => Promise<void>;
@@ -20,12 +20,12 @@ interface WorkspaceState {
 export const useWorkspace = create<WorkspaceState>((set, get) => ({
   workspaces: [],
 
-  current_workspace: {},
+  currentWorkspace: {},
 
   init: (workspaces) =>
     set({
       workspaces,
-      current_workspace: workspaces.find((w) => w.selected),
+      currentWorkspace: workspaces.find((w) => w.selected),
     }),
 
   create: async (name) => {
@@ -53,7 +53,7 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
 
     set({
       workspaces,
-      current_workspace: workspaces.find((w) => w.selected),
+      currentWorkspace: workspaces.find((w) => w.selected),
     });
 
     return workspaces as Array<Workspace>;

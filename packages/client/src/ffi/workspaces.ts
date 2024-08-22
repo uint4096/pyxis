@@ -9,7 +9,7 @@ export type Workspace = {
   updated_at: string;
 };
 
-export type Args = {
+type Args = {
   list_workspaces: never;
   create_workspace: { name: string; selected: boolean };
   delete_workspace: { id: number };
@@ -69,7 +69,7 @@ export const updateWorkspace = async (
   selected: boolean,
 ) => {
   try {
-    const workspace = await invoke<Args, boolean>()("update_workspace", {
+    const workspace = await invoke<Args, Workspace>()("update_workspace", {
       id,
       name,
       selected,

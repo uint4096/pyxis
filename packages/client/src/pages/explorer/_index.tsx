@@ -5,6 +5,7 @@ import { WorkspaceSelection } from "./forms/workspace-list";
 
 import { useWorkspace } from "../../store/use-workspace";
 import { CreateWorkspace } from "./forms/workspace";
+import { Tree } from "../tree";
 
 export type TConfigContext = {
   storeConfig: StoreConfig;
@@ -13,7 +14,7 @@ export type TConfigContext = {
 };
 
 export const Explorer = () => {
-  const { workspaces, list, current_workspace } = useWorkspace();
+  const { workspaces, list, currentWorkspace } = useWorkspace();
 
   const [showWorkspaceForm, setWorkspaceForm] = useState<boolean>(false);
   const [showWorkspaceSelectionForm, setWorkspaceSelectionForm] =
@@ -32,20 +33,19 @@ export const Explorer = () => {
       setWorkspaceForm(false);
     }
 
-    if (!current_workspace) {
+    if (!currentWorkspace) {
       setWorkspaceSelectionForm(true);
     } else {
       setWorkspaceSelectionForm(false);
       setEditor(true);
     }
-  }, [current_workspace, workspaces]);
+  }, [currentWorkspace, workspaces]);
 
+  console.log("Current workspace", currentWorkspace);
   return (
     <>
       <ExplorerWrapper>
-        {/* {workspaceConfig && systemConfig && storeConfig?.selected_workspace && (
-        <Tree />
-      )} */}
+        {currentWorkspace && <Tree />}
 
         {/* {showEditor && !noWorkspaces && file.name && workspacePath && (
         <Editor
@@ -55,7 +55,7 @@ export const Explorer = () => {
       )} */}
 
         {/* Modals and Forms */}
-        {showWorkspaceForm && (
+        {showWorkspaceForm && !currentWorkspace && (
           <CreateWorkspace setVisibility={setWorkspaceForm} />
         )}
         {showWorkspaceSelectionForm && workspaces.length > 0 && (
