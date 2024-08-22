@@ -56,6 +56,7 @@ impl Migrations for DirectoriesMigration {
             updated_at TEXT NOT NULL,
 
             FOREIGN KEY (workspace_id) REFERENCES workspaces(id)
+            ON DELETE CASCADE
         )";
 
         transaction.execute(sql, ())
