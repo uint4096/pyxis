@@ -47,6 +47,7 @@ impl Migrations for WorkspaceMigration {
     fn run(&self, transaction: &Transaction) -> Result<usize, rusqlite::Error> {
         let sql = "CREATE TABLE IF NOT EXISTS workspaces (
             id   INTEGER PRIMARY KEY AUTOINCREMENT,
+            uid  TEXT NOT NULL,
             name TEXT NOT NULL,
             selected INTEGER NOT NULL,
             created_at TEXT NOT NULL,

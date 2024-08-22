@@ -1,4 +1,5 @@
 use chrono::Utc;
+use nanoid::nanoid;
 use rusqlite::{Connection, Error};
 use tauri::State;
 
@@ -8,6 +9,7 @@ use crate::database::Database;
 pub struct Workspace {
     id: Option<i32>,
     name: String,
+    uid: String,
     selected: bool,
     created_at: String,
     updated_at: String,
@@ -20,6 +22,7 @@ impl Workspace {
         Self {
             id,
             selected,
+            uid: nanoid!(10),
             name,
             created_at: String::from(&current_time),
             updated_at: String::from(&current_time),
@@ -32,12 +35,13 @@ impl Workspace {
             conn.execute(&update_sql, ())?;
         }
 
-        let sql = "INSERT INTO workspaces (name, selected, created_at, updated_at) VALUES (?1, ?2, ?3, ?4)";
+        let sql = "INSERT INTO workspaces (name, uid, selected, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5)";
 
         conn.execute(
             sql,
             (
                 &self.name,
+                &self.uid,
                 &(self.selected as i32),
                 &self.created_at,
                 &self.updated_at,
@@ -49,16 +53,17 @@ impl Workspace {
 
     fn list(conn: &Connection) -> Result<Vec<Self>, Error> {
         let mut stmt =
-            conn.prepare("SELECT id, name, selected, created_at, updated_at from workspaces")?;
+            conn.prepare("SELECT id, uid, name, selected, created_at, updated_at from workspaces")?;
         let workspace_iter = stmt.query_map([], |row| {
-            let selected: i32 = row.get(2)?;
+            let selected: i32 = row.get(3)?;
 
             Ok(Workspace {
                 id: row.get(0)?,
-                name: row.get(1)?,
+                uid: row.get(1)?,
+                name: row.get(2)?,
                 selected: selected != 0,
-                created_at: row.get(3)?,
-                updated_at: row.get(4)?,
+                created_at: row.get(4)?,
+                updated_at: row.get(5)?,
             })
         })?;
 
@@ -76,7 +81,7 @@ impl Workspace {
         }
 
         let sql =
-            "UPDATE workspaces SET name = (?1), selected = (?2), updated_at = (?3) WHERE id = (?4)";
+            "UPDATE workspaces SET name = (?1), selected = (?2), updated_at = (?3) WHERE uid = (?4)";
 
         conn.execute(
             sql,
@@ -84,16 +89,16 @@ impl Workspace {
                 &self.name,
                 &(self.selected as i32),
                 &self.updated_at,
-                &self.id,
+                &self.uid,
             ),
         )?;
 
         Ok(())
     }
 
-    fn delete(id: String, conn: &Connection) -> Result<(), Error> {
-        let sql = "DELETE FROM workspaces WHERE id = (?id)";
-        conn.execute(sql, (id,))?;
+    fn delete(uid: String, conn: &Connection) -> Result<(), Error> {
+        let sql = "DELETE FROM workspaces WHERE uid = (?id)";
+        conn.execute(sql, (uid,))?;
 
         Ok(())
     }
@@ -117,16 +122,19 @@ pub fn create_workspace(
 }
 
 #[tauri::command]
-pub fn list_workspaces(database: State<Database>) -> Vec<Workspace> {
-    let workspaces =
-        Workspace::list(&database.get_connection()).expect("[Workspaces] Failed to fetch!");
-
-    workspaces
+pub fn list_workspaces(database: State<Database>) -> Option<Vec<Workspace>> {
+    match Workspace::list(&database.get_connection()) {
+        Ok(workspaces) => Some(workspaces),
+        Err(e) => {
+            eprintln!("[Workspaces] Failed to fetch! Error: {e}");
+            None
+        }
+    }
 }
 
 #[tauri::command]
-pub fn delete_workspace(id: String, database: State<Database>) -> bool {
-    match Workspace::delete(id, &database.get_connection()) {
+pub fn delete_workspace(uid: String, database: State<Database>) -> bool {
+    match Workspace::delete(uid, &database.get_connection()) {
         Ok(_) => true,
         Err(e) => {
             eprintln!("[Workspaces] Failed to delete! {}", e);
@@ -137,14 +145,14 @@ pub fn delete_workspace(id: String, database: State<Database>) -> bool {
 
 #[tauri::command]
 pub fn update_workspace(
-    id: i32,
+    uid: String,
     name: String,
     selected: bool,
     database: State<Database>,
 ) -> Option<Workspace> {
     let conn = &database.get_connection();
     let workspace = match Workspace::list(conn) {
-        Ok(w) => w.into_iter().find(|w| w.id == Some(id)),
+        Ok(w) => w.into_iter().find(|w| w.uid == uid),
         Err(e) => {
             eprintln!("[Workspaces] Failed to get for update! {}", e);
             None

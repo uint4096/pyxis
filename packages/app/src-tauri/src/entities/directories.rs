@@ -1,4 +1,5 @@
 use chrono::Utc;
+use nanoid::nanoid;
 use rusqlite::{Connection, Error, Result, Row};
 use tauri::State;
 
@@ -7,45 +8,57 @@ use crate::database::Database;
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct Directory {
     id: Option<i32>,
+    uid: String,
     name: String,
-    workspace_id: i32,
+    workspace_uid: String,
     created_at: String,
     updated_at: String,
     path: String,
-    parent_id: Option<i32>,
+    parent_uid: Option<String>,
 }
 
 impl Directory {
     fn new(
         name: String,
-        workspace_id: i32,
+        workspace_uid: String,
         path: String,
-        parent_id: Option<i32>,
+        parent_uid: Option<String>,
         id: Option<i32>,
     ) -> Self {
         let current_time = Utc::now().to_rfc3339();
 
         Self {
             id,
-            workspace_id,
+            uid: nanoid!(10),
+            workspace_uid,
             name,
             path,
-            parent_id,
+            parent_uid,
             created_at: String::from(&current_time),
             updated_at: String::from(&current_time),
         }
     }
 
     fn create(&self, conn: &Connection) -> Result<(), Error> {
-        let sql = "INSERT INTO directories (name, workspace_id, path, parent_id, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6)";
+        let mut workspace_sql = conn.prepare("SELECT id FROM workspaces WHERE uid = ?1")?;
+
+        let workspace_id: i32 = workspace_sql
+            .query_map(&[&self.workspace_uid], |row| -> Result<i32> {
+                Ok(row.get(0)?)
+            })?
+            .map(|res| res.expect("Unable to get workspace to create directory!"))
+            .collect::<Vec<i32>>()[0];
+
+        let sql = "INSERT INTO directories (name, uid, workspace_id, path, parent_uid, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)";
 
         conn.execute(
             sql,
             (
                 &self.name,
-                &self.workspace_id,
+                &self.uid,
+                &workspace_id,
                 &self.path,
-                &self.parent_id,
+                &self.parent_uid,
                 &self.created_at,
                 &self.updated_at,
             ),
@@ -56,30 +69,58 @@ impl Directory {
 
     fn list(
         conn: &Connection,
-        workspace_id: i32,
-        parent_id: Option<i32>,
+        workspace_uid: String,
+        parent_uid: Option<String>,
     ) -> Result<Vec<Self>, Error> {
-        let mut stmt =
-            match parent_id {
-                Some(_) => conn.prepare("SELECT id, name, workspace_id, path, parent_id, created_at, updated_at from directories WHERE workspace_id = ?1 AND parent_id = ?2")?,
-                None => conn.prepare("SELECT id, name, workspace_id, path, parent_id, created_at, updated_at from directories WHERE workspace_id = ?1 AND parent_id IS NULL")?
-            };
+        let mut stmt = match parent_uid {
+            Some(_) => conn.prepare(
+                "SELECT \
+                    d.id, \
+                    d.uid, \
+                    d.name, \
+                    w.uid as workspace_uid, \
+                    d.path, \
+                    d.parent_uid, \
+                    d.created_at, \
+                    d.updated_at \
+                    FROM directories d \
+                    INNER JOIN workspaces w ON d.workspace_id = w.id \
+                    WHERE w.uid = ?1 \
+                    AND d.parent_uid = ?2",
+            )?,
+            None => conn.prepare(
+                "SELECT \
+                    d.id, \
+                    d.uid, \
+                    d.name, \
+                    w.uid as workspace_uid, \
+                    d.path, \
+                    d.parent_uid, \
+                    d.created_at, \
+                    d.updated_at \
+                    FROM directories d \
+                    INNER JOIN workspaces w ON d.workspace_id = w.id \
+                    WHERE w.uid = ?1 \
+                    AND d.parent_uid IS NULL",
+            )?,
+        };
 
         let handler = |row: &Row| -> Result<Directory> {
             Ok(Directory {
                 id: row.get(0)?,
-                name: row.get(1)?,
-                workspace_id: row.get(2)?,
-                path: row.get(3)?,
-                parent_id: row.get(4)?,
-                created_at: row.get(5)?,
-                updated_at: row.get(6)?,
+                uid: row.get(1)?,
+                name: row.get(2)?,
+                workspace_uid: row.get(3)?,
+                path: row.get(4)?,
+                parent_uid: row.get(5)?,
+                created_at: row.get(6)?,
+                updated_at: row.get(7)?,
             })
         };
 
-        let dir_iter = match parent_id {
-            Some(p_id) => stmt.query_map(&[&workspace_id, &p_id], handler)?,
-            None => stmt.query_map(&[&workspace_id], handler)?,
+        let dir_iter = match parent_uid {
+            Some(p_id) => stmt.query_map(&[&workspace_uid, &p_id], handler)?,
+            None => stmt.query_map(&[&workspace_uid], handler)?,
         };
 
         let directories: Vec<Directory> = dir_iter
@@ -91,26 +132,26 @@ impl Directory {
 
     fn update(&self, conn: &Connection) -> Result<(), Error> {
         let sql =
-            "UPDATE directories SET name=(?1), workspace_id=(?2), path=(?3), parent_id=(?4), updated_at = (?5) WHERE id = (?6)";
+            "UPDATE directories SET name=(?1), workspace_uid=(?2), path=(?3), parent_uid=(?4), updated_at = (?5) WHERE uid = (?6)";
 
         conn.execute(
             sql,
             (
                 &self.name,
-                &self.workspace_id,
+                &self.workspace_uid,
                 &self.path,
-                &self.parent_id,
+                &self.parent_uid,
                 &self.updated_at,
-                &self.id,
+                &self.uid,
             ),
         )?;
 
         Ok(())
     }
 
-    fn delete(id: i32, conn: &Connection) -> Result<(), Error> {
-        let sql = "DELETE FROM directories WHERE id = (?1)";
-        conn.execute(sql, (id,))?;
+    fn delete(uid: String, conn: &Connection) -> Result<(), Error> {
+        let sql = "DELETE FROM directories WHERE uid = (?1)";
+        conn.execute(sql, (uid,))?;
 
         Ok(())
     }
@@ -119,12 +160,12 @@ impl Directory {
 #[tauri::command]
 pub fn create_dir(
     name: String,
-    workspace_id: i32,
+    workspace_uid: String,
     path: String,
-    parent_id: Option<i32>,
+    parent_uid: Option<String>,
     database: State<Database>,
 ) -> Option<Directory> {
-    let directory = Directory::new(name, workspace_id, path, parent_id, None);
+    let directory = Directory::new(name, workspace_uid, path, parent_uid, None);
 
     match directory.create(&database.get_connection()) {
         Ok(_) => Some(directory),
@@ -137,19 +178,22 @@ pub fn create_dir(
 
 #[tauri::command]
 pub fn list_dirs(
-    workspace_id: i32,
-    parent_id: Option<i32>,
+    workspace_uid: String,
+    parent_uid: Option<String>,
     database: State<Database>,
-) -> Vec<Directory> {
-    let directories = Directory::list(&database.get_connection(), workspace_id, parent_id)
-        .expect("[Directories] Failed to fetch!");
-
-    directories
+) -> Option<Vec<Directory>> {
+    match Directory::list(&database.get_connection(), workspace_uid, parent_uid) {
+        Ok(directories) => Some(directories),
+        Err(e) => {
+            eprintln!("[Directories] Failed to fetch! Error: {e}");
+            None
+        }
+    }
 }
 
 #[tauri::command]
-pub fn delete_dir(id: i32, database: State<Database>) -> bool {
-    match Directory::delete(id, &database.get_connection()) {
+pub fn delete_dir(uid: String, database: State<Database>) -> bool {
+    match Directory::delete(uid, &database.get_connection()) {
         Ok(_) => true,
         Err(e) => {
             eprintln!("[Directories] Failed to delete! {}", e);
@@ -162,13 +206,13 @@ pub fn delete_dir(id: i32, database: State<Database>) -> bool {
 pub fn update_dir(
     id: i32,
     name: String,
-    workspace_id: i32,
+    workspace_uid: String,
     path: String,
-    parent_id: Option<i32>,
+    parent_uid: Option<String>,
     database: State<Database>,
 ) -> Option<Directory> {
     let conn = &database.get_connection();
-    let directory = match Directory::list(conn, workspace_id, parent_id) {
+    let directory = match Directory::list(conn, workspace_uid.clone(), parent_uid.clone()) {
         Ok(w) => w.into_iter().find(|w| w.id == Some(id)),
         Err(e) => {
             eprintln!("[Directories] Failed to get for update! {}", e);
@@ -178,9 +222,9 @@ pub fn update_dir(
 
     if let Some(mut dir) = directory {
         dir.name = name;
-        dir.workspace_id = workspace_id;
+        dir.workspace_uid = workspace_uid;
         dir.path = path;
-        dir.parent_id = parent_id;
+        dir.parent_uid = parent_uid;
         dir.updated_at = Utc::now().to_rfc3339();
 
         match dir.update(conn) {

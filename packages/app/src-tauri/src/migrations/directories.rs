@@ -47,9 +47,10 @@ impl Migrations for DirectoriesMigration {
     fn run(&self, transaction: &Transaction) -> Result<usize, rusqlite::Error> {
         let sql = "CREATE TABLE IF NOT EXISTS directories (
             id   INTEGER PRIMARY KEY AUTOINCREMENT,
+            uid  TEXT NOT NULL,
             name TEXT NOT NULL,
-            workspace_id INTEGER NOT NULL,
-            parent_id INTEGER,
+            workspace_id INTEGER NULL,
+            parent_uid TEXT,
             path TEXT NOT NULL UNIQUE,
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL,
