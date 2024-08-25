@@ -1,5 +1,5 @@
 import { toast } from "../utils";
-import { invoke } from "./invoke_v2";
+import { invoke } from "./invoke";
 
 export type Directory = {
   id?: number;

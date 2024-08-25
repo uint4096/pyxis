@@ -1,155 +1,61 @@
 import { styled } from "@linaria/react";
-import { useCallback, useEffect, useState } from "react";
-import Editor from "../editor/editor";
-import { readWorkspaceConfig, read_dir_tree } from "../../ffi";
-import type {
-  StoreConfig,
-  SystemConfig,
-  WorkspaceConfig,
-} from "../../store/types";
-import { StoreForm } from "./forms/store";
-import { NoWorkspaceMessage } from "./forms/no-workspace";
-import { CreateWorkspace } from "./forms/workspace";
-import { WorkspaceSelection } from "./forms/workspace-list";
+import { useEffect, useState } from "react";
+import { WorkspaceSelection, CreateWorkspace } from "./forms";
+import { useWorkspace } from "../../store";
 import { Tree } from "../tree";
-import { useWorkspace, useFile, useStore, useSystem } from "../../store";
-
-export type TConfigContext = {
-  storeConfig: StoreConfig;
-  systemConfig: SystemConfig;
-  workspacePath: string;
-};
 
 export const Explorer = () => {
-  const {
-    config: workspaceConfig,
-    path: workspacePath,
-    initConfig: initWorkspaceConfig,
-  } = useWorkspace();
-  const {
-    config: storeConfig,
-    readFromDisk: readStoreConfig,
-    path: storePath,
-  } = useStore();
-  const { config: systemConfig, readFromDisk: readSystemConfig } = useSystem();
-  const { file, content, saveToDisk: saveFileContent } = useFile();
+  const { workspaces, list, currentWorkspace } = useWorkspace();
 
-  const [showStoreForm, setStoreForm] = useState<boolean>(false);
   const [showWorkspaceForm, setWorkspaceForm] = useState<boolean>(false);
   const [showWorkspaceSelectionForm, setWorkspaceSelectionForm] =
     useState<boolean>(false);
-  const [noWorkspaces, setNoWorkspaces] = useState<boolean>(false);
 
   const [showEditor, setEditor] = useState<boolean>(false);
 
-  const onWorkspaceCreation = useCallback(() => {
-    if (noWorkspaces) {
-      setNoWorkspaces(false);
+  useEffect(() => {
+    (async () => await list())();
+  }, [list]);
+
+  useEffect(() => {
+    if (!workspaces || !workspaces.length) {
+      setWorkspaceForm(true);
+    } else {
+      setWorkspaceForm(false);
     }
 
-    setWorkspaceForm(false);
-    setEditor(true);
-  }, [noWorkspaces]);
-
-  useEffect(() => {
-    (async () => {
-      const systemConfig = await readSystemConfig();
-
-      if (!systemConfig || !systemConfig.store) {
-        setStoreForm(true);
-        return;
-      }
-    })();
-  }, [readSystemConfig]);
-
-  useEffect(() => {
-    (async () => {
-      if (!systemConfig || !systemConfig.store) {
-        return;
-      }
-
-      const storeConfig = await readStoreConfig(systemConfig.store);
-
-      if (
-        !storeConfig ||
-        !storeConfig.workspaces ||
-        storeConfig.workspaces.length === 0
-      ) {
-        setNoWorkspaces(true);
-        return;
-      }
-    })();
-  }, [readStoreConfig, systemConfig]);
-
-  useEffect(() => {
-    (async () => {
-      if (!storeConfig || !storeConfig.workspaces?.length || !systemConfig) {
-        return;
-      }
-
-      if (!storeConfig.selected_workspace) {
-        setWorkspaceSelectionForm(true);
-
-        // Corrupted workspace? @todo: How can we handle this?
-        return;
-      }
-
-      const workspacePath = `${storePath}/${storeConfig.selected_workspace.name}`;
-      const workspaceConfig = await readWorkspaceConfig<WorkspaceConfig>({
-        path: workspacePath,
-      });
-
-      if (!workspaceConfig) {
-        // Corrupted workspace? @todo: How can we handle this?
-        return;
-      }
-
-      if (!workspaceConfig.tree || workspaceConfig.tree.length === 0) {
-        const tree = (await read_dir_tree(workspacePath)) ?? [];
-        initWorkspaceConfig({ ...workspaceConfig, tree }, workspacePath);
-      } else {
-        initWorkspaceConfig({ ...workspaceConfig }, workspacePath);
-      }
-
+    if (!currentWorkspace) {
+      setWorkspaceSelectionForm(true);
+    } else {
+      setWorkspaceSelectionForm(false);
       setEditor(true);
-    })();
-  }, [initWorkspaceConfig, storeConfig, storePath, systemConfig]);
+    }
+  }, [currentWorkspace, workspaces]);
 
   return (
-    <ExplorerWrapper>
-      {workspaceConfig && systemConfig && storeConfig?.selected_workspace && (
-        <Tree />
-      )}
+    <>
+      <ExplorerWrapper>
+        {currentWorkspace && <Tree />}
 
-      {showEditor && !noWorkspaces && file.name && workspacePath && (
+        {/* {showEditor && !noWorkspaces && file.name && workspacePath && (
         <Editor
           fileWithContent={{ ...file, content }}
           writer={saveFileContent(workspacePath)}
         />
-      )}
+      )} */}
 
-      {/* Modals and Forms */}
-      {noWorkspaces && (
-        <NoWorkspaceMessage onCreate={() => setWorkspaceForm(true)} />
-      )}
-      {showStoreForm && <StoreForm setVisibility={setStoreForm} />}
-      {systemConfig && showWorkspaceForm && (
-        <CreateWorkspace
-          onCreate={onWorkspaceCreation}
-          // storeConfig={storeConfig}
-        />
-      )}
-      {showWorkspaceSelectionForm &&
-        storeConfig &&
-        storeConfig.workspaces &&
-        systemConfig?.store &&
-        storeConfig.workspaces.length > 0 && (
+        {/* Modals and Forms */}
+        {showWorkspaceForm && !currentWorkspace && (
+          <CreateWorkspace setVisibility={setWorkspaceForm} />
+        )}
+        {showWorkspaceSelectionForm && workspaces.length > 0 && (
           <WorkspaceSelection
-            workspaces={storeConfig.workspaces}
+            workspaces={workspaces}
             setVisibility={setWorkspaceSelectionForm}
           />
         )}
-    </ExplorerWrapper>
+      </ExplorerWrapper>
+    </>
   );
 };
 

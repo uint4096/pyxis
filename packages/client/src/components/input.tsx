@@ -24,7 +24,7 @@ export const InputInPlace = ({
   <Input
     value={value}
     placeholder={placeholder ?? ""}
-    onChange={(e: any) => onChange(e.currentTarget.value)}
+    onChange={(e) => onChange(e.currentTarget.value)}
     variation={size}
     readOnly={readonly ?? false}
     autoFocus={true}

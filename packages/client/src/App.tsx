@@ -11,7 +11,7 @@ import "./App.css";
 // import { getStepsForTransformation } from "string-differ";
 // import { useWebsockets } from "./hooks/useWebsockets";
 // import Editor from "./pages/editor/editor";
-import { Explorer } from "./pages/explorer/_index";
+import { Explorer } from "./pages/explorer";
 import "react-toastify/dist/ReactToastify.css";
 
 function App() {

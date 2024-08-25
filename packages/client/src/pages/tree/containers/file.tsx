@@ -1,8 +1,9 @@
-import { useWorkspace } from "../../../store/use-workspace";
-import { useTreeStore } from "../../../store/use-tree";
-import type { File } from "../../../ffi/files";
-import { getOverflowMenu, type MenuOption } from "../../../components";
+import { styled } from "@linaria/react";
 import { useCallback, useRef } from "react";
+
+import { useWorkspace, useTreeStore } from "../../../store";
+import type { File } from "../../../ffi";
+import { getOverflowMenu, type MenuOption } from "../../../components";
 import { noop } from "../../../utils";
 import { useOutsideEvent } from "../../../hooks";
 import {
@@ -11,7 +12,6 @@ import {
   noDisplay,
   OptionsContainer,
 } from "./styles";
-import { styled } from "@linaria/react";
 
 type FileContainerProps = {
   file: Partial<File>;

@@ -1,10 +1,9 @@
 import { styled } from "@linaria/react";
 import { useCallback, useState } from "react";
 
-import { TextInput } from "../../../components/input";
-import { Modal } from "../../../components/modal";
+import { Modal, TextInput } from "../../../components";
 import { FormWrapper } from "./common";
-import { useWorkspace } from "../../../store/use-workspace";
+import { useWorkspace } from "../../../store";
 
 type WorkspaceSelectionProps = {
   setVisibility: React.Dispatch<React.SetStateAction<boolean>>;

@@ -21,6 +21,8 @@ export interface DirectoryState {
 
 export type Node = File | (Directory & { children: Array<Node> });
 
+export type Document = "file" | "dir";
+
 export interface FileState {
   tree: Array<Node>;
   findNode: (uid: string, tree?: Array<Node>) => Node | undefined;

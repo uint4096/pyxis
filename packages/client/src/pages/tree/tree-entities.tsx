@@ -2,10 +2,9 @@ import { styled } from "@linaria/react";
 import { useCallback, useState } from "react";
 import type { Document } from "../../types";
 import { InputInPlace } from "../../components";
-import { DirContainer, TreeDirectory } from "./containers/dir";
-import { isFile, useTreeStore } from "../../store/use-tree";
 import { FileContainer } from "./containers/file";
-import { Node } from "../../store/types";
+import { DirContainer, TreeDirectory } from "./containers/dir";
+import { isFile, Node, useTreeStore } from "../../store";
 
 type EntityProps = {
   node: TreeDirectory | Node;

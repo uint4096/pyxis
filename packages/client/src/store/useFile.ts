@@ -1,62 +1,116 @@
-import { create } from "zustand";
-import type { File } from "../types";
-import { readFileContent, saveContent } from "../ffi";
-import { PATH_SEPARATOR } from "../utils";
+import {
+  type File,
+  createFile,
+  updateFile,
+  getFiles,
+  deleteFile,
+} from "../ffi";
+import type { StateCreator } from "zustand";
+import { toast } from "../utils";
+import type { DirectoryState, DirWithChildren, FileState, Node } from "./types";
 
-export type FileStore = {
-  file: Partial<File>;
-  content: string;
-  unselect: () => void;
-  select: (file: File) => void;
-  readFromDisk: (workspacePath: string) => Promise<void>;
-  saveToDisk: (workspacePath: string) => (content: string) => Promise<void>;
+const getFilesForDirs = async (
+  workspaceUid: string,
+  dir: DirWithChildren,
+): Promise<Node> => {
+  const files = await getFiles(workspaceUid, dir.uid);
+
+  return {
+    ...dir,
+    children: [
+      ...(await Promise.all(
+        (dir.children || []).map((d) => getFilesForDirs(workspaceUid, d)),
+      )),
+      ...files,
+    ],
+  };
 };
 
-export const useFile = create<FileStore>((set, get) => ({
-  file: {},
+type DirectoryLike = { [k: string]: unknown; children: Array<unknown> };
+export const isFile = (element: File | DirectoryLike): element is File =>
+  !!(element as File).title;
 
-  content: "",
+export const fileSlice: StateCreator<
+  DirectoryState & FileState,
+  [],
+  [],
+  FileState
+> = (set, get) => ({
+  tree: [],
 
-  select: (file: File) => set({ file }),
-
-  unselect: () => set({ file: {} }),
-
-  readFromDisk: async (workspacePath) => {
-    const { file } = get();
-    if (!file.name) {
-      //@todo: handle error and show toast message
+  createFile: async (title, workspaceUid, path, links, tags, dirUid) => {
+    const file = await createFile(
+      title,
+      workspaceUid,
+      path,
+      links,
+      tags,
+      dirUid,
+    );
+    if (!file) {
       return;
     }
 
-    const content = await readFileContent<string>({
-      file: <File>file,
-      path: `${workspacePath}${file.path}`,
-    });
+    await get().createTree(workspaceUid);
 
-    if (content == null) {
-      //@todo: handle error and show toast message
-      return;
-    }
-
-    set({ content });
+    return file;
   },
 
-  saveToDisk: (workspacePath) => async (content) => {
-    const { file } = get();
-    if (!file.name) {
-      //@todo: handle error and show toast message
+  findNode: (uid: string, tree): Node | undefined =>
+    (tree ?? get().tree).reduce<Node | undefined>((acc, node) => {
+      if (acc) {
+        return acc;
+      }
+
+      if (node.uid === uid) {
+        return node;
+      }
+
+      return isFile(node) ? undefined : get().findNode(uid, node.children);
+    }, undefined),
+
+  deleteFile: async (file: File) => {
+    if (!file.uid) {
       return;
     }
 
-    const res = await saveContent({
-      path: `${workspacePath}${PATH_SEPARATOR}${file.path}`,
-      file: <File>file,
-      content,
-    });
+    await deleteFile(file.uid);
 
-    if (!res) {
-      //@todo: handle error and show toast message
+    await get().createTree(file.workspace_uid);
+  },
+
+  updateFile: async (file: File) => {
+    if (!file.id) {
       return;
+    }
+
+    const { uid, title, workspace_uid, path, dir_uid, tags, links } = file;
+    await updateFile(uid, title, workspace_uid, path, links, tags, dir_uid);
+
+    await get().createTree(workspace_uid);
+  },
+
+  buildTree: async (workspaceUid: string) => {
+    const builtDirs = await get().buildDir(workspaceUid);
+
+    return [
+      ...(await Promise.all(
+        builtDirs.map((dir) => getFilesForDirs(workspaceUid, dir)),
+      )),
+      ...(await getFiles(workspaceUid)),
+    ];
+  },
+
+  createTree: async (workspaceUid: string) => {
+    try {
+      const tree = await get().buildTree(workspaceUid);
+
+      set({ tree });
+
+      return tree;
+    } catch (e) {
+      toast("Failed to get files!");
+      return [];
     }
   },
-}));
+});

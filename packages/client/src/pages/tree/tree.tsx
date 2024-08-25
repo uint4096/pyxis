@@ -1,8 +1,7 @@
 import { styled } from "@linaria/react";
 import { Entities } from "./tree-entities";
-import { useWorkspace } from "../../store/use-workspace";
 import { useEffect } from "react";
-import { useTreeStore } from "../../store/use-tree";
+import { useWorkspace, useTreeStore } from "../../store";
 
 export const Tree = () => {
   const { tree, createTree } = useTreeStore();

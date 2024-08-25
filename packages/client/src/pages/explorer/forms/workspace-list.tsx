@@ -1,9 +1,9 @@
 import { styled } from "@linaria/react";
 import { useCallback } from "react";
-import { Modal } from "../../../components/modal";
+import { Modal } from "../../../components";
 import { FormWrapper } from "./common";
 import { Workspace } from "../../../ffi";
-import { useWorkspace } from "../../../store/use-workspace";
+import { useWorkspace } from "../../../store";
 
 type WorkspaceListProps = {
   workspaces: Array<Partial<Workspace>>;

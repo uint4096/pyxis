@@ -2,8 +2,9 @@ import { css } from "@linaria/core";
 import { styled } from "@linaria/react";
 import { HiPlus } from "react-icons/hi";
 import { MdKeyboardArrowDown, MdKeyboardArrowRight } from "react-icons/md";
-import { getOverflowMenu, type MenuOption } from "../../../components";
 import { useCallback, useRef } from "react";
+
+import { getOverflowMenu, type MenuOption } from "../../../components";
 import type { Document } from "../../../types";
 import {
   flexDisplay,
@@ -11,9 +12,8 @@ import {
   noDisplay,
   OptionsContainer,
 } from "./styles";
-import { useTreeStore } from "../../../store/use-tree";
 import { noop } from "../../../utils";
-import { DirWithChildren, Node } from "../../../store/types";
+import { useTreeStore, type DirWithChildren, type Node } from "../../../store";
 
 export type TreeDirectory = {
   children: Array<Node>;

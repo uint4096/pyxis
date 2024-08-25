@@ -1,5 +1,5 @@
 import { toast } from "../utils";
-import { invoke } from "./invoke_v2";
+import { invoke } from "./invoke";
 
 export type Workspace = {
   id?: number;
@@ -34,7 +34,7 @@ export const createWorkspace = async (name: string, selected: boolean) => {
     return workspace;
   } catch (e) {
     console.error("[Workspace] Create failed!", e);
-    toast("Failed to create workspace!", "error");
+    toast("Failed to create workspace!");
   }
 };
 
@@ -52,7 +52,7 @@ export const getWorkspaces = async () => {
     return workspaces;
   } catch (e) {
     console.error("[Workspace] Failed to fetch!", e);
-    toast("Failed to get workspaces!", "error");
+    toast("Failed to get workspaces!");
   }
 };
 
@@ -63,13 +63,13 @@ export const deleteWorkspace = async (uid: string) => {
         uid,
       }))
     ) {
-      toast("Failed to delete workspace!", "error");
+      toast("Failed to delete workspace!");
     }
 
     return;
   } catch (e) {
     console.error("[Workspace] Failed to delete!", e);
-    toast("Failed to delete workspace!", "error");
+    toast("Failed to delete workspace!");
   }
 };
 
@@ -86,12 +86,12 @@ export const updateWorkspace = async (
     });
 
     if (!workspace) {
-      toast("Failed to update workspace!", "error");
+      toast("Failed to update workspace!");
     }
 
     return workspace;
   } catch (e) {
     console.error("[Workspace] Failed to update!", e);
-    toast("Failed to update workspace!", "error");
+    toast("Failed to update workspace!");
   }
 };

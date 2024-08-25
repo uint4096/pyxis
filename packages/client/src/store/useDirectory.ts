@@ -1,6 +1,6 @@
 import { createDir, updateDir, getDirs, deleteDir } from "../ffi";
-import { StateCreator } from "zustand";
-import { DirectoryState, DirWithChildren, FileState } from "./types";
+import type { StateCreator } from "zustand";
+import type { DirectoryState, DirWithChildren, FileState } from "./types";
 
 export const dirSlice: StateCreator<
   DirectoryState & FileState,
