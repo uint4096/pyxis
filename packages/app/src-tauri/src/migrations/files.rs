@@ -5,11 +5,11 @@ use rusqlite::{
 };
 use std::fmt::Debug;
 
-pub struct DirectoriesMigration {
+pub struct FilesMigration {
     pub name: String,
 }
 
-impl ToSql for DirectoriesMigration {
+impl ToSql for FilesMigration {
     fn to_sql(&self) -> rusqlite::Result<rusqlite::types::ToSqlOutput<'_>> {
         Ok(ToSqlOutput::Owned(rusqlite::types::Value::Text(
             self.name.clone(),
@@ -17,25 +17,25 @@ impl ToSql for DirectoriesMigration {
     }
 }
 
-impl FromSql for DirectoriesMigration {
+impl FromSql for FilesMigration {
     fn column_result(
         value: rusqlite::types::ValueRef<'_>,
     ) -> Result<Self, rusqlite::types::FromSqlError> {
-        value.as_str().map(|s| DirectoriesMigration {
+        value.as_str().map(|s| FilesMigration {
             name: s.to_string(),
         })
     }
 }
 
-impl Debug for DirectoriesMigration {
+impl Debug for FilesMigration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("DirectoriesMigration")
+        f.debug_struct("FilesMigration")
             .field("name", &self.name)
             .finish()
     }
 }
 
-impl Clone for DirectoriesMigration {
+impl Clone for FilesMigration {
     fn clone(&self) -> Self {
         Self {
             name: self.name.clone(),
@@ -43,19 +43,21 @@ impl Clone for DirectoriesMigration {
     }
 }
 
-impl Migrations for DirectoriesMigration {
+impl Migrations for FilesMigration {
     fn run(&self, transaction: &Transaction) -> Result<usize, rusqlite::Error> {
-        let sql = "CREATE TABLE IF NOT EXISTS directories (
+        let sql = "CREATE TABLE IF NOT EXISTS files (
             id   INTEGER PRIMARY KEY AUTOINCREMENT,
             uid  TEXT NOT NULL,
             name TEXT NOT NULL,
-            workspace_id INTEGER NOT NULL,
-            parent_uid TEXT,
+            dir_id INTEGER NOT NULL,
+            title TEXT NOT NULL,
             path TEXT NOT NULL UNIQUE,
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL,
+            tags TEXT,
+            links TEXT,
 
-            FOREIGN KEY (workspace_id) REFERENCES workspaces(id)
+            FOREIGN KEY (dir_id) REFERENCES directories(id)
             ON DELETE CASCADE
         )";
 
@@ -72,4 +74,4 @@ impl Migrations for DirectoriesMigration {
     }
 }
 
-impl MigrationsTrait for DirectoriesMigration {}
+impl MigrationsTrait for FilesMigration {}
