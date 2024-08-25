@@ -1,34 +1,31 @@
 import { styled } from "@linaria/react";
-import { KeyboardEventHandler, useCallback, useState } from "react";
-import type { Document, File, Directory } from "../../types";
+import { useCallback, useState } from "react";
+import type { Document } from "../../types";
 import { InputInPlace } from "../../components";
-import { nanoid } from "nanoid";
-import { pathToDir, isFileEntity } from "../../utils";
-import { useWorkspace } from "../../store";
+import { DirContainer, TreeDirectory } from "./containers/dir";
+import { isFile, useTreeStore } from "../../store/use-tree";
 import { FileContainer } from "./containers/file";
-import { DirContainer } from "./containers/dir";
+import { Node } from "../../store/types";
 
 type EntityProps = {
-  dir: Directory;
+  node: TreeDirectory | Node;
+  workspaceUid: string;
 };
 
-export const Entities = ({ dir }: EntityProps) => {
-  const {
-    config: workspaceConfig,
-    path: workspacePath,
-    addEntity,
-  } = useWorkspace();
-
+export const Entities = ({ node, workspaceUid }: EntityProps) => {
   const [collapased, setCollapsed] = useState(false);
   const [newDocument, setNewDocument] = useState<Document>();
   const [documentName, setDocumentName] = useState("");
 
-  const [overflowPopup, setOverflowPopup] = useState("");
+  const [overflowPopup, setOverflowPopup] = useState<string | undefined>();
 
-  const { id, content: tree } = dir;
+  const { findNode, createDir, createFile } = useTreeStore();
 
-  const inputKeydown: KeyboardEventHandler<HTMLInputElement> = useCallback(
-    async (e) => {
+  const inputKeydown = useCallback(
+    async (
+      e: React.KeyboardEvent<HTMLInputElement>,
+      parentUid: string | undefined,
+    ) => {
       if (e.key === "Escape") {
         setDocumentName("");
         setNewDocument(undefined);
@@ -39,79 +36,63 @@ export const Entities = ({ dir }: EntityProps) => {
         return;
       }
 
-      const currentTime = new Date().toISOString();
-      const { path: entityPath } = pathToDir(id, workspaceConfig?.tree);
-      const path = `${entityPath}/${documentName}`;
+      const parent = parentUid ? findNode(parentUid) : undefined;
+      const entityPath = `${parent?.path ?? ""}/${documentName}`;
 
-      const entity =
-        newDocument === "file"
-          ? {
-              name: documentName,
-              title: documentName,
-              updated_at: currentTime,
-              created_at: currentTime,
-              owned_by: "", //@todo: to implement,
-              links: [],
-              tags: [],
-              whitelisted_groups: [],
-              whitelisted_users: [],
-              hidden: false,
-              path,
-            }
-          : {
-              name: documentName,
-              id: nanoid(10),
-              content: [],
-              path,
-            };
-
-      await (newDocument === "file"
-        ? addEntity(entity as File)
-        : addEntity(entity as Directory));
+      if (newDocument === "file") {
+        await createFile(
+          documentName,
+          workspaceUid,
+          entityPath,
+          [],
+          [],
+          parent?.uid,
+        );
+      } else {
+        await createDir(documentName, workspaceUid, entityPath, parent?.uid);
+      }
 
       setDocumentName("");
       setNewDocument(undefined);
     },
-    [id, workspaceConfig?.tree, documentName, newDocument, addEntity],
+    [findNode, documentName, newDocument, createFile, workspaceUid, createDir],
   );
 
   return (
     <DirTreeWrapper>
-      <DirContainer
-        collapsed={collapased}
-        setCollapsed={setCollapsed}
-        dir={dir}
-        overflowPopup={overflowPopup}
-        setOverflowPopup={setOverflowPopup}
-        setNewDocument={setNewDocument}
-      />
+      {isFile(node) ? (
+        <FileContainer
+          file={node}
+          overflowPopup={overflowPopup}
+          setOverflowPopup={setOverflowPopup}
+        />
+      ) : (
+        <>
+          <DirContainer
+            collapsed={collapased}
+            setCollapsed={setCollapsed}
+            dir={node}
+            overflowPopup={overflowPopup}
+            setOverflowPopup={setOverflowPopup}
+            setNewDocument={setNewDocument}
+          />
 
-      {!collapased && (
-        <EntityContainer>
-          {newDocument && (
-            <InputInPlace
-              size="small"
-              value={documentName}
-              onKeyDown={inputKeydown}
-              onChange={setDocumentName}
-            />
-          )}
-          {tree.map((entity) =>
-            isFileEntity(entity) ? (
-              !entity.File.hidden &&
-              workspacePath && (
-                <FileContainer
-                  file={entity.File}
-                  dirId={dir.id}
-                  overflowPopup={overflowPopup}
-                  setOverflowPopup={setOverflowPopup}
+          {!collapased && (
+            <EntityContainer>
+              {newDocument && (
+                <InputInPlace
+                  size="small"
+                  value={documentName}
+                  onKeyDown={(e) => inputKeydown(e, node.uid)}
+                  onChange={setDocumentName}
                 />
-              )
-            ) : (
-              <Entities dir={entity.Dir} key={entity.Dir.id} />
-            ),
+              )}
+              {(node.children ?? []).map((dir) => (
+                <Entities node={dir} workspaceUid={workspaceUid} key={dir.id} />
+              ))}
+            </EntityContainer>
           )}
-        </EntityContainer>
+        </>
       )}
     </DirTreeWrapper>
   );

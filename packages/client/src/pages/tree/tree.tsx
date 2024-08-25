@@ -1,20 +1,29 @@
 import { styled } from "@linaria/react";
 import { Entities } from "./tree-entities";
-import { useWorkspace } from "../../store/useWorkspace";
+import { useWorkspace } from "../../store/use-workspace";
+import { useEffect } from "react";
+import { useTreeStore } from "../../store/use-tree";
 
 export const Tree = () => {
-  const { config: wsConfig } = useWorkspace();
+  const { tree, createTree } = useTreeStore();
+  const { currentWorkspace } = useWorkspace();
+
+  useEffect(() => {
+    if (!tree.length && currentWorkspace?.uid) {
+      createTree(currentWorkspace.uid);
+    }
+  }, [createTree, currentWorkspace.uid, tree.length]);
 
   return (
     <EntitiesWrapper>
-      {wsConfig.tree && wsConfig.id && wsConfig.name && (
+      {!!currentWorkspace?.uid && tree && (
         <Entities
-          dir={{
-            content: wsConfig.tree,
-            id: wsConfig.id,
-            name: wsConfig.name,
-            path: "",
+          node={{
+            children: tree,
+            uid: currentWorkspace.uid,
+            name: currentWorkspace.name ?? "",
           }}
+          workspaceUid={currentWorkspace.uid}
         />
       )}
     </EntitiesWrapper>

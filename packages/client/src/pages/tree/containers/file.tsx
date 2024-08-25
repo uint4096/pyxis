@@ -1,7 +1,8 @@
-import { useFile, useWorkspace } from "../../../store";
-import type { File } from "../../../types";
+import { useWorkspace } from "../../../store/use-workspace";
+import { useTreeStore } from "../../../store/use-tree";
+import type { File } from "../../../ffi/files";
 import { getOverflowMenu, type MenuOption } from "../../../components";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useRef } from "react";
 import { noop } from "../../../utils";
 import { useOutsideEvent } from "../../../hooks";
 import {
@@ -14,27 +15,24 @@ import { styled } from "@linaria/react";
 
 type FileContainerProps = {
   file: Partial<File>;
-  dirId: string;
-  setOverflowPopup: React.Dispatch<React.SetStateAction<string>>;
-  overflowPopup: string;
+  setOverflowPopup: React.Dispatch<React.SetStateAction<string | undefined>>;
+  overflowPopup: string | undefined;
 };
 
 export const FileContainer = ({
   file,
-  dirId,
   setOverflowPopup,
   overflowPopup,
 }: FileContainerProps) => {
-  const { path: workspacePath, removeEntity } = useWorkspace();
-  const { select, readFromDisk, file: selectedFile, unselect } = useFile();
-
+  const { currentWorkspace } = useWorkspace();
+  const { deleteFile } = useTreeStore();
   const optionsRef = useRef<HTMLDivElement>(null);
 
   useOutsideEvent(optionsRef, () => {
     setOverflowPopup("");
   });
 
-  if (!workspacePath || !file?.name) {
+  if (!currentWorkspace || !file?.title) {
     return <></>;
   }
 
@@ -48,33 +46,31 @@ export const FileContainer = ({
     },
     {
       handler: useCallback(async () => {
-        if (selectedFile.path === file.path) {
-          unselect();
-        }
+        // if (selectedFile.path === file.path) {
+        //   unselect();
+        // }
 
-        removeEntity(file as File);
-      }, [file, removeEntity, selectedFile.path, unselect]),
+        deleteFile(file as File);
+      }, [deleteFile, file]),
       id: "delete",
       name: "Delete",
     },
   ];
 
-  const id = useMemo(() => `${dirId}/${file.name}`, [dirId, file.name]);
-
   return (
     <NameContainer
-      onClick={() => (
-        unselect(), select(file as File), readFromDisk(workspacePath)
-      )}
+      onClick={() => {
+        // (unselect(), select(file as File), readFromDisk(workspacePath))
+      }}
     >
-      <FileName>{file.name}</FileName>
+      <FileName>{file.title}</FileName>
       <OptionsContainer
-        className={overflowPopup === id ? flexDisplay : noDisplay}
+        className={overflowPopup === file.id ? flexDisplay : noDisplay}
       >
         <FileOverflow
           options={fileMenuOptions}
-          onClick={() => setOverflowPopup(id)}
-          showMenu={id === overflowPopup}
+          onClick={() => setOverflowPopup(file.uid)}
+          showMenu={file.uid === overflowPopup}
           onKeyDown={(e) =>
             e.key === "Escape" ? setOverflowPopup("") : noop()
           }

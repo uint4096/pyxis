@@ -1,17 +1,10 @@
 import { styled } from "@linaria/react";
 import { useEffect, useState } from "react";
-import type { StoreConfig, SystemConfig } from "../../store/types";
 import { WorkspaceSelection } from "./forms/workspace-list";
 
 import { useWorkspace } from "../../store/use-workspace";
 import { CreateWorkspace } from "./forms/workspace";
 import { Tree } from "../tree";
-
-export type TConfigContext = {
-  storeConfig: StoreConfig;
-  systemConfig: SystemConfig;
-  workspacePath: string;
-};
 
 export const Explorer = () => {
   const { workspaces, list, currentWorkspace } = useWorkspace();
@@ -41,7 +34,6 @@ export const Explorer = () => {
     }
   }, [currentWorkspace, workspaces]);
 
-  console.log("Current workspace", currentWorkspace);
   return (
     <>
       <ExplorerWrapper>
