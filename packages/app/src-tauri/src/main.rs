@@ -12,13 +12,14 @@ mod writer;
 
 use database::Database;
 use entities::directories::{create_dir, delete_dir, list_dirs, update_dir};
+use entities::files::{create_file, delete_file, list_files, update_file};
 use entities::workspaces::{create_workspace, delete_workspace, list_workspaces, update_workspace};
 use migrations::run_migrations;
 
 use crate::ffi::{
-    create_directory, create_file, delete_directory, delete_file, read_file, read_store_config,
-    read_system_config, read_workspace_config, read_workspace_tree, rename_dir, rename_file,
-    write_file, write_store_config, write_system_config, write_workspace_config,
+    create_directory, delete_directory, read_file, read_store_config, read_system_config,
+    read_workspace_config, read_workspace_tree, rename_dir, rename_file, write_file,
+    write_store_config, write_system_config, write_workspace_config,
 };
 use tauri::{App, Manager};
 
@@ -39,9 +40,7 @@ fn main() {
             read_workspace_tree,
             read_system_config,
             write_system_config,
-            create_file,
             rename_file,
-            delete_file,
             create_directory,
             rename_dir,
             delete_directory,
@@ -54,7 +53,11 @@ fn main() {
             create_dir,
             list_dirs,
             delete_dir,
-            update_dir
+            update_dir,
+            create_file,
+            delete_file,
+            list_files,
+            update_file
         ])
         .setup(|app: &mut App| {
             let window = app.get_window("main").expect("Failed to get main window!");

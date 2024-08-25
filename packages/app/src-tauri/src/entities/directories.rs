@@ -40,14 +40,12 @@ impl Directory {
     }
 
     fn create(&self, conn: &Connection) -> Result<(), Error> {
-        let mut workspace_sql = conn.prepare("SELECT id FROM workspaces WHERE uid = ?1")?;
-
-        let workspace_id: i32 = workspace_sql
-            .query_map(&[&self.workspace_uid], |row| -> Result<i32> {
+        let workspace_id: i32 = {
+            let mut workspace_sql = conn.prepare("SELECT id FROM workspaces WHERE uid = ?1")?;
+            workspace_sql.query_row(&[&self.workspace_uid], |row| -> Result<i32> {
                 Ok(row.get(0)?)
             })?
-            .map(|res| res.expect("Unable to get workspace to create directory!"))
-            .collect::<Vec<i32>>()[0];
+        };
 
         let sql = "INSERT INTO directories (name, uid, workspace_id, path, parent_uid, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)";
 
@@ -131,14 +129,21 @@ impl Directory {
     }
 
     fn update(&self, conn: &Connection) -> Result<(), Error> {
+        let mut workspace_sql = conn.prepare("SELECT id FROM workspaces WHERE uid = ?1")?;
+
+        let workspace_id: i32 = workspace_sql
+            .query_row(&[&self.workspace_uid], |row| -> Result<i32> {
+                Ok(row.get(0)?)
+            })?;
+
         let sql =
-            "UPDATE directories SET name=(?1), workspace_uid=(?2), path=(?3), parent_uid=(?4), updated_at = (?5) WHERE uid = (?6)";
+            "UPDATE directories SET name=(?1), workspace_id=(?2), path=(?3), parent_uid=(?4), updated_at = (?5) WHERE uid = (?6)";
 
         conn.execute(
             sql,
             (
                 &self.name,
-                &self.workspace_uid,
+                &workspace_id,
                 &self.path,
                 &self.parent_uid,
                 &self.updated_at,

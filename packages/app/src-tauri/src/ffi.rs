@@ -74,7 +74,7 @@ pub fn write_system_config(config: SystemConfig) -> bool {
 }
 
 #[tauri::command]
-pub fn create_file(path: &str, file: File) -> bool {
+pub fn _create_file(path: &str, file: File) -> bool {
     file.create(path)
 }
 
@@ -94,7 +94,7 @@ pub fn rename_file(path: &str, file: File, new_name: &str) -> bool {
 }
 
 #[tauri::command]
-pub fn delete_file(path: &str, file: File) -> bool {
+pub fn _delete_file(path: &str, file: File) -> bool {
     file.delete(path)
 }
 

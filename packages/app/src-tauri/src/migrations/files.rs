@@ -48,12 +48,12 @@ impl Migrations for FilesMigration {
         let sql = "CREATE TABLE IF NOT EXISTS files (
             id   INTEGER PRIMARY KEY AUTOINCREMENT,
             uid  TEXT NOT NULL,
-            name TEXT NOT NULL,
-            dir_id INTEGER NOT NULL,
+            dir_id INTEGER,
             title TEXT NOT NULL,
             path TEXT NOT NULL UNIQUE,
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL,
+            workspace_id INTEGER NOT NULL,
             tags TEXT,
             links TEXT,
 
