@@ -45,16 +45,14 @@ export const createDir = async (
     });
 
     if (!directory) {
-      toast("Failed to create directory!", "error");
+      toast("Failed to create directory!");
       return;
     }
-
-    toast("Directory created!");
 
     return directory;
   } catch (e) {
     console.error("[Directory] Create failed!", e);
-    toast("Failed to create directory!", "error");
+    toast("Failed to create directory!");
   }
 };
 
@@ -82,13 +80,13 @@ export const deleteDir = async (uid: string) => {
         uid,
       }))
     ) {
-      toast("Failed to delete directory!", "error");
+      toast("Failed to delete directory!");
     }
 
     return;
   } catch (e) {
     console.error("[Directory] Failed to delete!", e);
-    toast("Failed to delete directory!", "error");
+    toast("Failed to delete directory!");
   }
 };
 
@@ -109,13 +107,13 @@ export const updateDir = async (
     });
 
     if (!directory) {
-      toast("Failed to update directory!", "error");
+      toast("Failed to update directory!");
       return;
     }
 
     return directory;
   } catch (e) {
     console.error("[Directory] Failed to update!", e);
-    toast("Failed to update directory!", "error");
+    toast("Failed to update directory!");
   }
 };
