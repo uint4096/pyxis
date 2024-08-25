@@ -5,6 +5,7 @@ use rusqlite::{
 };
 use std::fmt::Debug;
 
+#[derive(Debug, Clone)]
 pub struct FilesMigration {
     pub name: String,
 }
@@ -24,22 +25,6 @@ impl FromSql for FilesMigration {
         value.as_str().map(|s| FilesMigration {
             name: s.to_string(),
         })
-    }
-}
-
-impl Debug for FilesMigration {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("FilesMigration")
-            .field("name", &self.name)
-            .finish()
-    }
-}
-
-impl Clone for FilesMigration {
-    fn clone(&self) -> Self {
-        Self {
-            name: self.name.clone(),
-        }
     }
 }
 

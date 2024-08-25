@@ -5,6 +5,7 @@ use rusqlite::{
 };
 use std::fmt::Debug;
 
+#[derive(Debug, Clone)]
 pub struct WorkspaceMigration {
     pub name: String,
 }
@@ -27,22 +28,6 @@ impl FromSql for WorkspaceMigration {
     }
 }
 
-impl Debug for WorkspaceMigration {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("WorkspaceMigration")
-            .field("name", &self.name)
-            .finish()
-    }
-}
-
-impl Clone for WorkspaceMigration {
-    fn clone(&self) -> Self {
-        Self {
-            name: self.name.clone(),
-        }
-    }
-}
-
 impl Migrations for WorkspaceMigration {
     fn run(&self, transaction: &Transaction) -> Result<usize, rusqlite::Error> {
         let sql = "CREATE TABLE IF NOT EXISTS workspaces (
@@ -56,12 +41,6 @@ impl Migrations for WorkspaceMigration {
 
         transaction.execute(sql, ())
     }
-
-    // fn revert(&self, transaction: &Transaction) -> Result<usize, rusqlite::Error> {
-    //     let sql = "DROP TABLE workspaces";
-
-    //     transaction.execute(sql, ())
-    // }
 
     fn get_name(&self) -> String {
         self.name.clone()
