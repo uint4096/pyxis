@@ -22,7 +22,7 @@ impl Database {
     pub fn create_connection() -> Self {
         let database = match Connection::open(Database::get_db_path()) {
             Ok(conn) => {
-                conn.execute("PRAGMA foreign_keys = ON", [])
+                conn.execute("PRAGMA foreign_keys = ON; PRAGMA journal_mode=WAL;", [])
                     .unwrap_or_default();
 
                 Database {
