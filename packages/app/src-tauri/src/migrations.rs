@@ -1,9 +1,11 @@
 mod directories;
 mod files;
 mod workspaces;
+mod content;
 
 use std::{collections::HashMap, fmt::Debug, rc::Rc};
 
+use content::FileContentMigration;
 use directories::DirectoriesMigration;
 use files::FilesMigration;
 use rusqlite::{types::ToSqlOutput, Error, Row, ToSql, Transaction};
@@ -168,6 +170,9 @@ pub fn run_migrations(database: &mut Database) -> Result<(), Error> {
             }),
             Box::new(FilesMigration {
                 name: String::from("files_migration"),
+            }),
+            Box::new(FileContentMigration {
+                name: String::from("file-content_migration"),
             }),
         ]),
     };

@@ -47,7 +47,8 @@ impl Directory {
             })?
         };
 
-        let sql = "INSERT INTO directories (name, uid, workspace_id, path, parent_uid, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)";
+        let sql = "INSERT INTO directories (name, uid, workspace_id, path, parent_uid, created_at, updated_at) \
+                         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)";
 
         conn.execute(
             sql,
@@ -137,7 +138,8 @@ impl Directory {
             })?;
 
         let sql =
-            "UPDATE directories SET name=(?1), workspace_id=(?2), path=(?3), parent_uid=(?4), updated_at = (?5) WHERE uid = (?6)";
+            "UPDATE directories SET name=(?1), workspace_id=(?2), path=(?3), parent_uid=(?4), updated_at = (?5) \
+             WHERE uid = (?6)";
 
         conn.execute(
             sql,
