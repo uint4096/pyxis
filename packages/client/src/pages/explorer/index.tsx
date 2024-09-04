@@ -1,11 +1,13 @@
 import { styled } from "@linaria/react";
 import { useEffect, useState } from "react";
 import { WorkspaceSelection, CreateWorkspace } from "./forms";
-import { useWorkspace } from "../../store";
+import { useTreeStore, useWorkspace } from "../../store";
 import { Tree } from "../tree";
+import Editor from "../editor/editor";
 
 export const Explorer = () => {
   const { workspaces, list, currentWorkspace } = useWorkspace();
+  const { selectedFile, updateContent, selectedFileContent } = useTreeStore();
 
   const [showWorkspaceForm, setWorkspaceForm] = useState<boolean>(false);
   const [showWorkspaceSelectionForm, setWorkspaceSelectionForm] =
@@ -37,12 +39,16 @@ export const Explorer = () => {
       <ExplorerWrapper>
         {currentWorkspace && <Tree />}
 
-        {/* {showEditor && !noWorkspaces && file.name && workspacePath && (
-        <Editor
-          fileWithContent={{ ...file, content }}
-          writer={saveFileContent(workspacePath)}
-        />
-      )} */}
+        {showEditor && selectedFile?.id && (
+          <Editor
+            key={selectedFile.id}
+            fileContent={{
+              file_id: selectedFile.id,
+              content: selectedFileContent ?? "",
+            }}
+            writer={updateContent}
+          />
+        )}
 
         {/* Modals and Forms */}
         {showWorkspaceForm && !currentWorkspace && (

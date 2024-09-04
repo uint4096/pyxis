@@ -1,4 +1,4 @@
-import { Directory, Link, File } from "../ffi";
+import { Directory, Link, File, FileContent } from "../ffi";
 
 export type ArrayElement<T> = T extends Array<infer X> ? X : never;
 
@@ -25,6 +25,9 @@ export type Document = "file" | "dir";
 
 export interface FileState {
   tree: Array<Node>;
+  selectedFile: File | undefined;
+  selectedFileContent: string | undefined;
+  selectFile: (file: File | undefined) => void;
   findNode: (uid: string, tree?: Array<Node>) => Node | undefined;
   createFile: (
     title: string,
@@ -41,4 +44,6 @@ export interface FileState {
 
   buildTree: (workspaceId: string) => Promise<Array<Node>>;
   createTree: (workspaceId: string) => Promise<Array<Node>>;
+  updateContent: (fileId: number, content: string) => Promise<void>;
+  getContent: (fileId: number) => Promise<string | undefined>;
 }

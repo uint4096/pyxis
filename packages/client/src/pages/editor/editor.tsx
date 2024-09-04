@@ -22,8 +22,8 @@ import {
   insertTextAtPosition,
   textLength,
 } from "../../utils";
-import { FileWithContent } from "../../types";
 import { useDebounce } from "../../hooks";
+import { FileContent } from "../../ffi";
 
 type EditorText = {
   text: string;
@@ -31,17 +31,19 @@ type EditorText = {
 };
 
 type EditorProps = {
-  fileWithContent: Partial<FileWithContent>;
-  writer: (content: string) => Promise<void>;
+  fileContent: Pick<FileContent, "content" | "file_id">;
+  writer: (fileId: number, content: string) => Promise<void>;
 };
 
-const Editor = ({ fileWithContent, writer }: EditorProps) => {
+const Editor = ({ fileContent, writer }: EditorProps) => {
   const [rawText, setRawText] = useState<EditorText>({
-    text: fileWithContent?.content ?? "",
+    text: fileContent?.content ?? "",
     caret: { start: 0, end: 0, collapsed: true },
   });
 
   const debouncedText = useDebounce(rawText.text, 0.5);
+
+  const textRef = useRef(debouncedText);
 
   const renderControl = useRef({ text: false, html: false });
 
@@ -145,7 +147,17 @@ const Editor = ({ fileWithContent, writer }: EditorProps) => {
   );
 
   useEffect(() => {
-    const content = fileWithContent?.content;
+    if (!fileContent?.file_id || textRef.current === debouncedText) {
+      return;
+    }
+
+    textRef.current = debouncedText;
+
+    (async () => await writer(fileContent.file_id!, debouncedText ?? ""))();
+  }, [debouncedText, fileContent.file_id, writer]);
+
+  useEffect(() => {
+    const content = fileContent?.content;
     if (content == null || !renderControl.current.text) {
       renderControl.current.text = true;
       return;
@@ -159,7 +171,7 @@ const Editor = ({ fileWithContent, writer }: EditorProps) => {
         collapsed: true,
       },
     }));
-  }, [fileWithContent?.content]);
+  }, [fileContent?.content]);
 
   useEffect(() => {
     if (!renderControl.current.html) {
@@ -176,15 +188,7 @@ const Editor = ({ fileWithContent, writer }: EditorProps) => {
       content,
       selection,
     }));
-  }, [fileWithContent, rawText, writer]);
-
-  useEffect(() => {
-    if (!fileWithContent.name) {
-      return;
-    }
-
-    (async () => await writer(debouncedText ?? ""))();
-  }, [fileWithContent, debouncedText, writer]);
+  }, [fileContent, rawText]);
 
   useEffect(() => {
     const { selection } = html ?? {};

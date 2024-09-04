@@ -25,7 +25,7 @@ export const FileContainer = ({
   overflowPopup,
 }: FileContainerProps) => {
   const { currentWorkspace } = useWorkspace();
-  const { deleteFile } = useTreeStore();
+  const { selectedFile, deleteFile, selectFile } = useTreeStore();
   const optionsRef = useRef<HTMLDivElement>(null);
 
   useOutsideEvent(optionsRef, () => {
@@ -46,12 +46,12 @@ export const FileContainer = ({
     },
     {
       handler: useCallback(async () => {
-        // if (selectedFile.path === file.path) {
-        //   unselect();
-        // }
+        if (selectedFile?.id === file.id) {
+          selectFile(undefined);
+        }
 
         deleteFile(file as File);
-      }, [deleteFile, file]),
+      }, [deleteFile, file, selectFile, selectedFile?.id]),
       id: "delete",
       name: "Delete",
     },
@@ -60,7 +60,8 @@ export const FileContainer = ({
   return (
     <NameContainer
       onClick={() => {
-        // (unselect(), select(file as File), readFromDisk(workspacePath))
+        selectFile(undefined);
+        selectFile(file as File);
       }}
     >
       <FileName>{file.title}</FileName>

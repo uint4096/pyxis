@@ -4,6 +4,8 @@ import {
   updateFile,
   getFiles,
   deleteFile,
+  updateContent,
+  getContent,
 } from "../ffi";
 import type { StateCreator } from "zustand";
 import { toast } from "../utils";
@@ -37,6 +39,27 @@ export const fileSlice: StateCreator<
   FileState
 > = (set, get) => ({
   tree: [],
+
+  selectedFile: undefined,
+  selectedFileContent: "",
+
+  selectFile: async (file) => {
+    if (!file?.id) {
+      set({
+        selectedFile: undefined,
+        selectedFileContent: undefined,
+      });
+
+      return;
+    }
+
+    const content = await get().getContent(file.id);
+
+    set({
+      selectedFile: file,
+      selectedFileContent: content,
+    });
+  },
 
   createFile: async (title, workspaceUid, path, links, tags, dirUid) => {
     const file = await createFile(
@@ -113,4 +136,9 @@ export const fileSlice: StateCreator<
       return [];
     }
   },
+
+  updateContent: async (fileId: number, content: string = "") =>
+    await updateContent(fileId, content),
+
+  getContent: async (fileId: number) => await getContent(fileId),
 });
