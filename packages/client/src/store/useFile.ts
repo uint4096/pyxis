@@ -141,4 +141,10 @@ export const fileSlice: StateCreator<
     await updateContent(fileId, content),
 
   getContent: async (fileId: number) => await getContent(fileId),
+
+  isFileInDir: (fileUid: string, dir: DirWithChildren) =>
+    dir.children.some((child) => isFile(child) && child.uid === fileUid) ||
+    dir.children.some(
+      (child) => !isFile(child) && get().isFileInDir(fileUid, child),
+    ),
 });

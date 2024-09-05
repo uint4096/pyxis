@@ -14,6 +14,7 @@ import {
 } from "./styles";
 import { noop } from "../../../utils";
 import { useTreeStore, type DirWithChildren, type Node } from "../../../store";
+import { useOutsideEvent } from "../../../hooks";
 
 export type TreeDirectory = {
   children: Array<Node>;
@@ -42,7 +43,11 @@ export const DirContainer = ({
 
   const DirOverflow = getOverflowMenu();
 
-  const { deleteDir } = useTreeStore();
+  useOutsideEvent(optionsRef, () => {
+    setOverflowPopup("");
+  });
+
+  const { deleteDir, selectedFile, selectFile, isFileInDir } = useTreeStore();
 
   const dirMenuOptions: Array<MenuOption> = [
     {
@@ -57,12 +62,22 @@ export const DirContainer = ({
     },
     {
       handler: useCallback(async () => {
-        // if (selectedFile.name && isFileInDir(selectedFile as File, dir)) {
-        //   unselect();
-        // }
+        if (
+          selectedFile?.path &&
+          isFileInDir(selectedFile.uid, dir as DirWithChildren)
+        ) {
+          selectFile(undefined);
+        }
 
         await deleteDir(dir as DirWithChildren);
-      }, [deleteDir, dir]),
+      }, [
+        deleteDir,
+        dir,
+        isFileInDir,
+        selectFile,
+        selectedFile?.path,
+        selectedFile?.uid,
+      ]),
       id: "delete",
       name: "Delete",
     },

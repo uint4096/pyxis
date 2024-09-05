@@ -17,6 +17,7 @@ export interface DirectoryState {
   ) => Promise<Array<DirWithChildren>>;
   deleteDir: (directory: DirWithChildren) => Promise<void>;
   updateDir: (directory: DirWithChildren) => Promise<void>;
+  isFileInDir: (fileUid: string, dir: DirWithChildren) => boolean;
 }
 
 export type Node = File | (Directory & { children: Array<Node> });
