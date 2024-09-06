@@ -7,6 +7,7 @@ import { getOverflowMenu, type MenuOption } from "../../../components";
 import { noop } from "../../../utils";
 import { useOutsideEvent } from "../../../hooks";
 import {
+  backgroundHover,
   flexDisplay,
   NameContainer,
   noDisplay,
@@ -46,12 +47,12 @@ export const FileContainer = ({
     },
     {
       handler: useCallback(async () => {
-        if (selectedFile?.id === file.id) {
+        if (selectedFile?.uid === file.uid) {
           selectFile(undefined);
         }
 
         deleteFile(file as File);
-      }, [deleteFile, file, selectFile, selectedFile?.id]),
+      }, [deleteFile, file, selectFile, selectedFile?.uid]),
       id: "delete",
       name: "Delete",
     },
@@ -63,10 +64,11 @@ export const FileContainer = ({
         selectFile(undefined);
         selectFile(file as File);
       }}
+      className={overflowPopup === file.uid ? backgroundHover : ""}
     >
       <FileName>{file.title}</FileName>
       <OptionsContainer
-        className={overflowPopup === file.id ? flexDisplay : noDisplay}
+        className={overflowPopup === file.uid ? flexDisplay : noDisplay}
       >
         <FileOverflow
           options={fileMenuOptions}

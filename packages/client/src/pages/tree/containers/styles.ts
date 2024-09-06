@@ -9,6 +9,10 @@ export const flexDisplay = css`
   display: flex;
 `;
 
+export const backgroundHover = css`
+  background-color: #080808;
+`;
+
 export const OptionsContainer = styled.div`
   height: 100%;
   align-items: center;

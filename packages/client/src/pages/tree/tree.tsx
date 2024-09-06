@@ -1,17 +1,34 @@
 import { styled } from "@linaria/react";
 import { Entities } from "./tree-entities";
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useWorkspace, useTreeStore } from "../../store";
 
 export const Tree = () => {
   const { tree, createTree } = useTreeStore();
   const { currentWorkspace } = useWorkspace();
 
+  const [overflowPopup, setOverflowPopup] = useState<string | undefined>();
+
   useEffect(() => {
     if (!tree.length && currentWorkspace?.uid) {
       createTree(currentWorkspace.uid);
     }
   }, [createTree, currentWorkspace.uid, tree.length]);
+
+  const keyListener = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === "Escape" && overflowPopup) {
+        setOverflowPopup("");
+      }
+    },
+    [overflowPopup],
+  );
+
+  useEffect(() => {
+    document.addEventListener("keydown", keyListener);
+
+    return () => document.removeEventListener("keydown", keyListener);
+  }, [keyListener, overflowPopup]);
 
   return (
     <EntitiesWrapper>
@@ -23,6 +40,8 @@ export const Tree = () => {
             name: currentWorkspace.name ?? "",
           }}
           workspaceUid={currentWorkspace.uid}
+          overflowPopup={overflowPopup}
+          setOverflowPopup={setOverflowPopup}
         />
       )}
     </EntitiesWrapper>

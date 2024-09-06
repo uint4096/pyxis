@@ -7,6 +7,7 @@ import { useCallback, useRef } from "react";
 import { getOverflowMenu, type MenuOption } from "../../../components";
 import type { Document } from "../../../types";
 import {
+  backgroundHover,
   flexDisplay,
   NameContainer,
   noDisplay,
@@ -86,7 +87,9 @@ export const DirContainer = ({
   return (
     <>
       {!!dir.uid && (
-        <NameContainer>
+        <NameContainer
+          className={overflowPopup === dir.uid ? backgroundHover : ""}
+        >
           <Collapsable onClick={() => setCollapsed((c) => !c)}>
             {collapsed ? (
               <MdKeyboardArrowRight className={verticallyMiddle} />

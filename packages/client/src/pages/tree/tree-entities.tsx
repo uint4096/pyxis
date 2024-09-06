@@ -1,5 +1,5 @@
 import { styled } from "@linaria/react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { Document } from "../../types";
 import { InputInPlace } from "../../components";
 import { FileContainer } from "./containers/file";
@@ -9,16 +9,21 @@ import { isFile, Node, useTreeStore } from "../../store";
 type EntityProps = {
   node: TreeDirectory | Node;
   workspaceUid: string;
+  overflowPopup: string | undefined;
+  setOverflowPopup: React.Dispatch<React.SetStateAction<string | undefined>>;
 };
 
-export const Entities = ({ node, workspaceUid }: EntityProps) => {
+export const Entities = ({
+  node,
+  workspaceUid,
+  overflowPopup,
+  setOverflowPopup,
+}: EntityProps) => {
   const [collapased, setCollapsed] = useState(false);
   const [newDocument, setNewDocument] = useState<Document>();
   const [documentName, setDocumentName] = useState("");
 
-  const [overflowPopup, setOverflowPopup] = useState<string | undefined>();
-
-  const { findNode, createDir, createFile } = useTreeStore();
+  const { findNode, createDir, createFile, selectedFile } = useTreeStore();
 
   const inputKeydown = useCallback(
     async (
@@ -57,6 +62,10 @@ export const Entities = ({ node, workspaceUid }: EntityProps) => {
     [findNode, documentName, newDocument, createFile, workspaceUid, createDir],
   );
 
+  useEffect(() => {
+    setOverflowPopup("");
+  }, [newDocument, selectedFile, setOverflowPopup]);
+
   return (
     <DirTreeWrapper>
       {isFile(node) ? (
@@ -87,7 +96,13 @@ export const Entities = ({ node, workspaceUid }: EntityProps) => {
                 />
               )}
               {(node.children ?? []).map((dir) => (
-                <Entities node={dir} workspaceUid={workspaceUid} key={dir.id} />
+                <Entities
+                  node={dir}
+                  workspaceUid={workspaceUid}
+                  key={dir.id}
+                  overflowPopup={overflowPopup}
+                  setOverflowPopup={setOverflowPopup}
+                />
               ))}
             </EntityContainer>
           )}
