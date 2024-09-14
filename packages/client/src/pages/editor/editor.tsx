@@ -23,7 +23,8 @@ import {
   textLength,
 } from "../../utils";
 import { useDebounce } from "../../hooks";
-import { FileContent } from "../../ffi";
+import { Loro } from "loro-crdt";
+import { getStepsForTransformation } from "string-differ";
 
 type EditorText = {
   text: string;
@@ -31,14 +32,26 @@ type EditorText = {
 };
 
 type EditorProps = {
-  fileContent: Pick<FileContent, "content" | "file_id">;
-  writer: (fileId: number, content: string) => Promise<void>;
+  fileId: number;
+  content: Uint8Array | undefined;
+  writer: (fileId: number, content: Uint8Array) => Promise<void>;
 };
 
-const Editor = ({ fileContent, writer }: EditorProps) => {
-  const [rawText, setRawText] = useState<EditorText>({
-    text: fileContent?.content ?? "",
-    caret: { start: 0, end: 0, collapsed: true },
+const CONTAINER_ID = "pyxis_doc";
+
+const Editor = ({ fileId, content, writer }: EditorProps) => {
+  const [rawText, setRawText] = useState<EditorText>(() => {
+    const doc = new Loro();
+    if (content?.length) {
+      doc.import(content);
+    }
+
+    const loroText = doc.getText(CONTAINER_ID)?.toString();
+
+    return {
+      text: loroText ?? "",
+      caret: { start: loroText.length, end: loroText.length, collapsed: true },
+    };
   });
 
   const debouncedText = useDebounce(rawText.text, 0.5);
@@ -62,6 +75,51 @@ const Editor = ({ fileContent, writer }: EditorProps) => {
 
     return editor;
   };
+
+  const textToBlob = useCallback(() => {
+    const doc = new Loro();
+
+    if (content?.length) {
+      doc.import(content);
+    }
+
+    const loroText = doc.getText(CONTAINER_ID);
+
+    const diff = getStepsForTransformation("Range", {
+      s1: loroText.toString() ?? "",
+      s2: debouncedText ?? "",
+    });
+
+    let positionCounter = 0;
+    diff.forEach((step) => {
+      switch (step.type) {
+        case "insert": {
+          loroText?.insert(positionCounter, step.value);
+          positionCounter += 1;
+          break;
+        }
+        case "delete": {
+          const length = step.endIndex - step.startIndex + 1;
+          loroText?.delete(positionCounter, length);
+          positionCounter += length;
+          break;
+        }
+        case "retain": {
+          const length = step.endIndex - step.startIndex + 1;
+          positionCounter += length;
+          break;
+        }
+        default: {
+          throw new Error("Unsupported Diff Operation!");
+        }
+      }
+    });
+
+    return {
+      updates: doc.exportFrom(),
+      snapshot: doc.exportSnapshot(),
+    };
+  }, [content, debouncedText]);
 
   const onPaste: ClipboardEventHandler<HTMLDivElement> = useCallback(
     (event) => {
@@ -139,39 +197,24 @@ const Editor = ({ fileContent, writer }: EditorProps) => {
 
       setRawText((rawText) => {
         const { text: textContent, caret } = rawText;
-        const text = Actions[key](textContent, caret, event.ctrlKey);
-        return text;
+        const textAndCaret = Actions[key](textContent, caret, event.ctrlKey);
+        return textAndCaret;
       });
     },
     [rawText],
   );
 
   useEffect(() => {
-    if (!fileContent?.file_id || textRef.current === debouncedText) {
+    if (!fileId || textRef.current === debouncedText) {
       return;
     }
 
     textRef.current = debouncedText;
 
-    (async () => await writer(fileContent.file_id!, debouncedText ?? ""))();
-  }, [debouncedText, fileContent.file_id, writer]);
+    const blob = textToBlob();
 
-  useEffect(() => {
-    const content = fileContent?.content;
-    if (content == null || !renderControl.current.text) {
-      renderControl.current.text = true;
-      return;
-    }
-
-    setRawText(() => ({
-      text: content,
-      caret: {
-        start: content.length,
-        end: content.length,
-        collapsed: true,
-      },
-    }));
-  }, [fileContent?.content]);
+    (async () => await writer(fileId!, blob.snapshot))();
+  }, [debouncedText, fileId, textToBlob, writer]);
 
   useEffect(() => {
     if (!renderControl.current.html) {
@@ -179,16 +222,16 @@ const Editor = ({ fileContent, writer }: EditorProps) => {
       return;
     }
     const { caret, text } = rawText;
-    const { html: content, selection } = getHTMLContent(
+    const { html: htmlContent, selection } = getHTMLContent(
       caret.start,
       caret.end,
       text,
     );
     setHtml(() => ({
-      content,
+      content: htmlContent,
       selection,
     }));
-  }, [fileContent, rawText]);
+  }, [rawText]);
 
   useEffect(() => {
     const { selection } = html ?? {};
