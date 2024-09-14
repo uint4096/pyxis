@@ -1,4 +1,4 @@
-import { invoke as invokeCommand } from "@tauri-apps/api";
+import { invoke as invokeCommand } from "@tauri-apps/api/core";
 
 export const invoke =
   <T extends Record<string, Record<string, unknown>>, X>() =>

@@ -3,58 +3,44 @@
   "build": {
     "beforeBuildCommand": "pnpm --filter client build",
     "beforeDevCommand": "pnpm --filter client dev",
-    "devPath": "http://localhost:5173",
-    "distDir": "../../client/dist"
+    "frontendDist": "../../client/dist",
+    "devUrl": "http://localhost:5173"
   },
-  "package": {
-    "productName": "pyxis",
-    "version": "0.1.0"
-  },
-  "tauri": {
-    "allowlist": {
-      "all": false,
-      "dialog": {
-        "all": true
-      },
-      "path": {
-        "all": true
-      }
+  "bundle": {
+    "active": true,
+    "category": "DeveloperTool",
+    "copyright": "",
+    "targets": "all",
+    "externalBin": [],
+    "icon": [
+      "icons/32x32.png"
+    ],
+    "windows": {
+      "certificateThumbprint": null,
+      "digestAlgorithm": "sha256",
+      "timestampUrl": ""
     },
-    "bundle": {
-      "active": true,
-      "category": "DeveloperTool",
-      "copyright": "",
+    "longDescription": "",
+    "macOS": {
+      "entitlements": null,
+      "exceptionDomain": "",
+      "frameworks": [],
+      "providerShortName": null,
+      "signingIdentity": null
+    },
+    "resources": [],
+    "shortDescription": "",
+    "linux": {
       "deb": {
         "depends": []
-      },
-      "externalBin": [],
-      "icon": [
-        "icons/32x32.png"
-      ],
-      "identifier": "dev.pyxis.app",
-      "longDescription": "",
-      "macOS": {
-        "entitlements": null,
-        "exceptionDomain": "",
-        "frameworks": [],
-        "providerShortName": null,
-        "signingIdentity": null
-      },
-      "resources": [],
-      "shortDescription": "",
-      "targets": "all",
-      "windows": {
-        "certificateThumbprint": null,
-        "digestAlgorithm": "sha256",
-        "timestampUrl": ""
       }
-    },
-    "security": {
-      "csp": null
-    },
-    "updater": {
-      "active": false
-    },
+    }
+  },
+  "productName": "pyxis",
+  "version": "0.1.0",
+  "identifier": "dev.pyxis.app",
+  "plugins": {},
+  "app": {
     "windows": [
       {
         "fullscreen": false,
@@ -64,6 +50,9 @@
         "width": 800,
         "theme": "Dark"
       }
-    ]
+    ],
+    "security": {
+      "csp": null
+    }
   }
 }

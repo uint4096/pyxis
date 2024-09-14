@@ -12,7 +12,8 @@
   "dependencies": {
     "@linaria/core": "^6.2.0",
     "@linaria/react": "^6.2.1",
-    "@tauri-apps/api": "^1.5.4",
+    "@tauri-apps/api": "2.0.0-rc.4",
+    "@tauri-apps/plugin-dialog": "2.0.0-rc.1",
     "loro-crdt": "^0.10.1",
     "nanoid": "^5.0.7",
     "react": "^18.2.0",

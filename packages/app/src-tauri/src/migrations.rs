@@ -1,7 +1,7 @@
+mod content;
 mod directories;
 mod files;
 mod workspaces;
-mod content;
 
 use std::{collections::HashMap, fmt::Debug, rc::Rc};
 

@@ -36,25 +36,14 @@ impl FileContent {
                          ON CONFLICT(file_id) \
                          DO UPDATE SET content=?2, updated_at=?3";
 
-        conn.execute(
-            sql,
-            (
-                &self.file_id,
-                &self.content,
-                &self.updated_at,
-            ),
-        )?;
+        conn.execute(sql, (&self.file_id, &self.content, &self.updated_at))?;
 
         Ok(())
     }
 }
 
 #[tauri::command]
-pub fn update_content(
-    file_id: i32,
-    content: String,
-    database: State<Database>,
-) -> Option<bool> {
+pub fn update_content(file_id: i32, content: String, database: State<Database>) -> Option<bool> {
     let content = FileContent::new(file_id, Some(content), None);
 
     match content.update(&database.get_connection()) {
@@ -67,10 +56,7 @@ pub fn update_content(
 }
 
 #[tauri::command]
-pub fn get_content(
-    file_id: i32,
-    database: State<Database>,
-) -> Option<String> {
+pub fn get_content(file_id: i32, database: State<Database>) -> Option<String> {
     match FileContent::get(&file_id, &database.get_connection()) {
         Ok(content) => Some(content),
         Err(e) => {

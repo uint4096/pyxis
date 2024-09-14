@@ -1,5 +1,5 @@
 import { styled } from "@linaria/react";
-import { open } from "@tauri-apps/api/dialog";
+import { open } from "@tauri-apps/plugin-dialog";
 import { KeyboardEventHandler, Ref, useCallback, useState } from "react";
 
 export type InputProps = {

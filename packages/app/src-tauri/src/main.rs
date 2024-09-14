@@ -5,9 +5,9 @@ mod entities;
 mod migrations;
 
 use database::Database;
+use entities::content::{get_content, update_content};
 use entities::directories::{create_dir, delete_dir, list_dirs, update_dir};
 use entities::files::{create_file, delete_file, list_files, update_file};
-use entities::content::{get_content, update_content};
 use entities::workspaces::{create_workspace, delete_workspace, list_workspaces, update_workspace};
 use migrations::run_migrations;
 use tauri::{App, Manager};
@@ -20,6 +20,7 @@ fn main() {
     }
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .manage(database)
         .invoke_handler(tauri::generate_handler![
             create_workspace,
@@ -38,7 +39,7 @@ fn main() {
             get_content
         ])
         .setup(|app: &mut App| {
-            let window = app.get_window("main").expect("Failed to get main window!");
+            let window = app.get_webview_window("main").expect("Failed to get main window!");
             // Doing this in tauri config does not allow super + arrow keys to work
             let _ = window.maximize();
             window.open_devtools();
