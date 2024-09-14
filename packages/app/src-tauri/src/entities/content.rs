@@ -1,19 +1,19 @@
 use chrono::Utc;
 use rusqlite::{Connection, Error};
+use serde::{Deserialize, Serialize};
 use tauri::State;
-
 use crate::database::Database;
 
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct FileContent {
     id: Option<i32>,
-    content: Option<String>,
+    content: Vec<u8>,
     file_id: i32,
     updated_at: String,
 }
 
 impl FileContent {
-    fn new(file_id: i32, content: Option<String>, id: Option<i32>) -> Self {
+    fn new(file_id: i32, content: Vec<u8>, id: Option<i32>) -> Self {
         let current_time = Utc::now().to_rfc3339();
 
         Self {
@@ -24,9 +24,9 @@ impl FileContent {
         }
     }
 
-    fn get(file_id: &i32, conn: &Connection) -> Result<String, Error> {
+    fn get(file_id: &i32, conn: &Connection) -> Result<Vec<u8>, Error> {
         let mut sql = conn.prepare("SELECT content FROM file_content WHERE file_id=?1")?;
-        Ok(sql.query_row(&[&file_id], |row| -> Result<String, Error> {
+        Ok(sql.query_row(&[&file_id], |row| -> Result<Vec<u8>, Error> {
             Ok(row.get(0)?)
         })?)
     }
@@ -43,8 +43,12 @@ impl FileContent {
 }
 
 #[tauri::command]
-pub fn update_content(file_id: i32, content: String, database: State<Database>) -> Option<bool> {
-    let content = FileContent::new(file_id, Some(content), None);
+pub fn update_content(
+    file_id: i32,
+    content: Vec<u8>,
+    database: State<Database>,
+) -> Option<bool> {
+    let content = FileContent::new(file_id, content, None);
 
     match content.update(&database.get_connection()) {
         Ok(_) => Some(true),
@@ -56,7 +60,10 @@ pub fn update_content(file_id: i32, content: String, database: State<Database>) 
 }
 
 #[tauri::command]
-pub fn get_content(file_id: i32, database: State<Database>) -> Option<String> {
+pub fn get_content(
+    file_id: i32,
+    database: State<Database>,
+) -> Option<Vec<u8>> {
     match FileContent::get(&file_id, &database.get_connection()) {
         Ok(content) => Some(content),
         Err(e) => {

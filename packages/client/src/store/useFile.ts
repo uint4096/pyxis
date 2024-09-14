@@ -41,13 +41,13 @@ export const fileSlice: StateCreator<
   tree: [],
 
   selectedFile: undefined,
-  selectedFileContent: "",
+  doc: undefined,
 
   selectFile: async (file) => {
     if (!file?.id) {
       set({
         selectedFile: undefined,
-        selectedFileContent: undefined,
+        doc: undefined,
       });
 
       return;
@@ -57,7 +57,7 @@ export const fileSlice: StateCreator<
 
     set({
       selectedFile: file,
-      selectedFileContent: content,
+      doc: content,
     });
   },
 
@@ -137,8 +137,10 @@ export const fileSlice: StateCreator<
     }
   },
 
-  updateContent: async (fileId: number, content: string = "") =>
-    await updateContent(fileId, content),
+  updateContent: async (
+    fileId: number,
+    content: Uint8Array = new Uint8Array(),
+  ) => await updateContent(fileId, content),
 
   getContent: async (fileId: number) => await getContent(fileId),
 

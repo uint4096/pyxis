@@ -33,7 +33,7 @@ impl Migrations for FileContentMigration {
         let sql = "CREATE TABLE IF NOT EXISTS file_content (
             id         INTEGER PRIMARY KEY AUTOINCREMENT,
             file_id    INTEGER NOT NULL UNIQUE,
-            content    TEXT,
+            content    BLOB,
             updated_at TEXT NOT NULL,
 
             FOREIGN KEY (file_id) REFERENCES files(id)
