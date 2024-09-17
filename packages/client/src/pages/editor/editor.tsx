@@ -23,12 +23,12 @@ import {
   insertTextAtPosition,
   textLength,
 } from "../../utils";
-import { useDebounce, useWebsockets } from "../../hooks";
+import { useDebounce } from "../../hooks";
 import { Loro, LoroList, LoroText } from "loro-crdt";
 import fastDiff from "fast-diff";
 
 type EditorText = {
-  text: string;
+  text: string | undefined;
   caret: Caret;
 };
 
@@ -42,7 +42,7 @@ const CONTAINER_ID = "pyxis_doc";
 
 const Editor = ({ fileId, content, writer }: EditorProps) => {
   const [rawText, setRawText] = useState<EditorText>({
-    text: "",
+    text: undefined,
     caret: { start: 0, end: 0, collapsed: true },
   });
 
@@ -67,10 +67,24 @@ const Editor = ({ fileId, content, writer }: EditorProps) => {
   }: { doc: Loro; loroText: LoroText; loroCaret: LoroList } = useMemo(() => {
     const doc = new Loro();
 
+    if (content?.length) {
+      doc.import(content);
+    }
+
     const loroCaret = doc.getList(`${CONTAINER_ID}_caret`);
     const loroText = doc.getText(`${CONTAINER_ID}_text`);
 
-    formatCaret(loroCaret, { start: 0, end: 0, collapsed: true });
+    const currentCaret = extractCaret(loroCaret);
+    formatCaret(loroCaret, currentCaret);
+
+    setRawText(() => ({
+      text: loroText?.toString() ?? "",
+      caret: {
+        start: currentCaret?.start ?? 0,
+        end: currentCaret?.end ?? 0,
+        collapsed: currentCaret?.collapsed ?? true,
+      },
+    }));
 
     doc.subscribe((e) => {
       console.log("Event", e);
@@ -87,10 +101,10 @@ const Editor = ({ fileId, content, writer }: EditorProps) => {
       }));
     });
     return { doc, loroCaret, loroText };
-  }, [extractCaret, formatCaret]);
+  }, [content, extractCaret, formatCaret]);
 
-  // const debouncedText = useDebounce(rawText.text, 0.5);
-  // const textRef = useRef(debouncedText);
+  const debouncedText = useDebounce(rawText.text, 0.5);
+  const textRef = useRef(debouncedText);
 
   const renderControl = useRef({ text: false, html: false });
 
@@ -124,11 +138,8 @@ const Editor = ({ fileId, content, writer }: EditorProps) => {
 
   // const { sendMessage } = useWebsockets({ onMessage });
 
-  const getEditor = (): Node => {
+  const getEditor = (): Node | null => {
     const editor = document.getElementById("editor");
-    if (!editor) {
-      throw new Error(`Editor isn't available yet!`);
-    }
 
     return editor;
   };
@@ -209,6 +220,10 @@ const Editor = ({ fileId, content, writer }: EditorProps) => {
 
       const editor = getEditor();
 
+      if (!editor) {
+        return;
+      }
+
       const { anchor, focus, collapsed } = getSelection(editor);
 
       if (anchor && focus && editor) {
@@ -286,21 +301,19 @@ const Editor = ({ fileId, content, writer }: EditorProps) => {
     ],
   );
 
-  // useEffect(() => {
-  //   if (!fileId || textRef.current === debouncedText) {
-  //     return;
-  //   }
+  useEffect(() => {
+    if (!fileId || textRef.current === debouncedText) {
+      return;
+    }
 
-  //   textRef.current = debouncedText;
+    textRef.current = debouncedText;
 
-  //   const blob = textToBlob();
-
-  //   (async () =>
-  //     await Promise.all([
-  //       writer(fileId!, blob.snapshot),
-  //       sendMessage(blob.updates),
-  //     ]))();
-  // }, [debouncedText, fileId, sendMessage, textToBlob, writer]);
+    (async () =>
+      await Promise.all([
+        writer(fileId!, doc.exportSnapshot()),
+        // sendMessage(blob.updates),
+      ]))();
+  }, [debouncedText, doc, fileId, writer]);
 
   useEffect(() => {
     if (!renderControl.current.html) {
@@ -311,7 +324,7 @@ const Editor = ({ fileId, content, writer }: EditorProps) => {
     const { html: htmlContent, selection } = getHTMLContent(
       caret.start,
       caret.end,
-      text,
+      text ?? "",
     );
     setHtml(() => ({
       content: htmlContent,
@@ -322,6 +335,10 @@ const Editor = ({ fileId, content, writer }: EditorProps) => {
   useEffect(() => {
     const { selection } = html ?? {};
     const editor = getEditor();
+
+    if (!editor) {
+      return;
+    }
 
     const anchorNode = getDescendant(editor, selection?.anchor.element ?? "0");
     const anchor = anchorNode ?? editor;
@@ -343,16 +360,18 @@ const Editor = ({ fileId, content, writer }: EditorProps) => {
 
   return (
     <>
-      <div
-        id={"editor"}
-        contentEditable
-        dangerouslySetInnerHTML={{
-          __html: html?.content ?? "",
-        }}
-        onSelect={onSelection}
-        onKeyDown={onKeyDown}
-        onPaste={onPaste}
-      />
+      {rawText.text != null && (
+        <div
+          id={"editor"}
+          contentEditable
+          dangerouslySetInnerHTML={{
+            __html: html?.content ?? "",
+          }}
+          onSelect={onSelection}
+          onKeyDown={onKeyDown}
+          onPaste={onPaste}
+        />
+      )}
     </>
   );
 };
