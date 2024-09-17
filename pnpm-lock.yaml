@@ -28,9 +28,9 @@ importers:
       '@tauri-apps/plugin-dialog':
         specifier: 2.0.0-rc.1
         version: 2.0.0-rc.1
-      dialog:
-        specifier: link:@tauri-apps/api/dialog
-        version: link:@tauri-apps/api/dialog
+      fast-diff:
+        specifier: ^1.3.0
+        version: 1.3.0
       loro-crdt:
         specifier: ^0.10.1
         version: 0.10.1
@@ -49,9 +49,6 @@ importers:
       react-toastify:
         specifier: ^9.1.3
         version: 9.1.3(react-dom@18.3.1)(react@18.3.1)
-      string-differ:
-        specifier: 1.0.0
-        version: 1.0.0
       zustand:
         specifier: ^4.5.4
         version: 4.5.4(@types/react@18.3.3)(react@18.3.1)
@@ -2627,7 +2624,6 @@ packages:
 
   /fast-diff@1.3.0:
     resolution: {integrity: sha512-VxPP4NqbUjj6MaAOafWeUn2cXWLcCtljklUtZf0Ind4XQ+QPtmA0b18zZy0jIQx+ExRVCR/ZQpBmik5lXshNsw==}
-    dev: true
 
   /fast-glob@3.3.2:
     resolution: {integrity: sha512-oX2ruAFQwf/Orj8m737Y5adxDQO0LAB7/S5MnxCdTNDd4p6BsyIVsv9JQsATbTSq8KHRpLwIHbVlUNatxd+1Ow==}
@@ -3706,10 +3702,6 @@ packages:
     resolution: {integrity: sha512-l3BikUxvPOcn5E74dZiq5BGsTb5yEwhaTSzccU6t4sDOH8NWJCstKO5QT2CvtFoK6F0saL7p9xHAqHOlCPJygA==}
     engines: {node: '>= 8'}
     dev: true
-
-  /string-differ@1.0.0:
-    resolution: {integrity: sha512-j7PY6sNlmeD3+YjgZIuVyA1m4L+H+Em3I13aOobxcMDdhNlNOriUEqg8bhZQ26BnOwyHS1pPgpedtxiRlLLcTQ==}
-    dev: false
 
   /string.prototype.matchall@4.0.10:
     resolution: {integrity: sha512-rGXbGmOEosIQi6Qva94HUjgPs9vKW+dkG7Y8Q5O2OYkWL6wFaTRZO8zM4mhP94uX55wgyrXzfS2aGtGzUL7EJQ==}

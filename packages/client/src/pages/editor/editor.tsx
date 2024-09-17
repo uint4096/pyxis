@@ -7,6 +7,7 @@ import {
   SyntheticEvent,
   useCallback,
   ClipboardEventHandler,
+  useMemo,
 } from "react";
 import { getCaretFromDomNodes, getDescendant, getSelection } from "./dom";
 import { getHTMLContent, type Selection } from "./text";
@@ -22,9 +23,9 @@ import {
   insertTextAtPosition,
   textLength,
 } from "../../utils";
-import { useDebounce } from "../../hooks";
-import { Loro } from "loro-crdt";
-import { getStepsForTransformation } from "string-differ";
+import { useDebounce, useWebsockets } from "../../hooks";
+import { Loro, LoroList, LoroText } from "loro-crdt";
+import fastDiff from "fast-diff";
 
 type EditorText = {
   text: string;
@@ -40,23 +41,56 @@ type EditorProps = {
 const CONTAINER_ID = "pyxis_doc";
 
 const Editor = ({ fileId, content, writer }: EditorProps) => {
-  const [rawText, setRawText] = useState<EditorText>(() => {
-    const doc = new Loro();
-    if (content?.length) {
-      doc.import(content);
-    }
-
-    const loroText = doc.getText(CONTAINER_ID)?.toString();
-
-    return {
-      text: loroText ?? "",
-      caret: { start: loroText.length, end: loroText.length, collapsed: true },
-    };
+  const [rawText, setRawText] = useState<EditorText>({
+    text: "",
+    caret: { start: 0, end: 0, collapsed: true },
   });
 
-  const debouncedText = useDebounce(rawText.text, 0.5);
+  const formatCaret = useCallback((loroList: LoroList, caret: Caret) => {
+    loroList.insert(0, caret.start);
+    loroList.insert(1, caret.end);
+    loroList.insert(2, caret.collapsed);
+  }, []);
 
-  const textRef = useRef(debouncedText);
+  const extractCaret = useCallback((loroList: LoroList): Caret => {
+    return {
+      start: (loroList.get(0) ?? 0) as number,
+      end: (loroList.get(1) ?? 0) as number,
+      collapsed: (loroList.get(2) ?? true) as boolean,
+    };
+  }, []);
+
+  const {
+    doc,
+    loroText,
+    loroCaret,
+  }: { doc: Loro; loroText: LoroText; loroCaret: LoroList } = useMemo(() => {
+    const doc = new Loro();
+
+    const loroCaret = doc.getList(`${CONTAINER_ID}_caret`);
+    const loroText = doc.getText(`${CONTAINER_ID}_text`);
+
+    formatCaret(loroCaret, { start: 0, end: 0, collapsed: true });
+
+    doc.subscribe((e) => {
+      console.log("Event", e);
+
+      const caret = extractCaret(loroCaret);
+
+      setRawText(() => ({
+        text: loroText?.toString() ?? "",
+        caret: {
+          start: caret?.start ?? 0,
+          end: caret?.end ?? 0,
+          collapsed: caret?.collapsed ?? true,
+        },
+      }));
+    });
+    return { doc, loroCaret, loroText };
+  }, [extractCaret, formatCaret]);
+
+  // const debouncedText = useDebounce(rawText.text, 0.5);
+  // const textRef = useRef(debouncedText);
 
   const renderControl = useRef({ text: false, html: false });
 
@@ -67,6 +101,29 @@ const Editor = ({ fileId, content, writer }: EditorProps) => {
 
   const [lastKey, setLastKey] = useState({ key: "", ctrl: false });
 
+  // const onMessage = useCallback(
+  //   (message: ArrayBufferLike) => {
+  //     setRawText((rawText) => {
+  //       const remoteDoc = new Uint8Array(message);
+  //       doc?.import(remoteDoc);
+
+  //       console.log("Rawtext on message", rawText.text);
+  //       console.log("Lorotext on message", loroText.toString());
+  //       console.log(
+  //         "Doc text on message",
+  //         doc.getText(CONTAINER_ID)?.toString(),
+  //       );
+  //       return {
+  //         text: doc.getText(CONTAINER_ID)?.toString(),
+  //         caret: rawText.caret,
+  //       };
+  //     });
+  //   },
+  //   [doc, loroText],
+  // );
+
+  // const { sendMessage } = useWebsockets({ onMessage });
+
   const getEditor = (): Node => {
     const editor = document.getElementById("editor");
     if (!editor) {
@@ -76,71 +133,66 @@ const Editor = ({ fileId, content, writer }: EditorProps) => {
     return editor;
   };
 
-  const textToBlob = useCallback(() => {
-    const doc = new Loro();
+  const applyTextEvents = useCallback(
+    (loroText: LoroText, currentText: string, updatedText: string) => {
+      const diff = fastDiff(currentText, updatedText);
 
-    if (content?.length) {
-      doc.import(content);
-    }
-
-    const loroText = doc.getText(CONTAINER_ID);
-
-    const diff = getStepsForTransformation("Range", {
-      s1: loroText.toString() ?? "",
-      s2: debouncedText ?? "",
-    });
-
-    let positionCounter = 0;
-    diff.forEach((step) => {
-      switch (step.type) {
-        case "insert": {
-          loroText?.insert(positionCounter, step.value);
-          positionCounter += 1;
-          break;
+      let positionCounter = 0;
+      diff.forEach(([op, text]) => {
+        switch (op) {
+          case fastDiff.INSERT: {
+            loroText?.insert(positionCounter, text);
+            positionCounter += text.length;
+            break;
+          }
+          case fastDiff.DELETE: {
+            loroText?.delete(positionCounter, text.length);
+            break;
+          }
+          case fastDiff.EQUAL: {
+            positionCounter += text.length;
+            break;
+          }
+          default: {
+            throw new Error("Unsupported Diff Operation!");
+          }
         }
-        case "delete": {
-          const length = step.endIndex - step.startIndex + 1;
-          loroText?.delete(positionCounter, length);
-          positionCounter += length;
-          break;
-        }
-        case "retain": {
-          const length = step.endIndex - step.startIndex + 1;
-          positionCounter += length;
-          break;
-        }
-        default: {
-          throw new Error("Unsupported Diff Operation!");
-        }
-      }
-    });
-
-    return {
-      updates: doc.exportFrom(),
-      snapshot: doc.exportSnapshot(),
-    };
-  }, [content, debouncedText]);
-
-  const onPaste: ClipboardEventHandler<HTMLDivElement> = useCallback(
-    (event) => {
-      setRawText(({ text, caret }) => {
-        const content = event.clipboardData.getData("text");
-        return {
-          text: insertTextAtPosition(
-            text,
-            content.replace(new RegExp(ZERO_WIDTH_SPACE_UNICODE, "g"), ""),
-            caret.start,
-            caret.end,
-          ),
-          caret: {
-            start: caret.start + textLength(content),
-            end: caret.start + textLength(content),
-            collapsed: true,
-          },
-        };
       });
     },
     [],
+  );
+
+  const onPaste: ClipboardEventHandler<HTMLDivElement> = useCallback(
+    (event) => {
+      if (!loroText || !loroCaret) {
+        return;
+      }
+
+      const currentText = loroText.toString();
+      const currentCaret = extractCaret(loroCaret);
+
+      const clipboardContent = event.clipboardData.getData("text");
+
+      const text = insertTextAtPosition(
+        currentText,
+        event.clipboardData
+          .getData("text")
+          ?.replace(new RegExp(ZERO_WIDTH_SPACE_UNICODE, "g"), ""),
+        currentCaret.start,
+        currentCaret.end,
+      );
+
+      const caret = {
+        start: currentCaret.start + textLength(clipboardContent),
+        end: currentCaret.start + textLength(clipboardContent),
+        collapsed: true,
+      };
+
+      applyTextEvents(loroText, currentText, text);
+      formatCaret(loroCaret, caret);
+      doc.commit();
+    },
+    [applyTextEvents, doc, extractCaret, formatCaret, loroCaret, loroText],
   );
 
   const onSelection = useCallback(
@@ -167,17 +219,28 @@ const Editor = ({ fileId, content, writer }: EditorProps) => {
           : getCaretFromDomNodes(editor, focus.node, focus.offset);
 
         setLastKey({ key: "", ctrl: false });
-        setRawText((rawText) => ({
-          ...rawText,
-          caret: {
-            start: start > end ? end : start,
-            end: start > end ? start : end,
-            collapsed,
-          },
-        }));
+
+        if (!loroCaret) {
+          return;
+        }
+
+        formatCaret(loroCaret, {
+          start: start > end ? end : start,
+          end: start > end ? start : end,
+          collapsed,
+        });
+
+        doc.commit();
       }
     },
-    [lastKey, rawText.caret.collapsed],
+    [
+      doc,
+      formatCaret,
+      lastKey.ctrl,
+      lastKey.key,
+      loroCaret,
+      rawText.caret.collapsed,
+    ],
   );
 
   const onKeyDown = useCallback(
@@ -195,26 +258,49 @@ const Editor = ({ fileId, content, writer }: EditorProps) => {
         return;
       }
 
-      setRawText((rawText) => {
-        const { text: textContent, caret } = rawText;
-        const textAndCaret = Actions[key](textContent, caret, event.ctrlKey);
-        return textAndCaret;
-      });
+      if (!loroText || !loroCaret) {
+        return;
+      }
+
+      const currentText = loroText.toString();
+      const currentCaret = extractCaret(loroCaret);
+
+      const { text, caret } = Actions[key](
+        currentText ?? "",
+        currentCaret,
+        event.ctrlKey,
+      );
+
+      applyTextEvents(loroText, currentText, text);
+      formatCaret(loroCaret, caret);
+      doc.commit();
     },
-    [rawText],
+    [
+      applyTextEvents,
+      doc,
+      extractCaret,
+      formatCaret,
+      loroCaret,
+      loroText,
+      rawText.caret.collapsed,
+    ],
   );
 
-  useEffect(() => {
-    if (!fileId || textRef.current === debouncedText) {
-      return;
-    }
+  // useEffect(() => {
+  //   if (!fileId || textRef.current === debouncedText) {
+  //     return;
+  //   }
 
-    textRef.current = debouncedText;
+  //   textRef.current = debouncedText;
 
-    const blob = textToBlob();
+  //   const blob = textToBlob();
 
-    (async () => await writer(fileId!, blob.snapshot))();
-  }, [debouncedText, fileId, textToBlob, writer]);
+  //   (async () =>
+  //     await Promise.all([
+  //       writer(fileId!, blob.snapshot),
+  //       sendMessage(blob.updates),
+  //     ]))();
+  // }, [debouncedText, fileId, sendMessage, textToBlob, writer]);
 
   useEffect(() => {
     if (!renderControl.current.html) {
