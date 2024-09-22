@@ -42,7 +42,7 @@ fn main() {
             let window = app.get_webview_window("main").expect("Failed to get main window!");
             // Doing this in tauri config does not allow super + arrow keys to work
             let _ = window.maximize();
-            window.open_devtools();
+            // window.open_devtools();
             Ok(())
         })
         .run(tauri::generate_context!())

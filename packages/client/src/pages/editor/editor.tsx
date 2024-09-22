@@ -23,7 +23,7 @@ import {
   insertTextAtPosition,
   textLength,
 } from "../../utils";
-import { useDebounce } from "../../hooks";
+import { useDebounce, useWebsockets } from "../../hooks";
 import { Loro, LoroList, LoroText } from "loro-crdt";
 import fastDiff from "fast-diff";
 
@@ -60,6 +60,8 @@ const Editor = ({ fileId, content, writer }: EditorProps) => {
     };
   }, []);
 
+  const caretRef = useRef<Caret>();
+
   const {
     doc,
     loroText,
@@ -87,10 +89,22 @@ const Editor = ({ fileId, content, writer }: EditorProps) => {
     }));
 
     doc.subscribe((e) => {
-      console.log("Event", e);
+      if (!e.local) {
+        formatCaret(
+          loroCaret,
+          caretRef.current ?? { start: 0, end: 0, collapsed: true },
+        );
+
+        setRawText((raw) => ({
+          ...raw,
+          text: loroText.toString() ?? "",
+        }));
+
+        return;
+      }
 
       const caret = extractCaret(loroCaret);
-
+      caretRef.current = caret;
       setRawText(() => ({
         text: loroText?.toString() ?? "",
         caret: {
@@ -115,28 +129,14 @@ const Editor = ({ fileId, content, writer }: EditorProps) => {
 
   const [lastKey, setLastKey] = useState({ key: "", ctrl: false });
 
-  // const onMessage = useCallback(
-  //   (message: ArrayBufferLike) => {
-  //     setRawText((rawText) => {
-  //       const remoteDoc = new Uint8Array(message);
-  //       doc?.import(remoteDoc);
+  const onMessage = useCallback(
+    (message: Uint8Array) => {
+      doc.import(new Uint8Array(message));
+    },
+    [doc],
+  );
 
-  //       console.log("Rawtext on message", rawText.text);
-  //       console.log("Lorotext on message", loroText.toString());
-  //       console.log(
-  //         "Doc text on message",
-  //         doc.getText(CONTAINER_ID)?.toString(),
-  //       );
-  //       return {
-  //         text: doc.getText(CONTAINER_ID)?.toString(),
-  //         caret: rawText.caret,
-  //       };
-  //     });
-  //   },
-  //   [doc, loroText],
-  // );
-
-  // const { sendMessage } = useWebsockets({ onMessage });
+  const { sendMessage } = useWebsockets({ onMessage });
 
   const getEditor = (): Node | null => {
     const editor = document.getElementById("editor");
@@ -311,9 +311,9 @@ const Editor = ({ fileId, content, writer }: EditorProps) => {
     (async () =>
       await Promise.all([
         writer(fileId!, doc.exportSnapshot()),
-        // sendMessage(blob.updates),
+        sendMessage(doc.exportFrom()),
       ]))();
-  }, [debouncedText, doc, fileId, writer]);
+  }, [debouncedText, doc, fileId, sendMessage, writer]);
 
   useEffect(() => {
     if (!renderControl.current.html) {

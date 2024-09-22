@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 type WebsocketProps = {
   uri?: string;
@@ -8,16 +8,25 @@ type WebsocketProps = {
 export const useWebsockets = ({ uri, onMessage }: WebsocketProps) => {
   const [socket, setSocket] = useState<WebSocket>();
 
+  const listener = useCallback(
+    (event: MessageEvent<ArrayBufferLike>) => {
+      console.log("On message called!");
+      onMessage?.(event.data);
+    },
+    [onMessage],
+  );
+
   useEffect(() => {
     const socket = new WebSocket(uri ?? "ws://localhost:8080");
     socket.binaryType = "arraybuffer";
-    socket.addEventListener("message", async (event) => {
-      await onMessage(event.data);
-    });
+    socket.addEventListener("message", listener);
 
     setSocket(socket);
-    return () => socket.close();
-  }, [onMessage, uri]);
+    return () => {
+      socket.removeEventListener("message", listener);
+      socket.close();
+    };
+  }, [listener, onMessage, uri]);
 
   return {
     sendMessage: (message: string | Uint8Array) => socket?.send(message),
