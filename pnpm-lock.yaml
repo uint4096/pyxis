@@ -14,6 +14,12 @@ importers:
         specifier: 2.0.0-rc.13
         version: 2.0.0-rc.13
 
+  packages/auth:
+    dependencies:
+      scylla:
+        specifier: ^0.2.0
+        version: 0.2.0
+
   packages/client:
     dependencies:
       '@linaria/core':
@@ -3662,6 +3668,11 @@ packages:
     resolution: {integrity: sha512-UOShsPwz7NrMUqhR6t0hWjFduvOzbtv7toDH1/hIrfRNIDBnnBWd0CwJTGvTpngVlmwGCdP9/Zl/tVrDqcuYzQ==}
     dependencies:
       loose-envify: 1.4.0
+
+  /scylla@0.2.0:
+    resolution: {integrity: sha512-s09zYP9G19Ii5NmpyOMeYjYB75GLTwff1kv6UhsQMxaNK9oCoYBeLnKDkJchr9MmcScndwGizqsUV30YmCGrxw==}
+    engines: {node: '>=0.8'}
+    dev: false
 
   /semver@6.3.1:
     resolution: {integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==}

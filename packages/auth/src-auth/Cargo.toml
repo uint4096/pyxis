@@ -1,0 +1,16 @@
+[package]
+name = "src-auth"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+scylla = "0.15.0"
+tokio = { version = "1.12", features = ['full'] }
+futures = "0.3.6"
+uuid = { version = "1.11.0", features = ["v4", "serde"] }
+chrono = { version = "0.4.38", features = ["serde"]}
+axum = "0.7.9"
+jsonwebtoken = "9.3.0"
+serde = "1.0.215"
+serde_with = { version = "3.11.0", features = ["chrono"]}
+pwhash = "1.0.0"
