@@ -2,7 +2,7 @@ use pwhash::bcrypt;
 use scylla::Session;
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
-use std::error::Error;
+use std::{error::Error, sync::Arc};
 use uuid::Uuid;
 
 #[serde_as]
@@ -11,16 +11,19 @@ pub struct User {
     pub user_id: Uuid,
     pub username: String,
     pub device_id: Uuid,
-    pub password: String,
 }
 
 pub struct UserRepository {
-    session: Session,
+    session: Arc<Session>,
 }
 
 impl UserRepository {
-    pub async fn create(&self, user: User) -> Result<User, Box<dyn Error>> {
-        let hashed_pwd = pwhash::bcrypt::hash(user.password.clone())?;
+    pub fn new(session: Arc<Session>) -> Self {
+        Self { session }
+    }
+
+    pub async fn create(&self, user: User, password: String) -> Result<User, Box<dyn Error>> {
+        let hashed_pwd = pwhash::bcrypt::hash(password.clone())?;
 
         self.session.query_unpaged("INSERT INTO pyxis_db.users (user_id, username, device_id, password) VALUES (?, ?, ?, ?)", &(user.user_id, user.username.clone(), user.device_id, hashed_pwd)).await?;
 
@@ -35,7 +38,11 @@ impl UserRepository {
         Ok(())
     }
 
-    pub async fn verify(&self, username: String, password: String) -> Result<bool, Box<dyn Error>> {
+    pub async fn verify(
+        &self,
+        username: String,
+        password: String,
+    ) -> Result<Option<User>, Box<dyn Error>> {
         let user_iter = self
             .session
             .query_unpaged(
@@ -48,12 +55,18 @@ impl UserRepository {
         let user = user_iter.maybe_first_row::<(Uuid, String, Uuid, String)>()?;
 
         if let Some(user) = user {
-            let pwd_hash = user.3;
+            let (user_id, username, device_id, pwd_hash) = user;
             let verification = bcrypt::verify(password, &pwd_hash);
 
-            return Ok(verification);
+            if verification {
+                return Ok(Some(User {
+                    user_id,
+                    username,
+                    device_id,
+                }));
+            }
         }
 
-        Ok(false)
+        Ok(None)
     }
 }

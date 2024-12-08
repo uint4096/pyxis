@@ -3,9 +3,9 @@ use std::{error::Error, sync::Arc};
 use scylla::{Session, SessionBuilder};
 
 pub struct ScyllaCredentials {
-    uri: String,
-    username: String,
-    password: String,
+    pub uri: String,
+    pub username: String,
+    pub password: String,
 }
 
 pub struct Scylla {

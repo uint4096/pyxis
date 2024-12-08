@@ -1,4 +1,4 @@
-use std::{env, error::Error};
+use std::{env, error::Error, sync::Arc};
 
 use chrono::{Duration, Utc};
 use jsonwebtoken::{encode, EncodingKey, Header};
@@ -22,16 +22,20 @@ pub struct Claims {
 pub struct UserToken {
     user_id: Uuid,
     device_id: Uuid,
-    token: String,
+    user_token: String,
     #[serde_as(as = "DurationSeconds<i64>")]
     expiration_time: TimeDelta,
 }
 
 pub struct TokenRepository {
-    session: Session,
+    session: Arc<Session>,
 }
 
 impl TokenRepository {
+    pub fn new(session: Arc<Session>) -> Self {
+        Self { session }
+    }
+
     pub async fn create(&self, user: User) -> Result<UserToken, Box<dyn Error>> {
         let duration = Duration::hours(24 * 30);
 
@@ -59,11 +63,11 @@ impl TokenRepository {
         let user_token = UserToken {
             user_id: claim.user.user_id,
             device_id: claim.user.device_id,
-            token: token.clone(),
+            user_token: token.clone(),
             expiration_time: duration,
         };
 
-        self.session.query_unpaged("INSERT INTO pyxis_db.user_tokens (user_id, device_id, token, expiration_time) VALUES (?, ?, ?, ?)", &(claim.user.user_id, claim.user.device_id, token, CqlTimestamp(duration.num_seconds()))).await?;
+        self.session.query_unpaged("INSERT INTO pyxis_db.user_tokens (user_id, device_id, user_token, expiration_time) VALUES (?, ?, ?, ?)", &(claim.user.user_id, claim.user.device_id, token, CqlTimestamp(duration.num_seconds()))).await?;
 
         Ok(user_token)
     }
