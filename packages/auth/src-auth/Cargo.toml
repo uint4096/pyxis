@@ -14,3 +14,4 @@ jsonwebtoken = "9.3.0"
 serde = "1.0.215"
 serde_with = { version = "3.11.0", features = ["chrono"]}
 pwhash = "1.0.0"
+axum-macros = "0.4.2"
