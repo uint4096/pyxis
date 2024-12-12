@@ -4,7 +4,7 @@ use axum::{extract::State, http::StatusCode, Json};
 use serde::Deserialize;
 
 use crate::database::{
-    connection::Scylla,
+    connection::Dynamo,
     token_repository::{TokenRepository, UserToken},
     user_repository::UserRepository,
 };
@@ -17,7 +17,7 @@ pub struct SignInPayload {
 
 #[axum_macros::debug_handler]
 pub async fn sign_in(
-    State(db): State<Arc<Scylla>>,
+    State(db): State<Arc<Dynamo>>,
     Json(user): Json<SignInPayload>,
 ) -> Result<Json<UserToken>, StatusCode> {
     let SignInPayload { password, username } = user;
@@ -28,7 +28,7 @@ pub async fn sign_in(
     let user = match user_repository.verify(username, password).await {
         Ok(user) => user,
         Err(e) => {
-            println!("Error while verifying password: {}", e);
+            println!("Error while verifying password: {:?}", e);
             return Err(StatusCode::INTERNAL_SERVER_ERROR);
         }
     };

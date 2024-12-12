@@ -4,7 +4,7 @@ use axum::{extract::State, http::StatusCode, Json};
 use serde::Deserialize;
 use uuid::Uuid;
 
-use crate::database::{connection::Scylla, token_repository::TokenRepository};
+use crate::database::{connection::Dynamo, token_repository::TokenRepository};
 
 #[derive(Deserialize)]
 pub struct SignOutPayload {
@@ -13,7 +13,7 @@ pub struct SignOutPayload {
 
 #[axum_macros::debug_handler]
 pub async fn sign_out(
-    State(db): State<Arc<Scylla>>,
+    State(db): State<Arc<Dynamo>>,
     Json(user): Json<SignOutPayload>,
 ) -> Result<StatusCode, StatusCode> {
     let SignOutPayload { user_id } = user;

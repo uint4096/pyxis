@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-scylla = "0.15.0"
 tokio = { version = "1.12", features = ['full'] }
 futures = "0.3.6"
 uuid = { version = "1.11.0", features = ["v4", "serde"] }
@@ -15,3 +14,5 @@ serde = "1.0.215"
 serde_with = { version = "3.11.0", features = ["chrono"]}
 pwhash = "1.0.0"
 axum-macros = "0.4.2"
+aws-sdk-dynamodb = "1.55.0"
+aws-config = { version = "1.1.7", features = ["behavior-version-latest"] }

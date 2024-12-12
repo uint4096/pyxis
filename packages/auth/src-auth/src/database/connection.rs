@@ -1,33 +1,18 @@
 use std::{error::Error, sync::Arc};
+use aws_sdk_dynamodb as DynamoDB;
+use aws_config as Config;
 
-use scylla::{Session, SessionBuilder};
-
-pub struct ScyllaCredentials {
-    pub uri: String,
-    pub username: String,
-    pub password: String,
+pub struct Dynamo {
+    pub connection: Arc<DynamoDB::client::Client>,
 }
 
-pub struct Scylla {
-    pub connection: Arc<Session>,
-}
-
-impl Scylla {
-    pub async fn new(creds: ScyllaCredentials) -> Result<Scylla, Box<dyn Error>> {
-        let ScyllaCredentials {
-            uri,
-            username,
-            password,
-        } = creds;
-
-        let session = SessionBuilder::new()
-            .known_node(uri)
-            .user(username, password)
-            .build()
-            .await?;
-
-        Ok(Scylla {
-            connection: Arc::new(session),
+impl Dynamo {
+    pub async fn new() -> Result<Dynamo, Box<dyn Error>> {
+        let config = Config::load_from_env().await;
+        let client = aws_sdk_dynamodb::Client::new(&config);
+    
+        Ok(Dynamo {
+            connection: Arc::new(client),
         })
     }
 }

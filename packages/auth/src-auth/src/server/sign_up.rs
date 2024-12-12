@@ -5,9 +5,9 @@ use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::database::{
-    connection::Scylla,
+    connection::Dynamo,
     token_repository::{TokenRepository, UserToken},
-    user_repository::{User, UserRepository},
+    user_repository::{UserWithoutPassword, UserRepository},
 };
 
 #[derive(Deserialize)]
@@ -19,7 +19,7 @@ pub struct SignUpPayload {
 
 #[axum_macros::debug_handler]
 pub async fn sign_up(
-    State(db): State<Arc<Scylla>>,
+    State(db): State<Arc<Dynamo>>,
     Json(user): Json<SignUpPayload>,
 ) -> Result<Json<UserToken>, StatusCode> {
     let SignUpPayload {
@@ -34,7 +34,7 @@ pub async fn sign_up(
     let user_id = Uuid::new_v4();
     let user = match user_repository
         .create(
-            User {
+            UserWithoutPassword {
                 device_id,
                 username,
                 user_id,
