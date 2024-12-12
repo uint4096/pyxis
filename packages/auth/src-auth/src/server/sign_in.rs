@@ -28,7 +28,7 @@ pub async fn sign_in(
     let user = match user_repository.verify(username, password).await {
         Ok(user) => user,
         Err(e) => {
-            println!("Error while verifying password: {:?}", e);
+            println!("Error while verifying password: {}", e);
             return Err(StatusCode::INTERNAL_SERVER_ERROR);
         }
     };

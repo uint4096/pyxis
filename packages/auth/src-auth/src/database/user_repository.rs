@@ -1,5 +1,5 @@
-use pwhash::bcrypt;
 use aws_sdk_dynamodb::{self as DynamoDB, types::AttributeValue};
+use pwhash::bcrypt;
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
 use std::{collections::HashMap, error::Error, str::FromStr, sync::Arc};
@@ -13,7 +13,7 @@ pub struct UserWithPassword {
     pub user_id: String,
     pub username: String,
     pub device_id: String,
-    pub password: String
+    pub password: String,
 }
 
 #[serde_as]
@@ -27,24 +27,27 @@ pub struct UserWithoutPassword {
 impl From<&HashMap<String, AttributeValue>> for UserWithPassword {
     fn from(value: &HashMap<String, AttributeValue>) -> Self {
         UserWithPassword {
-            user_id: value.get("user_id")
+            user_id: value
+                .get("user_id")
                 .and_then(|v| v.as_s().ok())
                 .cloned()
                 .expect("user_id should exist"),
-            username: value.get("username")
+            username: value
+                .get("username")
                 .and_then(|v| v.as_s().ok())
                 .cloned()
                 .expect("username should exist"),
-            password: value.get("password")
+            password: value
+                .get("password")
                 .and_then(|v| v.as_s().ok())
                 .cloned()
                 .expect("password should exist"),
-            device_id: value.get("device_id")
+            device_id: value
+                .get("device_id")
                 .and_then(|v| v.as_s().ok())
                 .cloned()
                 .expect("device_id should exist"),
         }
-
     }
 }
 
@@ -57,7 +60,11 @@ impl UserRepository {
         Self { client }
     }
 
-    pub async fn create(&self, user: UserWithoutPassword, password: String) -> Result<UserWithoutPassword, Box<dyn Error>> {
+    pub async fn create(
+        &self,
+        user: UserWithoutPassword,
+        password: String,
+    ) -> Result<UserWithoutPassword, Box<dyn Error>> {
         let hashed_pwd = pwhash::bcrypt::hash(password.clone())?;
 
         let user_id_av = AttributeValue::S(user.user_id.to_string());
@@ -111,7 +118,12 @@ impl UserRepository {
 
         if let Some(users) = user_iter.items {
             let user_map: Vec<UserWithPassword> = users.iter().map(|v| v.into()).collect();
-            let UserWithPassword { password: pwd_hash, user_id, device_id, username } = &user_map[0];
+            let UserWithPassword {
+                password: pwd_hash,
+                user_id,
+                device_id,
+                username,
+            } = &user_map[0];
             let verification = bcrypt::verify(password, &pwd_hash);
 
             if verification {

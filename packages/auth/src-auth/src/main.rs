@@ -7,8 +7,7 @@ use std::{error::Error, sync::Arc};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let dynamo = Dynamo::new()
-    .await?;
+    let dynamo = Dynamo::new().await?;
 
     let app = create_route(Arc::new(dynamo));
 

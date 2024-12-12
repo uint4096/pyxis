@@ -1,10 +1,10 @@
 use std::{env, error::Error, sync::Arc};
 
+use aws_sdk_dynamodb::{self as DynamoDB, types::AttributeValue};
 use chrono::{Duration, Utc};
 use jsonwebtoken::{encode, EncodingKey, Header};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use aws_sdk_dynamodb::{self as DynamoDB, types::AttributeValue};
 
 use super::user_repository::UserWithoutPassword;
 use serde_with::{chrono::TimeDelta, serde_as, DurationSeconds};

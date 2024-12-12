@@ -7,7 +7,7 @@ use uuid::Uuid;
 use crate::database::{
     connection::Dynamo,
     token_repository::{TokenRepository, UserToken},
-    user_repository::{UserWithoutPassword, UserRepository},
+    user_repository::{UserRepository, UserWithoutPassword},
 };
 
 #[derive(Deserialize)]
