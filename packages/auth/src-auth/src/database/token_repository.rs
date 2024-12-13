@@ -86,11 +86,12 @@ impl TokenRepository {
         Ok(user_token)
     }
 
-    pub async fn delete(&self, user_id: &Uuid) -> Result<(), Box<dyn Error>> {
+    pub async fn delete(&self, user_id: &Uuid, device_id: &Uuid) -> Result<(), Box<dyn Error>> {
         self.client
             .delete_item()
             .table_name(TABLE_NAME)
             .key("user_id", AttributeValue::S(user_id.to_string()))
+            .key("device_id", AttributeValue::S(device_id.to_string()))
             .send()
             .await?;
 
