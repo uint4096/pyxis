@@ -34,7 +34,7 @@ export const Modal = ({ body, footer, header, size, onClose }: ModalProps) => {
 };
 
 const ModalOverlay = styled.div`
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
@@ -46,15 +46,17 @@ const ModalOverlay = styled.div`
 const ModalContainer = styled.div<{ size: ModalSize }>`
   display: flex;
   flex-direction: column;
-  border-radius: 3%;
+  border-radius: 5px;
   border: 1px solid grey;
   box-shadow: 5px 5px 5px black;
   justify-content: flex-end;
-  position: fixed;
+  position: absolute;
+  top: 35%;
+  left: 10%;
   gap: 1em;
   background-color: rgb(17, 19, 25);
   z-index: 1000;
-  padding: 2vh 0.5vw;
+  padding: 0.5vh 0.5vw 2vh 0.5vw;
   width: ${(props) =>
     ({ small: "20vw", medium: "30vw", large: "40vw" })[props.size]};
 `;

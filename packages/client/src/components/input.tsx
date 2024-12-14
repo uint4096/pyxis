@@ -2,6 +2,8 @@ import { styled } from "@linaria/react";
 import { open } from "@tauri-apps/plugin-dialog";
 import { KeyboardEventHandler, Ref, useCallback, useState } from "react";
 
+type InputType = "text" | "password";
+
 export type InputProps = {
   size: "small" | "medium" | "large";
   value: string;
@@ -11,6 +13,7 @@ export type InputProps = {
   onChange: React.Dispatch<React.SetStateAction<string>>;
   ref?: Ref<HTMLInputElement>;
   onKeyDown?: KeyboardEventHandler<HTMLInputElement>;
+  type?: InputType;
 };
 
 export const InputInPlace = ({
@@ -20,6 +23,7 @@ export const InputInPlace = ({
   onChange,
   readonly,
   onKeyDown,
+  type,
 }: InputProps & { readonly?: boolean }) => (
   <Input
     value={value}
@@ -29,6 +33,7 @@ export const InputInPlace = ({
     readOnly={readonly ?? false}
     autoFocus={true}
     onKeyDown={onKeyDown}
+    type={type}
   />
 );
 
@@ -82,15 +87,17 @@ export const TextInput = ({
   validationMessage,
   message,
   onChange,
+  type,
 }: InputProps) => (
   <InputWrapper>
-    <InputMessage>{message}</InputMessage>
+    {message && <InputMessage>{message}</InputMessage>}
     <InputInPlace
       value={value}
       placeholder={placeholder ?? ""}
       readonly={false}
       size={size}
       onChange={onChange}
+      type={type}
     />
     {validationMessage && <span>{validationMessage}</span>}
   </InputWrapper>
@@ -110,7 +117,10 @@ const InputMessage = styled.span`
   margin-left: 2em;
 `;
 
-const Input = styled.input<{ variation: InputProps["size"] }>`
+const Input = styled.input<{
+  variation: InputProps["size"];
+  type?: InputType;
+}>`
   border: 1px solid grey;
   background-color: inherit;
   border-radius: 10px;
@@ -129,6 +139,7 @@ const Input = styled.input<{ variation: InputProps["size"] }>`
     ({ small: "60%", medium: "80%", large: "90%" })[props.variation]};
   height: ${(props) =>
     ({ small: "2.4vh", medium: "2.7vh", large: "2.9vh" })[props.variation]};
+  type: ${(props) => props.type ?? "text"};
 `;
 
 const InputSelection = styled.div`

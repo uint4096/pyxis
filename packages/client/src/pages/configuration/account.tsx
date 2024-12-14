@@ -1,11 +1,15 @@
+import { useState } from "react";
 import { UserSquare } from "../../icons";
 import { Option } from "./wrappers";
+import { AccountForm } from "./forms";
 
 export const Account = () => {
+  const [showDialog, setDialog] = useState(false);
+
   return (
-    <Option
-      icon={<UserSquare />}
-      onClick={() => console.info("Clicked on user icon")}
-    />
+    <>
+      {showDialog && <AccountForm onDone={() => setDialog(false)} />}
+      <Option icon={<UserSquare />} onClick={() => setDialog(true)} />
+    </>
   );
 };
