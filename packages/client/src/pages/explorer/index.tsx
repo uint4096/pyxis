@@ -67,7 +67,7 @@ const ExplorerWrapper = styled.div`
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
-  padding: 7vh 5vw;
+  padding: 1vh 5vw;
   height: 100%;
   flex-grow: 1;
   gap: 5vw;
