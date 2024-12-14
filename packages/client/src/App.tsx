@@ -13,20 +13,12 @@ import "./App.css";
 // import Editor from "./pages/editor/editor";
 import { Explorer } from "./pages/explorer";
 import "react-toastify/dist/ReactToastify.css";
-import { Option, Options } from "./pages/options";
-import { UserSquare } from "./icons";
+import { ConfigurationTray } from "./pages/configuration";
 
 function App() {
-  const options = (
-    <Option
-      icon={<UserSquare />}
-      onClick={() => console.info("Clicked on user icon")}
-    ></Option>
-  );
-
   return (
     <>
-      <Options>{[options]}</Options>
+      <ConfigurationTray />
       <Explorer />
       <ToastContainer
         position={"bottom-right"}
