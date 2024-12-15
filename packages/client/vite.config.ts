@@ -8,7 +8,13 @@ import wyw from "@wyw-in-js/vite";
 export default defineConfig({
   clearScreen: false,
   server: {
-    strictPort: true,
+    proxy: {
+      "/auth": {
+        target: "http://127.0.0.1:8080",
+        secure: false,
+        changeOrigin: true,
+      },
+    },
   },
   envPrefix: [
     "VITE_",
