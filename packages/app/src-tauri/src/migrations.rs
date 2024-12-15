@@ -1,3 +1,4 @@
+mod config;
 mod content;
 mod directories;
 mod files;
@@ -5,6 +6,7 @@ mod workspaces;
 
 use std::{collections::HashMap, fmt::Debug, rc::Rc};
 
+use config::ConfigurationMigration;
 use content::FileContentMigration;
 use directories::DirectoriesMigration;
 use files::FilesMigration;
@@ -173,6 +175,9 @@ pub fn run_migrations(database: &mut Database) -> Result<(), Error> {
             }),
             Box::new(FileContentMigration {
                 name: String::from("file-content_migration"),
+            }),
+            Box::new(ConfigurationMigration {
+                name: String::from("configuration_migration"),
             }),
         ]),
     };

@@ -1,8 +1,8 @@
+use crate::database::Database;
 use chrono::Utc;
 use rusqlite::{Connection, Error};
 use serde::{Deserialize, Serialize};
 use tauri::State;
-use crate::database::Database;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FileContent {
@@ -43,11 +43,7 @@ impl FileContent {
 }
 
 #[tauri::command]
-pub fn update_content(
-    file_id: i32,
-    content: Vec<u8>,
-    database: State<Database>,
-) -> Option<bool> {
+pub fn update_content(file_id: i32, content: Vec<u8>, database: State<Database>) -> Option<bool> {
     let content = FileContent::new(file_id, content, None);
 
     match content.update(&database.get_connection()) {
@@ -60,10 +56,7 @@ pub fn update_content(
 }
 
 #[tauri::command]
-pub fn get_content(
-    file_id: i32,
-    database: State<Database>,
-) -> Option<Vec<u8>> {
+pub fn get_content(file_id: i32, database: State<Database>) -> Option<Vec<u8>> {
     match FileContent::get(&file_id, &database.get_connection()) {
         Ok(content) => Some(content),
         Err(e) => {

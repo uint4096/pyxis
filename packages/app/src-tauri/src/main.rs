@@ -5,6 +5,7 @@ mod entities;
 mod migrations;
 
 use database::Database;
+use entities::config::{add_user_data, get_config, remove_user_data};
 use entities::content::{get_content, update_content};
 use entities::directories::{create_dir, delete_dir, list_dirs, update_dir};
 use entities::files::{create_file, delete_file, list_files, update_file};
@@ -36,10 +37,15 @@ fn main() {
             list_files,
             update_file,
             update_content,
-            get_content
+            get_content,
+            get_config,
+            add_user_data,
+            remove_user_data
         ])
         .setup(|app: &mut App| {
-            let window = app.get_webview_window("main").expect("Failed to get main window!");
+            let window = app
+                .get_webview_window("main")
+                .expect("Failed to get main window!");
             // Doing this in tauri config does not allow super + arrow keys to work
             let _ = window.maximize();
             // window.open_devtools();
