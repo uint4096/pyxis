@@ -12,7 +12,7 @@ use uuid::Uuid;
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Configuration {
     device_id: Option<Uuid>,
-    token: Option<String>,
+    user_token: Option<String>,
     user_id: Option<Uuid>,
     username: Option<String>,
 }
@@ -30,10 +30,10 @@ fn get_machine_id() -> Uuid {
 }
 
 impl Configuration {
-    fn new(token: Option<String>, user_id: Option<String>, username: Option<String>) -> Self {
+    fn new(user_token: Option<String>, user_id: Option<String>, username: Option<String>) -> Self {
         Self {
             device_id: Some(get_machine_id()),
-            token,
+            user_token,
             user_id: if let Some(uid) = user_id {
                 Some(
                     Uuid::from_str(&uid).expect("[Configuration] Failed to convert string to uuid"),
@@ -61,7 +61,7 @@ impl Configuration {
     fn add(&self, conn: &Connection) -> Result<(), Error> {
         let json_payload = serde_json::json!({
             "device_id": self.device_id,
-            "token": self.token,
+            "user_token": self.user_token,
             "user_id": self.user_id,
             "username": self.username
         });
@@ -77,11 +77,11 @@ impl Configuration {
 #[tauri::command]
 pub fn add_user_data(
     username: String,
-    token: String,
+    user_token: String,
     user_id: String,
     database: State<Database>,
 ) -> Option<bool> {
-    let content = Configuration::new(Some(token), Some(user_id), Some(username));
+    let content = Configuration::new(Some(user_token), Some(user_id), Some(username));
 
     match content.add(&database.get_connection()) {
         Ok(_) => Some(true),

@@ -3,34 +3,39 @@ import { useCallback, useState } from "react";
 
 import { Modal, TextInput } from "../../../components";
 import { ky, toast } from "../../../utils";
+import { useConfig } from "../../../store";
+import { ConfigResponse } from "../../../ffi";
 
 export const AccountForm = ({ onDone }: { onDone: () => void }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
+  const { create, config } = useConfig();
+
   const [type, setType] = useState("signin");
 
   const action = useCallback(async () => {
-    const endpoint =
-      type === "signin"
-        ? "http://localhost:8080/signup"
-        : "http://localhost:8080/signin";
+    const endpoint = type === "signin" ? "/auth/signin" : "/auth/signup";
 
     try {
-      const response = await ky
-        .post(endpoint, {
-          json: { username, password },
+      const {
+        user_id,
+        user_token: token,
+        device_id,
+      } = await ky
+        .post<Required<ConfigResponse>>(endpoint, {
+          json: { username, password, device_id: config.deviceId },
         })
         .json();
 
-      // @todo: store token in config
-      // show toast message
-      // have a onDone prop and use it to close the modal
+      await create(username, user_id, token, device_id);
+      onDone();
     } catch (e) {
       const message = type === "signin" ? "Signin failed!" : "Signup failed";
+      console.error(e);
       toast(message);
     }
-  }, [type, username, password]);
+  }, [type, username, password, config.deviceId, create, onDone]);
 
   const body = (
     <InputWrapper>
@@ -54,7 +59,7 @@ export const AccountForm = ({ onDone }: { onDone: () => void }) => {
             setType((type) => (type === "signin" ? "signup" : "signin"))
           }
         >
-          {type === "signin" ? "sign in" : "sign up"}{" "}
+          {type === "signin" ? "sign up" : "sign in"}{" "}
         </SwitchTypeSpan>
         instead
       </span>
