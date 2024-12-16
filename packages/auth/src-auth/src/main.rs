@@ -1,12 +1,15 @@
 pub mod database;
 pub mod server;
 
+use dotenv::dotenv;
 use database::connection::Dynamo;
 use server::router::create_route;
 use std::{error::Error, sync::Arc};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+    dotenv().ok();
+
     let dynamo = Dynamo::new().await?;
 
     let app = create_route(Arc::new(dynamo));

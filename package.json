@@ -7,6 +7,7 @@
     "build:ws": "pnpm --filter 'ws' build",
     "watch:ws": "pnpm --filter 'ws' build:w",
     "start:ws": "pnpm --filter 'ws' start",
+    "start:auth": "pnpm --filter 'auth' start",
     "build:client": "pnpm --filter 'client' build",
     "start:client": "pnpm --filter 'client' dev",
     "start:app": "pnpm --filter 'app' dev",

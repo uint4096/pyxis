@@ -114,8 +114,6 @@ impl UserRepository {
             .send()
             .await?;
 
-        println!("Fetched user {:?}", user_iter);
-
         if let Some(users) = user_iter.items {
             let user_map: Vec<UserWithPassword> = users.iter().map(|v| v.into()).collect();
             let UserWithPassword {
