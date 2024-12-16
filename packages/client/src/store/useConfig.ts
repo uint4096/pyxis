@@ -1,4 +1,11 @@
-import { addUserData, removeUserData, getConfig, type Config } from "../ffi";
+import {
+  addUserData,
+  removeUserData,
+  getConfig,
+  type Config,
+  ConfigResponse,
+} from "../ffi";
+import { jwtDecode } from "jwt-decode";
 import { create } from "zustand";
 
 interface ConfigState {
@@ -12,6 +19,20 @@ interface ConfigState {
   delete: () => Promise<void>;
   setConfig: () => Promise<void>;
 }
+
+type DecodedToken = {
+  user: Pick<ConfigResponse, "user_id" | "username">;
+  exp: number;
+};
+
+const decodeToken = (token: string): DecodedToken | null => {
+  try {
+    return jwtDecode(token);
+  } catch (e) {
+    console.error("[Auth] Error while decoding token!", e);
+    return null;
+  }
+};
 
 export const useConfig = create<ConfigState>((set, get) => ({
   config: {},
@@ -37,6 +58,15 @@ export const useConfig = create<ConfigState>((set, get) => ({
 
     if (!config) {
       return;
+    }
+
+    if (config.userToken) {
+      const decodedToken = decodeToken(config.userToken);
+      const currentTime = new Date().getTime();
+      if (!decodedToken || decodedToken.exp * 1000 < currentTime) {
+        await get().delete();
+        return;
+      }
     }
 
     set({

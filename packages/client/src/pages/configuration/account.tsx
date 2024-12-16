@@ -1,14 +1,21 @@
 import { useState } from "react";
 import { UserSquare } from "../../icons";
 import { Option } from "./wrappers";
-import { AccountForm } from "./forms";
+import { AccountForm, UserDetails } from "./modals";
+import { useConfig } from "../../store";
 
 export const Account = () => {
   const [showDialog, setDialog] = useState(false);
+  const { config } = useConfig();
 
   return (
     <>
-      {showDialog && <AccountForm onDone={() => setDialog(false)} />}
+      {showDialog && !config.username && (
+        <AccountForm onDone={() => setDialog(false)} />
+      )}
+      {showDialog && config.username && (
+        <UserDetails onDone={() => setDialog(false)} />
+      )}
       <Option icon={<UserSquare />} onClick={() => setDialog(true)} />
     </>
   );
