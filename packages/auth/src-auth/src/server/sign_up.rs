@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use axum::{extract::State, http::StatusCode, Json};
+use axum::{extract::State, http::StatusCode, response::{IntoResponse, Response}, Json};
 use serde::Deserialize;
 use uuid::Uuid;
 
@@ -21,7 +21,7 @@ pub struct SignUpPayload {
 pub async fn sign_up(
     State(db): State<Arc<Dynamo>>,
     Json(user): Json<SignUpPayload>,
-) -> Result<Json<UserToken>, StatusCode> {
+) -> Result<Json<UserToken>, Response> {
     let SignUpPayload {
         device_id,
         password,
@@ -30,6 +30,19 @@ pub async fn sign_up(
 
     let user_repository = UserRepository::new(db.connection.clone());
     let token_repository = TokenRepository::new(db.connection.clone());
+
+    match user_repository.get(&username).await {
+        Ok(user) => {
+            if let Some(_) = user {
+                println!("Username taken!");
+                return Err((StatusCode::CONFLICT, format!("Username taken!")).into_response());
+            }
+        }
+        Err(e) => {
+            println!("Error while trying to validate username: {}", e);
+            return Err((StatusCode::INTERNAL_SERVER_ERROR, format!("Signup failed! Unable to fetch username.")).into_response())
+        }
+    };
 
     let user_id = Uuid::new_v4();
     let user = match user_repository
@@ -46,7 +59,7 @@ pub async fn sign_up(
         Ok(user) => user,
         Err(e) => {
             println!("Error while trying to create user: {}", e);
-            return Err(StatusCode::INTERNAL_SERVER_ERROR);
+            return Err((StatusCode::INTERNAL_SERVER_ERROR, format!("Signup failed! Error while creating user.")).into_response());
         }
     };
 
@@ -54,7 +67,7 @@ pub async fn sign_up(
         Ok(token) => token,
         Err(e) => {
             println!("Error while trying to create token: {}", e);
-            return Err(StatusCode::INTERNAL_SERVER_ERROR);
+            return Err((StatusCode::INTERNAL_SERVER_ERROR, format!("Signup failed! Error while creating token.")).into_response());
         }
     };
 

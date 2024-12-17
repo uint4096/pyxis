@@ -8,7 +8,7 @@ use uuid::Uuid;
 static TABLE_NAME: &str = "users";
 
 #[serde_as]
-#[derive(Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct UserWithPassword {
     pub user_id: String,
     pub username: String,
@@ -96,13 +96,7 @@ impl UserRepository {
         Ok(())
     }
 
-    pub async fn verify(
-        &self,
-        username: String,
-        password: String,
-    ) -> Result<Option<UserWithoutPassword>, Box<dyn Error>> {
-        println!("Fetching user {}", username);
-
+    pub async fn get(&self, username: &str) -> Result<Option<UserWithPassword>, Box<dyn Error>> {
         let user_iter = self
             .client
             .query()
@@ -110,18 +104,36 @@ impl UserRepository {
             .index_name("username-index")
             .key_condition_expression("#username=:username")
             .expression_attribute_names("#username", "username")
-            .expression_attribute_values(":username", AttributeValue::S(username))
+            .expression_attribute_values(":username", AttributeValue::S(username.to_string()))
             .send()
             .await?;
 
         if let Some(users) = user_iter.items {
             let user_map: Vec<UserWithPassword> = users.iter().map(|v| v.into()).collect();
+            if user_map.len() > 0 {
+                return Ok(Some(user_map[0].clone()));
+            }
+        }
+
+        Ok(None)
+    }
+
+    pub async fn verify(
+        &self,
+        username: String,
+        password: String,
+    ) -> Result<Option<UserWithoutPassword>, Box<dyn Error>> {
+        println!("Fetching user {}", username);
+
+        let users = self.get(&username).await?;
+
+        if let Some(users) = users {
             let UserWithPassword {
                 password: pwd_hash,
                 user_id,
                 device_id,
                 username,
-            } = &user_map[0];
+            } = users;
             let verification = bcrypt::verify(password, &pwd_hash);
 
             if verification {

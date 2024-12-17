@@ -5,6 +5,7 @@ import { Modal, TextInput } from "../../../components";
 import { ky, toast } from "../../../utils";
 import { useConfig } from "../../../store";
 import { ConfigResponse } from "../../../ffi";
+import { HTTPError } from "ky";
 
 export const AccountForm = ({ onDone }: { onDone: () => void }) => {
   const [username, setUsername] = useState("");
@@ -31,8 +32,12 @@ export const AccountForm = ({ onDone }: { onDone: () => void }) => {
       await create(username, user_id, token, device_id);
       onDone();
     } catch (e) {
-      const message = type === "signin" ? "Signin failed!" : "Signup failed";
-      console.error(e);
+      if (e instanceof HTTPError && /Username taken/g.test(e.message)) {
+        toast(e.message);
+        return;
+      }
+
+      const message = type === "signin" ? "Signin failed!" : "Signup failed!";
       toast(message);
     }
   }, [type, username, password, config.deviceId, create, onDone]);

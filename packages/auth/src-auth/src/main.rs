@@ -1,8 +1,8 @@
 pub mod database;
 pub mod server;
 
-use dotenv::dotenv;
 use database::connection::Dynamo;
+use dotenv::dotenv;
 use server::router::create_route;
 use std::{error::Error, sync::Arc};
 

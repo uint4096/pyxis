@@ -9,7 +9,7 @@ use crate::database::{connection::Dynamo, token_repository::TokenRepository};
 #[derive(Deserialize)]
 pub struct SignOutPayload {
     user_id: Uuid,
-    device_id: Uuid
+    device_id: Uuid,
 }
 
 #[axum_macros::debug_handler]

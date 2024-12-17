@@ -20,7 +20,7 @@ export const UserDetails = ({ onDone }: { onDone: () => void }) => {
       await removeTokenFromStore();
       onDone();
     } catch (e) {
-      console.error("[Auth] Logout failed!", e);
+      console.error("[Auth] Logout failed!");
       toast("Sign out failed!");
     }
   }, [config.deviceId, config.userId, removeTokenFromStore, onDone]);
