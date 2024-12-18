@@ -43,20 +43,27 @@ export const AccountForm = ({ onDone }: { onDone: () => void }) => {
   }, [type, username, password, config.deviceId, create, onDone]);
 
   const body = (
-    <InputWrapper>
-      <TextInput
-        value={username}
-        placeholder="Username"
-        size="medium"
-        onChange={setUsername}
-      />
-      <TextInput
-        value={password}
-        placeholder="Password"
-        size="medium"
-        onChange={setPassword}
-        type="password"
-      />
+    <FormWrapper>
+      <FormContainer>
+        <InputWrapper>
+          <TextInput
+            value={username}
+            placeholder="Username"
+            size="medium"
+            onChange={setUsername}
+          />
+          <TextInput
+            value={password}
+            placeholder="Password"
+            size="medium"
+            onChange={setPassword}
+            type="password"
+          />
+        </InputWrapper>
+      </FormContainer>
+      <LoginButton onClick={action}>
+        {type === "signin" ? "Sign In" : "Sign Up"}
+      </LoginButton>
       <span>
         or{" "}
         <SwitchTypeSpan
@@ -68,37 +75,22 @@ export const AccountForm = ({ onDone }: { onDone: () => void }) => {
         </SwitchTypeSpan>
         instead
       </span>
-    </InputWrapper>
-  );
-
-  const footer = (
-    <FormFooter>
-      <button onClick={() => action()}>
-        {type === "signin" ? "Sign In" : "Sign Up"}
-      </button>
-    </FormFooter>
+    </FormWrapper>
   );
 
   return (
     <>
-      <FormWrapper>
-        <FormContainer>
-          <Modal body={body} size="medium" footer={footer} onClose={onDone} />
-        </FormContainer>
-      </FormWrapper>
+      <Modal body={body} size="medium" onClose={onDone} />
     </>
   );
 };
 
 const FormContainer = styled.div`
-  width: 20vw;
-  height: 10vw;
-  position: fixed;
-`;
-
-const FormFooter = styled.div`
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
+  gap: 0.5em;
+  width: 100%;
+  justify-content: center;
 `;
 
 const InputWrapper = styled.div`
@@ -109,15 +101,19 @@ const InputWrapper = styled.div`
 
 const SwitchTypeSpan = styled.span`
   cursor: pointer;
-  color: #000fff;
+  color: #96a4e5;
 `;
 
 const FormWrapper = styled.div`
-  width: 90%;
-  height: 80%;
   display: flex;
   justify-content: center;
   align-items: center;
-  position: fixed;
   flex-direction: column;
+  gap: 2em;
+`;
+
+const LoginButton = styled.button`
+  background-color: #96a4e5;
+  width: 80%;
+  align-self: flex-start;
 `;

@@ -52,7 +52,7 @@ const ModalContainer = styled.div<{ size: ModalSize }>`
   justify-content: flex-end;
   position: absolute;
   top: 35%;
-  left: 10%;
+  left: 35%;
   gap: 1em;
   background-color: rgb(17, 19, 25);
   z-index: 1000;

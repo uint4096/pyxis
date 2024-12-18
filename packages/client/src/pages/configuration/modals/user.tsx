@@ -30,8 +30,8 @@ export const UserDetails = ({ onDone }: { onDone: () => void }) => {
   const body = (
     <Wrapper>
       <UserContainer>
-        <UserSquare />
-        <span>{config.username}</span>
+        <UserSquare width={36} height={36} stroke="#808080" />
+        <Username>{config.username}</Username>
       </UserContainer>
       <LogoutButton onClick={logout}>Sign out</LogoutButton>
     </Wrapper>
@@ -49,16 +49,23 @@ const Wrapper = styled.div`
   flex-direction: column;
   padding: 0.5em 1em;
   gap: 2em;
+  align-items: center;
 `;
 
 const UserContainer = styled.div`
   display: flex;
   padding: 0.5em 1em;
   flex-direction: column;
-  justify-content: center;
+  align-items: center;
   gap: 1em;
+`;
+
+const Username = styled.span`
+  font-weight: 600;
+  font-size: 2rem;
 `;
 
 const LogoutButton = styled.button`
   background-color: #cf142b;
+  width: 60%;
 `;

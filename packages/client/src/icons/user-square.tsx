@@ -1,11 +1,13 @@
-export const UserSquare = ({ classname }: { classname?: string }) => (
+import { IconProps } from "./icon-props";
+
+export const UserSquare = ({ classname, width, height, stroke }: IconProps) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="28"
-    height="28"
+    width={`${width ?? 28}`}
+    height={`${height ?? 28}`}
     viewBox="0 0 24 24"
     fill="none"
-    stroke="currentColor"
+    stroke={`${stroke ?? "currentColor"}`}
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
