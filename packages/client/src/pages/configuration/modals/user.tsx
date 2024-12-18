@@ -13,7 +13,9 @@ export const UserDetails = ({ onDone }: { onDone: () => void }) => {
     try {
       await ky
         .post<void>("/auth/signout", {
-          json: { device_id: config.deviceId, user_id: config.userId },
+          headers: {
+            authorization: `Bearer ${config.userToken}`,
+          },
         })
         .json();
 
@@ -23,7 +25,7 @@ export const UserDetails = ({ onDone }: { onDone: () => void }) => {
       console.error("[Auth] Logout failed!");
       toast("Sign out failed!");
     }
-  }, [config.deviceId, config.userId, removeTokenFromStore, onDone]);
+  }, [config.userToken, removeTokenFromStore, onDone]);
 
   const body = (
     <Wrapper>

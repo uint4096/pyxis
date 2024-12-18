@@ -11,11 +11,11 @@ use serde_with::{chrono::TimeDelta, serde_as, DurationSeconds};
 
 static TABLE_NAME: &str = "tokens";
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Claims {
-    user: UserWithoutPassword,
-    exp: usize,
-    iat: usize,
+    pub user: UserWithoutPassword,
+    pub exp: usize,
+    pub iat: usize,
 }
 
 #[serde_as]
@@ -52,7 +52,7 @@ impl TokenRepository {
         };
 
         let token = encode(
-            &Header::default(),
+            &Header::new(jsonwebtoken::Algorithm::HS256),
             &claim,
             &EncodingKey::from_secret(
                 env::var("AUTH_SECRET")

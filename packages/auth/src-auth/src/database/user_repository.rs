@@ -17,7 +17,7 @@ pub struct UserWithPassword {
 }
 
 #[serde_as]
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct UserWithoutPassword {
     pub user_id: Uuid,
     pub username: String,
