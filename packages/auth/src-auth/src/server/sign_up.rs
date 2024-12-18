@@ -1,6 +1,11 @@
 use std::sync::Arc;
 
-use axum::{extract::State, http::StatusCode, response::{IntoResponse, Response}, Json};
+use axum::{
+    extract::State,
+    http::StatusCode,
+    response::{IntoResponse, Response},
+    Json,
+};
 use serde::Deserialize;
 use uuid::Uuid;
 
@@ -40,7 +45,11 @@ pub async fn sign_up(
         }
         Err(e) => {
             println!("Error while trying to validate username: {}", e);
-            return Err((StatusCode::INTERNAL_SERVER_ERROR, format!("Signup failed! Unable to fetch username.")).into_response())
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Signup failed! Unable to fetch username."),
+            )
+                .into_response());
         }
     };
 
@@ -59,7 +68,11 @@ pub async fn sign_up(
         Ok(user) => user,
         Err(e) => {
             println!("Error while trying to create user: {}", e);
-            return Err((StatusCode::INTERNAL_SERVER_ERROR, format!("Signup failed! Error while creating user.")).into_response());
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Signup failed! Error while creating user."),
+            )
+                .into_response());
         }
     };
 
@@ -67,7 +80,11 @@ pub async fn sign_up(
         Ok(token) => token,
         Err(e) => {
             println!("Error while trying to create token: {}", e);
-            return Err((StatusCode::INTERNAL_SERVER_ERROR, format!("Signup failed! Error while creating token.")).into_response());
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Signup failed! Error while creating token."),
+            )
+                .into_response());
         }
     };
 

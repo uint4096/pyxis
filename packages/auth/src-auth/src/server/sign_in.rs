@@ -34,6 +34,14 @@ pub async fn sign_in(
     };
 
     if let Some(user) = user {
+        if let Err(e) = token_repository
+            .delete(&user.user_id, &user.device_id)
+            .await
+        {
+            println!("Error while trying to delete existing tokens: {}", e);
+            return Err(StatusCode::INTERNAL_SERVER_ERROR);
+        }
+
         let user_token = match token_repository.create(user).await {
             Ok(token) => token,
             Err(e) => {
