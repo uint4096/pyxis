@@ -50,9 +50,10 @@ struct Migration {
 }
 
 impl Migration {
-    fn from_row(row: &Row) -> Result<String, rusqlite::Error> {
+    fn from_row(row: &Row) -> Result<(String, String), rusqlite::Error> {
         let name: String = row.get(0)?;
-        Ok(name)
+        let status: String = row.get(1)?;
+        Ok((name, status))
     }
 
     fn dup_check(&self) -> bool {
@@ -90,20 +91,20 @@ impl Migration {
 
         let conn = database.get_connection();
 
-        let query = format!("SELECT name FROM migrations WHERE name IN ({})", str_names);
+        let query = format!("SELECT name, status FROM migrations WHERE name IN ({})", str_names);
         let mut sql = conn.prepare(&query).expect("Failed to prepare statement!");
 
         let migrations_iter = sql
             .query_map([], |row| Migration::from_row(row))
             .expect("Failed to execute query!");
 
-        let migrations: Vec<String> = migrations_iter.collect::<Result<Vec<_>, _>>().unwrap();
+        let migrations: Vec<(String, String)> = migrations_iter.collect::<Result<Vec<_>, _>>().unwrap();
 
         let filtered_entities = {
             let mut entities: Vec<Box<dyn MigrationsTrait>> = vec![];
 
             for entity in self.entites.iter() {
-                if !migrations.contains(&entity.get_name()) {
+                if (migrations.iter().find(|m| m.0 == entity.get_name() && m.1 == String::from("success"))).is_none() {
                     entities.push(entity.clone_box())
                 }
             }
@@ -118,7 +119,7 @@ impl Migration {
 
     fn run(&self, entity: &Box<dyn MigrationsTrait>, database: &mut Database) -> Result<(), Error> {
         database.get_connection().execute(
-            "INSERT INTO migrations (name, status) VALUES (?1, ?2)",
+            "INSERT INTO migrations (name, status) VALUES (?1, ?2) ON CONFLICT(name) DO UPDATE SET status=?2",
             (entity, MigrationStatus::InProgress),
         )?;
 
