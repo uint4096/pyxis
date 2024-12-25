@@ -6,11 +6,11 @@ use rusqlite::{
 use std::fmt::Debug;
 
 #[derive(Debug, Clone)]
-pub struct FileContentMigration {
+pub struct SnapshotsMigration {
     pub name: String,
 }
 
-impl ToSql for FileContentMigration {
+impl ToSql for SnapshotsMigration {
     fn to_sql(&self) -> rusqlite::Result<rusqlite::types::ToSqlOutput<'_>> {
         Ok(ToSqlOutput::Owned(rusqlite::types::Value::Text(
             self.name.clone(),
@@ -18,23 +18,24 @@ impl ToSql for FileContentMigration {
     }
 }
 
-impl FromSql for FileContentMigration {
+impl FromSql for SnapshotsMigration {
     fn column_result(
         value: rusqlite::types::ValueRef<'_>,
     ) -> Result<Self, rusqlite::types::FromSqlError> {
-        value.as_str().map(|s| FileContentMigration {
+        value.as_str().map(|s| SnapshotsMigration {
             name: s.to_string(),
         })
     }
 }
 
-impl Migrations for FileContentMigration {
+impl Migrations for SnapshotsMigration {
     fn run(&self, transaction: &Transaction) -> Result<usize, rusqlite::Error> {
-        let sql = "CREATE TABLE IF NOT EXISTS file_content (
-            id         INTEGER PRIMARY KEY AUTOINCREMENT,
-            file_id    INTEGER NOT NULL UNIQUE,
-            content    BLOB,
-            updated_at TEXT NOT NULL,
+        let sql = "CREATE TABLE IF NOT EXISTS snapshots (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            file_id     INTEGER NOT NULL UNIQUE,
+            content     BLOB,
+            updated_at  TEXT NOT NULL,
+            snapshot_id INTEGER NOT NULL,
 
             FOREIGN KEY (file_id) REFERENCES files(id)
             ON DELETE CASCADE
@@ -53,4 +54,4 @@ impl Migrations for FileContentMigration {
     }
 }
 
-impl MigrationsTrait for FileContentMigration {}
+impl MigrationsTrait for SnapshotsMigration {}

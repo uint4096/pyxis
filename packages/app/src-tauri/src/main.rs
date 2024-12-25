@@ -6,7 +6,8 @@ mod migrations;
 
 use database::Database;
 use entities::config::{add_user_data, get_config, remove_user_data};
-use entities::content::{get_content, update_content};
+use entities::snapshots::{get_snapshot, update_snapshot};
+use entities::updates::{get_updates, insert_updates};
 use entities::directories::{create_dir, delete_dir, list_dirs, update_dir};
 use entities::files::{create_file, delete_file, list_files, update_file};
 use entities::workspaces::{create_workspace, delete_workspace, list_workspaces, update_workspace};
@@ -36,11 +37,13 @@ fn main() {
             delete_file,
             list_files,
             update_file,
-            update_content,
-            get_content,
+            update_snapshot,
+            get_snapshot,
             get_config,
             add_user_data,
-            remove_user_data
+            remove_user_data,
+            get_updates,
+            insert_updates
         ])
         .setup(|app: &mut App| {
             let window = app

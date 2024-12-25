@@ -1,13 +1,15 @@
 mod config;
-mod content;
+mod snapshots;
 mod directories;
 mod files;
 mod workspaces;
+mod updates;
 
 use std::{collections::HashMap, fmt::Debug, rc::Rc};
 
 use config::ConfigurationMigration;
-use content::FileContentMigration;
+use snapshots::SnapshotsMigration;
+use updates::UpdatesMigration;
 use directories::DirectoriesMigration;
 use files::FilesMigration;
 use rusqlite::{types::ToSqlOutput, Error, Row, ToSql, Transaction};
@@ -174,8 +176,11 @@ pub fn run_migrations(database: &mut Database) -> Result<(), Error> {
             Box::new(FilesMigration {
                 name: String::from("files_migration"),
             }),
-            Box::new(FileContentMigration {
-                name: String::from("file-content_migration"),
+            Box::new(SnapshotsMigration {
+                name: String::from("snapshots_migration"),
+            }),
+            Box::new(UpdatesMigration {
+                name: String::from("updates_migration"),
             }),
             Box::new(ConfigurationMigration {
                 name: String::from("configuration_migration"),
