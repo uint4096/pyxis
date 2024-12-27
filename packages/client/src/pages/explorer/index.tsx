@@ -7,7 +7,7 @@ import Editor from "../editor/editor";
 
 export const Explorer = () => {
   const { workspaces, list, currentWorkspace } = useWorkspace();
-  const { selectedFile, updateContent, doc } = useTreeStore();
+  const { selectedFile, updateSnapshots, insertUpdates, doc } = useTreeStore();
 
   const [showWorkspaceForm, setWorkspaceForm] = useState<boolean>(false);
   const [showWorkspaceSelectionForm, setWorkspaceSelectionForm] =
@@ -43,8 +43,9 @@ export const Explorer = () => {
           <Editor
             key={selectedFile.id}
             fileId={selectedFile.id}
-            content={doc ?? new Uint8Array()}
-            writer={updateContent}
+            content={doc}
+            updatesWriter={insertUpdates}
+            snapshotWriter={updateSnapshots}
           />
         )}
 

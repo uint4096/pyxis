@@ -23,9 +23,10 @@ import {
   insertTextAtPosition,
   textLength,
 } from "../../utils";
-import { useDebounce, useWebsockets } from "../../hooks";
-import { Loro, LoroList, LoroText } from "loro-crdt";
+import { useDebounce } from "../../hooks";
+import { LoroDoc, LoroList, LoroText, VersionVector } from "loro-crdt";
 import fastDiff from "fast-diff";
+import { Snapshot } from "../../ffi";
 
 type EditorText = {
   text: string | undefined;
@@ -34,17 +35,32 @@ type EditorText = {
 
 type EditorProps = {
   fileId: number;
-  content: Uint8Array | undefined;
-  writer: (fileId: number, content: Uint8Array) => Promise<void>;
+  content: { snapshot: Snapshot | undefined; updates: Array<Uint8Array> };
+  snapshotWriter: (fileId: number, content: Uint8Array) => Promise<void>;
+  updatesWriter: (
+    fileId: number,
+    snapshotId: number,
+    content: Uint8Array,
+  ) => Promise<void>;
 };
 
 const CONTAINER_ID = "pyxis_doc";
 
-const Editor = ({ fileId, content, writer }: EditorProps) => {
+const Editor = ({
+  fileId,
+  content,
+  updatesWriter,
+  snapshotWriter,
+}: EditorProps) => {
   const [rawText, setRawText] = useState<EditorText>({
     text: undefined,
     caret: { start: 0, end: 0, collapsed: true },
   });
+
+  const [snapshotId, setSnapshotId] = useState<number>(
+    content.snapshot?.snapshot_id ?? 0,
+  );
+  const [version, setVersion] = useState<VersionVector>();
 
   const formatCaret = useCallback((loroList: LoroList, caret: Caret) => {
     loroList.insert(0, caret.start);
@@ -66,13 +82,19 @@ const Editor = ({ fileId, content, writer }: EditorProps) => {
     doc,
     loroText,
     loroCaret,
-  }: { doc: Loro; loroText: LoroText; loroCaret: LoroList } = useMemo(() => {
-    const doc = new Loro();
+  }: { doc: LoroDoc; loroText: LoroText; loroCaret: LoroList } = useMemo(() => {
+    const doc = new LoroDoc();
+    const { snapshot, updates } = content ?? {};
 
-    if (content?.length) {
-      doc.import(content);
+    if (snapshot?.content?.length) {
+      doc.import(snapshot.content);
     }
 
+    if (updates?.length) {
+      doc.importBatch(updates);
+    }
+
+    setVersion(doc.version());
     const loroCaret = doc.getList(`${CONTAINER_ID}_caret`);
     const loroText = doc.getText(`${CONTAINER_ID}_text`);
 
@@ -89,17 +111,7 @@ const Editor = ({ fileId, content, writer }: EditorProps) => {
     }));
 
     doc.subscribe((e) => {
-      if (!e.local) {
-        formatCaret(
-          loroCaret,
-          caretRef.current ?? { start: 0, end: 0, collapsed: true },
-        );
-
-        setRawText((raw) => ({
-          ...raw,
-          text: loroText.toString() ?? "",
-        }));
-
+      if (e.by !== "local") {
         return;
       }
 
@@ -128,15 +140,6 @@ const Editor = ({ fileId, content, writer }: EditorProps) => {
   }>();
 
   const [lastKey, setLastKey] = useState({ key: "", ctrl: false });
-
-  const onMessage = useCallback(
-    (message: Uint8Array) => {
-      doc.import(new Uint8Array(message));
-    },
-    [doc],
-  );
-
-  const { sendMessage } = useWebsockets({ onMessage });
 
   const getEditor = (): Node | null => {
     const editor = document.getElementById("editor");
@@ -302,6 +305,18 @@ const Editor = ({ fileId, content, writer }: EditorProps) => {
   );
 
   useEffect(() => {
+    const interval = setInterval(
+      async () => {
+        await snapshotWriter(fileId, doc.export({ mode: "snapshot" }));
+        setSnapshotId((snapshotId) => snapshotId + 1);
+      },
+      15 * 60 * 1000,
+    );
+
+    return () => clearInterval(interval);
+  }, [doc, fileId, snapshotWriter, version]);
+
+  useEffect(() => {
     if (!fileId || textRef.current === debouncedText) {
       return;
     }
@@ -309,11 +324,12 @@ const Editor = ({ fileId, content, writer }: EditorProps) => {
     textRef.current = debouncedText;
 
     (async () =>
-      await Promise.all([
-        writer(fileId!, doc.exportSnapshot()),
-        sendMessage(doc.exportFrom()),
-      ]))();
-  }, [debouncedText, doc, fileId, sendMessage, writer]);
+      await updatesWriter(
+        fileId!,
+        snapshotId + 1,
+        doc.export({ mode: "update", from: version }),
+      ))();
+  }, [debouncedText, doc, fileId, snapshotId, updatesWriter, version]);
 
   useEffect(() => {
     if (!renderControl.current.html) {

@@ -1,4 +1,4 @@
-import type { Directory, Link, File } from "../ffi";
+import type { Directory, Link, File, Snapshot } from "../ffi";
 
 export type ArrayElement<T> = T extends Array<infer X> ? X : never;
 
@@ -26,7 +26,7 @@ export type Document = "file" | "dir";
 export interface FileState {
   tree: Array<Node>;
   selectedFile: File | undefined;
-  doc: Uint8Array | undefined;
+  doc: { snapshot: Snapshot | undefined; updates: Array<Uint8Array> };
   selectFile: (file: File | undefined) => void;
   findNode: (uid: string, tree?: Array<Node>) => Node | undefined;
   createFile: (
@@ -44,7 +44,14 @@ export interface FileState {
 
   buildTree: (workspaceId: string) => Promise<Array<Node>>;
   createTree: (workspaceId: string) => Promise<Array<Node>>;
-  updateContent: (fileId: number, content: Uint8Array) => Promise<void>;
-  getContent: (fileId: number) => Promise<Uint8Array | undefined>;
+  updateSnapshots: (fileId: number, content: Uint8Array) => Promise<void>;
+  insertUpdates: (
+    fileId: number,
+    snapshotId: number,
+    content: Uint8Array,
+  ) => Promise<void>;
+  getContent: (
+    fileId: number,
+  ) => Promise<{ snapshot: Snapshot | undefined; updates: Array<Uint8Array> }>;
   isFileInDir: (fileUid: string, dir: DirWithChildren) => boolean;
 }

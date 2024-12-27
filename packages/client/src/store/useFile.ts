@@ -4,8 +4,10 @@ import {
   updateFile,
   getFiles,
   deleteFile,
-  updateContent,
-  getContent,
+  updateSnapshot,
+  getSnapshot,
+  insertUpdates,
+  getUpdates,
 } from "../ffi";
 import type { StateCreator } from "zustand";
 import { toast } from "../utils";
@@ -41,7 +43,7 @@ export const fileSlice: StateCreator<
   tree: [],
 
   selectedFile: undefined,
-  doc: undefined,
+  doc: { snapshot: undefined, updates: [] },
 
   selectFile: async (file) => {
     if (!file?.id) {
@@ -137,12 +139,27 @@ export const fileSlice: StateCreator<
     }
   },
 
-  updateContent: async (
+  updateSnapshots: async (
     fileId: number,
     content: Uint8Array = new Uint8Array(),
-  ) => await updateContent(fileId, content),
+  ) => await updateSnapshot(fileId, content),
 
-  getContent: async (fileId: number) => await getContent(fileId),
+  insertUpdates: async (
+    fileId: number,
+    snapshotId: number,
+    content: Uint8Array = new Uint8Array(),
+  ) => await insertUpdates(fileId, snapshotId, content),
+
+  getContent: async (fileId: number) => {
+    const snapshot = await getSnapshot(fileId);
+    const snapshotId = snapshot?.snapshot_id ? snapshot?.snapshot_id + 1 : 1;
+    const updates = await getUpdates(fileId, snapshotId);
+
+    return {
+      snapshot: snapshot,
+      updates: updates ?? [],
+    };
+  },
 
   isFileInDir: (fileUid: string, dir: DirWithChildren) =>
     dir.children.some((child) => isFile(child) && child.uid === fileUid) ||
