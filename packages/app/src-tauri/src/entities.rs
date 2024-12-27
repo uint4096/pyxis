@@ -1,6 +1,6 @@
 pub mod config;
-pub mod snapshots;
 pub mod directories;
 pub mod files;
-pub mod workspaces;
+pub mod snapshots;
 pub mod updates;
+pub mod workspaces;

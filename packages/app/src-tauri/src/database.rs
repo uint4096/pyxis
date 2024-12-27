@@ -1,12 +1,19 @@
 use std::{
     path::PathBuf,
-    sync::{Mutex, MutexGuard},
+    sync::{mpsc::channel, Arc, Mutex, MutexGuard}, thread,
 };
 
-use rusqlite::Connection;
+use rusqlite::{hooks::Action, Connection};
 
 pub struct Database {
-    conn: Mutex<Connection>,
+    conn: Arc<Mutex<Connection>>,
+}
+
+struct HookPayload {
+    action: Action,
+    db_name: String,
+    table_name: String,
+    row_id: i64,
 }
 
 impl Database {
@@ -26,7 +33,7 @@ impl Database {
                     .unwrap_or_default();
 
                 Database {
-                    conn: Mutex::new(conn),
+                    conn: Arc::new(Mutex::new(conn)),
                 }
             }
             Err(e) => {
@@ -42,9 +49,42 @@ impl Database {
             Ok(conn) => conn,
             Err(e) => {
                 eprintln!("Failed to acquire lock on DB connection. {}", e);
-                println!("Attempting to recover,,,");
+                println!("Attempting to recover...");
                 e.into_inner()
             }
         }
+    }
+
+    pub fn set_update_hook<F>(&self, hook: F)
+    where
+        F: Fn(Action, &str, &str, i64, &Connection) + Send + Sync + 'static,
+    {
+        let (sender, receiver) = channel::<HookPayload>();
+        let conn = self.conn.clone();
+
+        thread::spawn(move || {
+            while let Ok(update) = receiver.recv() {
+                if let Ok(conn) = conn.lock() {
+                    hook(
+                        update.action,
+                        &update.db_name,
+                        &update.table_name,
+                        update.row_id,
+                        &conn,
+                    );
+                }
+            }
+        });
+
+        let update_hook = move |action, db: &str, table: &str, row_id: i64| {
+            let _ = sender.send(HookPayload {
+                action,
+                db_name: db.to_string(),
+                table_name: table.to_string(),
+                row_id,
+            });
+        };
+
+        self.get_connection().update_hook(Some(update_hook));
     }
 }

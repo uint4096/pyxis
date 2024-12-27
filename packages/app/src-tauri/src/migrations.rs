@@ -1,18 +1,18 @@
 mod config;
-mod snapshots;
 mod directories;
 mod files;
-mod workspaces;
+mod snapshots;
 mod updates;
+mod workspaces;
 
 use std::{collections::HashMap, fmt::Debug, rc::Rc};
 
 use config::ConfigurationMigration;
-use snapshots::SnapshotsMigration;
-use updates::UpdatesMigration;
 use directories::DirectoriesMigration;
 use files::FilesMigration;
 use rusqlite::{types::ToSqlOutput, Error, Row, ToSql, Transaction};
+use snapshots::SnapshotsMigration;
+use updates::UpdatesMigration;
 use workspaces::WorkspaceMigration;
 
 use crate::database::Database;
@@ -93,20 +93,28 @@ impl Migration {
 
         let conn = database.get_connection();
 
-        let query = format!("SELECT name, status FROM migrations WHERE name IN ({})", str_names);
+        let query = format!(
+            "SELECT name, status FROM migrations WHERE name IN ({})",
+            str_names
+        );
         let mut sql = conn.prepare(&query).expect("Failed to prepare statement!");
 
         let migrations_iter = sql
             .query_map([], |row| Migration::from_row(row))
             .expect("Failed to execute query!");
 
-        let migrations: Vec<(String, String)> = migrations_iter.collect::<Result<Vec<_>, _>>().unwrap();
+        let migrations: Vec<(String, String)> =
+            migrations_iter.collect::<Result<Vec<_>, _>>().unwrap();
 
         let filtered_entities = {
             let mut entities: Vec<Box<dyn MigrationsTrait>> = vec![];
 
             for entity in self.entites.iter() {
-                if (migrations.iter().find(|m| m.0 == entity.get_name() && m.1 == String::from("success"))).is_none() {
+                if (migrations
+                    .iter()
+                    .find(|m| m.0 == entity.get_name() && m.1 == String::from("success")))
+                .is_none()
+                {
                     entities.push(entity.clone_box())
                 }
             }
