@@ -32,8 +32,8 @@ impl Migrations for UpdatesMigration {
     fn run(&self, transaction: &Transaction) -> Result<usize, rusqlite::Error> {
         let sql = "CREATE TABLE IF NOT EXISTS updates (
             id          INTEGER PRIMARY KEY AUTOINCREMENT,
-            file_id     INTEGER NOT NULL UNIQUE,
             content     BLOB,
+            file_id     INTEGER NOT NULL,
             updated_at  TEXT NOT NULL,
             snapshot_id INTEGER NOT NULL,
 
