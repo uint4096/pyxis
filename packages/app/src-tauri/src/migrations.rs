@@ -4,12 +4,14 @@ mod files;
 mod snapshots;
 mod updates;
 mod workspaces;
+mod listener_queue;
 
 use std::{collections::HashMap, fmt::Debug, rc::Rc};
 
 use config::ConfigurationMigration;
 use directories::DirectoriesMigration;
 use files::FilesMigration;
+use listener_queue::ListenerQueueMigration;
 use rusqlite::{types::ToSqlOutput, Error, Row, ToSql, Transaction};
 use snapshots::SnapshotsMigration;
 use updates::UpdatesMigration;
@@ -172,7 +174,6 @@ impl Migration {
 }
 
 pub fn run_migrations(database: &mut Database) -> Result<(), Error> {
-    //List new migrations here
     let migration = Migration {
         entites: Rc::new(vec![
             Box::new(WorkspaceMigration {
@@ -192,6 +193,9 @@ pub fn run_migrations(database: &mut Database) -> Result<(), Error> {
             }),
             Box::new(ConfigurationMigration {
                 name: String::from("configuration_migration"),
+            }),
+            Box::new(ListenerQueueMigration {
+                name: String::from("listener_queue_migration"),
             }),
         ]),
     };
