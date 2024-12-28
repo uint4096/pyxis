@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use crate::database::Database;
+use crate::database::ConfigDatabase;
 use machineid_rs::{Encryption, HWIDComponent, IdBuilder};
 use rusqlite::{Connection, Error};
 use serde::{Deserialize, Serialize};
@@ -79,11 +79,11 @@ pub fn add_user_data(
     username: String,
     user_token: String,
     user_id: String,
-    database: State<Database>,
+    config_database: State<ConfigDatabase>,
 ) -> Option<bool> {
     let content = Configuration::new(Some(user_token), Some(user_id), Some(username));
 
-    match content.add(&database.get_connection()) {
+    match content.add(&config_database.0.get_connection()) {
         Ok(_) => Some(true),
         Err(e) => {
             eprintln!("[Configuration] Failed to add user data to config! {}", e);
@@ -93,10 +93,10 @@ pub fn add_user_data(
 }
 
 #[tauri::command]
-pub fn remove_user_data(database: State<Database>) -> Option<bool> {
+pub fn remove_user_data(config_database: State<ConfigDatabase>) -> Option<bool> {
     let content = Configuration::new(None, None, None);
 
-    match content.add(&database.get_connection()) {
+    match content.add(&config_database.0.get_connection()) {
         Ok(_) => Some(true),
         Err(e) => {
             eprintln!(
@@ -109,8 +109,8 @@ pub fn remove_user_data(database: State<Database>) -> Option<bool> {
 }
 
 #[tauri::command]
-pub fn get_config(database: State<Database>) -> Option<Configuration> {
-    match Configuration::get(&database.get_connection()) {
+pub fn get_config(config_database: State<ConfigDatabase>) -> Option<Configuration> {
+    match Configuration::get(&config_database.0.get_connection()) {
         Ok(content) => Some(content),
         Err(e) => {
             eprintln!("[Configuration] Failed to fetch! {}", e);

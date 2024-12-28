@@ -58,21 +58,22 @@ fn handle_action(
     listener: &dyn Listener,
     action: Action,
     conn: &Connection,
+    config_connection: &Connection,
     row_id: i64,
 ) -> Result<(), Error> {
     match action {
-        Action::SQLITE_INSERT => listener.insert(conn, row_id),
-        Action::SQLITE_UPDATE => listener.update(conn, row_id),
-        Action::SQLITE_DELETE => listener.delete(conn, row_id),
+        Action::SQLITE_INSERT => listener.insert(conn, config_connection, row_id),
+        Action::SQLITE_UPDATE => listener.update(conn, config_connection, row_id),
+        Action::SQLITE_DELETE => listener.delete(conn, config_connection, row_id),
         _ => Ok(()),
     }
 }
 
-pub fn content_hook(action: Action, _: &str, table: &str, row_id: i64, connection: &Connection) {
+pub fn content_hook(action: Action, _: &str, table: &str, row_id: i64, connection: &Connection, config_connection: &Connection) {
     let listeners = create_listeners();
 
     if let Some(listener) = listeners.get(table) {
-        if let Err(err) = handle_action(listener.as_ref(), action, connection, row_id) {
+        if let Err(err) = handle_action(listener.as_ref(), action, connection, config_connection, row_id) {
             println!("[Listeners] Error: {}", err);
         }
     }

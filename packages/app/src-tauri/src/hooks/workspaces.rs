@@ -29,25 +29,25 @@ impl WorkspacesListener {
 }
 
 impl Listener for WorkspacesListener {
-    fn insert(&self, connection: &Connection, row_id: i64) -> Result<(), Error> {
+    fn insert(&self, connection: &Connection, config_connection: &Connection, row_id: i64) -> Result<(), Error> {
         let payload = serde_json::to_string(&WorkspacesListener::get_data(connection, row_id)?)
             .expect("[Workspaces Listener] Failed to serialize to json!");
 
-        self.insert_into_queue(connection, payload, "insert", &self.name)
+        self.insert_into_queue(config_connection, payload, "insert", &self.name)
     }
 
-    fn update(&self, connection: &Connection, row_id: i64) -> Result<(), Error> {
+    fn update(&self, connection: &Connection, config_connection: &Connection, row_id: i64) -> Result<(), Error> {
         let payload = serde_json::to_string(&WorkspacesListener::get_data(connection, row_id)?)
             .expect("[Workspaces Listener] Failed to serialize to json!");
 
-        self.insert_into_queue(connection, payload, "update", &self.name)
+        self.insert_into_queue(config_connection, payload, "update", &self.name)
     }
 
-    fn delete(&self, connection: &Connection, row_id: i64) -> Result<(), Error> {
+    fn delete(&self, _: &Connection, config_connection: &Connection, row_id: i64) -> Result<(), Error> {
         let payload = json!({
             "id": row_id
         });
 
-        self.insert_into_queue(connection, payload.to_string(), "delete", &self.name)
+        self.insert_into_queue(config_connection, payload.to_string(), "delete", &self.name)
     }
 }

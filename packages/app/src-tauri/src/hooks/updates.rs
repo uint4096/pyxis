@@ -9,7 +9,7 @@ pub struct UpdatesListener {
 }
 
 impl Listener for UpdatesListener {
-    fn insert(&self, connection: &Connection, row_id: i64) -> Result<(), Error> {
+    fn insert(&self, connection: &Connection, config_connection: &Connection, row_id: i64) -> Result<(), Error> {
         let mut sql = connection.prepare(
             "SELECT content, snapshot_id, file_id, updated_at, id from updates where id=?1",
         )?;
@@ -27,14 +27,14 @@ impl Listener for UpdatesListener {
                 .expect("[Updates Listener] Failed to serialize to json!"))
         })?;
 
-        self.insert_into_queue(connection, payload, "insert", &self.name)
+        self.insert_into_queue(config_connection, payload, "insert", &self.name)
     }
 
-    fn update(&self, _: &Connection, _: i64) -> Result<(), Error> {
+    fn update(&self, _: &Connection, _: &Connection, _: i64) -> Result<(), Error> {
         Ok(())
     }
 
-    fn delete(&self, _: &Connection, _: i64) -> Result<(), Error> {
+    fn delete(&self, _: &Connection, _: &Connection, _: i64) -> Result<(), Error> {
         Ok(())
     }
 }

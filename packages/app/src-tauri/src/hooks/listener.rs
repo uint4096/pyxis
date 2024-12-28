@@ -15,7 +15,7 @@ pub trait Listener {
 
         Ok(())
     }
-    fn insert(&self, connection: &Connection, row_id: i64) -> Result<(), Error>;
-    fn update(&self, connection: &Connection, row_id: i64) -> Result<(), Error>;
-    fn delete(&self, connection: &Connection, row_id: i64) -> Result<(), Error>;
+    fn insert(&self, connection: &Connection, config_connection: &Connection, row_id: i64) -> Result<(), Error>;
+    fn update(&self, connection: &Connection, config_connection: &Connection, row_id: i64) -> Result<(), Error>;
+    fn delete(&self, connection: &Connection, config_connection: &Connection, row_id: i64) -> Result<(), Error>;
 }
