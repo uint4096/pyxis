@@ -18,12 +18,12 @@ use tauri::{App, Manager};
 
 fn main() {
     let mut database = Database::create_connection();
-    
+
     match run_migrations(&mut database) {
         Ok(_) => println!("Migration successful!"),
         Err(e) => eprintln!("Migration failed! Error: {}", e),
     }
-    
+
     database.set_update_hook(content_hook);
 
     tauri::Builder::default()

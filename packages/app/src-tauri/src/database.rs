@@ -1,6 +1,7 @@
 use std::{
     path::PathBuf,
-    sync::{mpsc::channel, Arc, Mutex, MutexGuard}, thread,
+    sync::{mpsc::channel, Arc, Mutex, MutexGuard},
+    thread,
 };
 
 use rusqlite::{hooks::Action, Connection};

@@ -7,12 +7,12 @@ use crate::database::Database;
 
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct Workspace {
-    id: Option<i32>,
-    name: String,
-    uid: String,
-    selected: bool,
-    created_at: String,
-    updated_at: String,
+    pub id: Option<i32>,
+    pub name: String,
+    pub uid: String,
+    pub selected: bool,
+    pub created_at: String,
+    pub updated_at: String,
 }
 
 impl Workspace {

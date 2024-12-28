@@ -26,6 +26,20 @@ pub struct Files {
     links: Vec<Link>,
 }
 
+#[derive(serde::Serialize, serde::Deserialize)]
+pub struct FilesRaw {
+    pub id: Option<i32>,
+    pub uid: String,
+    pub dir_id: Option<i32>,
+    pub title: String,
+    pub path: String,
+    pub created_at: String,
+    pub updated_at: String,
+    pub tags: String,
+    pub workspace_id: i32,
+    pub links: String,
+}
+
 fn val_or_else<'a, T>(val: &'a Option<T>, value: &'a str, else_value: &'a str) -> &'a str {
     if let Some(_) = val {
         value

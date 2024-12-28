@@ -17,6 +17,18 @@ pub struct Directory {
     parent_uid: Option<String>,
 }
 
+#[derive(serde::Serialize, serde::Deserialize)]
+pub struct DirectoryRaw {
+    pub id: Option<i32>,
+    pub uid: String,
+    pub name: String,
+    pub workspace_id: i32,
+    pub created_at: String,
+    pub updated_at: String,
+    pub path: String,
+    pub parent_uid: Option<String>,
+}
+
 impl Directory {
     fn new(
         name: String,
