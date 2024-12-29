@@ -18,6 +18,11 @@ use tauri::{App, Manager};
 
 fn main() {
     let mut database = Database::create_connection("pyxis");
+
+    /*
+     * SQLite locks the database file during inserts and updates. Hence, a different
+     * database to handle queue operations
+     */ 
     let mut config_database = ConfigDatabase(Database::create_connection("pyxis_config"));
 
     match run_migrations(&mut database) {

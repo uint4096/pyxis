@@ -47,15 +47,15 @@ impl Configuration {
 
     fn get(conn: &Connection) -> Result<Configuration, Error> {
         let mut stmt = conn.prepare("SELECT config FROM configuration")?;
-        let config: Configuration = stmt.query_row([], |row| {
+        let config = stmt.query_row([], |row| {
             let json_str: String = row.get(0)?;
             let config: Configuration = serde_json::from_str(&json_str)
                 .expect("[Configuration] Failed to cast JSON to struct!");
 
             Ok(config)
-        })?;
+        });
 
-        Ok(config)
+        config
     }
 
     fn add(&self, conn: &Connection) -> Result<(), Error> {

@@ -1,5 +1,7 @@
 use rusqlite::{Connection, Error};
 
+use crate::entities::queue::ListenerQueue;
+
 pub trait Listener {
     fn insert_into_queue(
         &self,
@@ -8,10 +10,8 @@ pub trait Listener {
         op: &str,
         source: &str,
     ) -> Result<(), Error> {
-        let insert_sql =
-            "INSERT INTO listener_queue (status, source, operation, payload) VALUES (?1, ?2, ?3, ?4)";
-
-        connection.execute(insert_sql, ("init", source, op, &payload))?;
+        let elem = ListenerQueue::new(None, String::from("init"), source.to_owned(), op.to_owned(), payload);
+        elem.enqueue(connection)?;
 
         Ok(())
     }

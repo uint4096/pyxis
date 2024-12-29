@@ -30,17 +30,16 @@ impl Snapshots {
         let mut sql = conn.prepare(
             "SELECT content, snapshot_id, file_id, updated_at, id FROM snapshots WHERE file_id=?1",
         )?;
-        Ok(
-            sql.query_row(&[&file_id], |row| -> Result<Snapshots, Error> {
-                Ok(Snapshots {
-                    content: row.get(0)?,
-                    snapshot_id: row.get(1)?,
-                    file_id: row.get(2)?,
-                    updated_at: row.get(3)?,
-                    id: row.get(4)?,
-                })
-            })?,
-        )
+
+        sql.query_row(&[&file_id], |row| -> Result<Snapshots, Error> {
+            Ok(Snapshots {
+                content: row.get(0)?,
+                snapshot_id: row.get(1)?,
+                file_id: row.get(2)?,
+                updated_at: row.get(3)?,
+                id: row.get(4)?,
+            })
+        })
     }
 
     fn update(&self, conn: &Connection) -> Result<(), Error> {
