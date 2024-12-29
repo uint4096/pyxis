@@ -3455,6 +3455,7 @@ dependencies = [
  "dirs",
  "machineid-rs",
  "nanoid",
+ "pyxis_db",
  "rusqlite",
  "serde",
  "serde_json",
@@ -3481,6 +3482,21 @@ dependencies = [
  "serde",
  "serde_with",
  "tokio",
+ "uuid",
+]
+
+[[package]]
+name = "pyxis_db"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "dirs",
+ "machineid-rs",
+ "nanoid",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "serde_with",
  "uuid",
 ]
 

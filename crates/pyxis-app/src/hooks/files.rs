@@ -1,8 +1,6 @@
+use pyxis_db::entities::files::FilesRaw;
 use rusqlite::{Connection, Error};
 use serde_json::json;
-
-use crate::entities::files::FilesRaw;
-
 use super::listener::Listener;
 
 pub struct FilesListener {

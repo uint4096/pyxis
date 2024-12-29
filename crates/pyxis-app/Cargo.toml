@@ -26,6 +26,7 @@ tauri-plugin-dialog = "2.0.1"
 uuid = { version = "1.11.0", features = ["v4", "v5", "serde"] }
 machineid-rs = "1.2.4"
 serde_with = "3.0.0"
+pyxis_db = { path = "../pyxis_db" }
 
 # [features]
 # this feature is used for production builds or when `devPath` points to the filesystem and the built-in dev server is disabled.

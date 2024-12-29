@@ -2,9 +2,6 @@ use chrono::Utc;
 use nanoid::nanoid;
 use rusqlite::{Connection, Error, Result, Row};
 use serde_json::{from_str, to_string};
-use tauri::State;
-
-use crate::database::Database;
 
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct Link {
@@ -14,16 +11,16 @@ pub struct Link {
 
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct Files {
-    id: Option<i32>,
-    uid: String,
-    dir_uid: Option<String>,
-    title: String,
-    path: String,
-    created_at: String,
-    updated_at: String,
-    tags: Vec<String>,
-    workspace_uid: String,
-    links: Vec<Link>,
+    pub id: Option<i32>,
+    pub uid: String,
+    pub dir_uid: Option<String>,
+    pub title: String,
+    pub path: String,
+    pub created_at: String,
+    pub updated_at: String,
+    pub tags: Vec<String>,
+    pub workspace_uid: String,
+    pub links: Vec<Link>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -40,7 +37,7 @@ pub struct FilesRaw {
     pub links: String,
 }
 
-fn val_or_else<'a, T>(val: &'a Option<T>, value: &'a str, else_value: &'a str) -> &'a str {
+pub fn val_or_else<'a, T>(val: &'a Option<T>, value: &'a str, else_value: &'a str) -> &'a str {
     if let Some(_) = val {
         value
     } else {
@@ -49,7 +46,7 @@ fn val_or_else<'a, T>(val: &'a Option<T>, value: &'a str, else_value: &'a str) -
 }
 
 impl Files {
-    fn new(
+    pub fn new(
         dir_uid: Option<String>,
         path: String,
         title: String,
@@ -74,7 +71,7 @@ impl Files {
         }
     }
 
-    fn create(&self, conn: &Connection) -> Result<(), Error> {
+    pub fn create(&self, conn: &Connection) -> Result<(), Error> {
         let dir_id: Option<i32> = if let Some(_) = self.dir_uid {
             let mut stmt = conn.prepare("SELECT id FROM directories WHERE uid = ?1")?;
             Some(stmt.query_row(&[&self.dir_uid], |row| -> Result<i32> { Ok(row.get(0)?) })?)
@@ -109,7 +106,7 @@ impl Files {
         Ok(())
     }
 
-    fn list(
+    pub fn list(
         conn: &Connection,
         workspace_uid: String,
         dir_uid: Option<String>,
@@ -173,7 +170,7 @@ impl Files {
         Ok(files)
     }
 
-    fn update(&self, conn: &Connection) -> Result<(), Error> {
+    pub fn update(&self, conn: &Connection) -> Result<(), Error> {
         let dir_id: Option<i32> = if let Some(_) = self.dir_uid {
             let mut dir_sql = conn.prepare("SELECT id FROM directories WHERE uid = ?1")?;
 
@@ -200,99 +197,10 @@ impl Files {
         Ok(())
     }
 
-    fn delete(uid: String, conn: &Connection) -> Result<(), Error> {
+    pub fn delete(uid: String, conn: &Connection) -> Result<(), Error> {
         let sql = "DELETE FROM files WHERE uid = (?1)";
         conn.execute(sql, (uid,))?;
 
         Ok(())
     }
-}
-
-#[tauri::command]
-pub fn create_file(
-    title: String,
-    dir_uid: Option<String>,
-    path: String,
-    workspace_uid: String,
-    links: Vec<Link>,
-    tags: Vec<String>,
-    database: State<Database>,
-) -> Option<Files> {
-    let file = Files::new(dir_uid, path, title, tags, links, workspace_uid, None);
-
-    match file.create(&database.get_connection()) {
-        Ok(_) => Some(file),
-        Err(e) => {
-            eprintln!("[Files] Failed to create! {}", e);
-            None
-        }
-    }
-}
-
-#[tauri::command]
-pub fn list_files(
-    workspace_uid: String,
-    dir_uid: Option<String>,
-    database: State<Database>,
-) -> Option<Vec<Files>> {
-    match Files::list(&database.get_connection(), workspace_uid, dir_uid) {
-        Ok(directories) => Some(directories),
-        Err(e) => {
-            eprintln!("[Files] Failed to fetch! Error: {e}");
-            None
-        }
-    }
-}
-
-#[tauri::command]
-pub fn delete_file(uid: String, database: State<Database>) -> bool {
-    match Files::delete(uid, &database.get_connection()) {
-        Ok(_) => true,
-        Err(e) => {
-            eprintln!("[Files] Failed to delete! {}", e);
-            false
-        }
-    }
-}
-
-#[tauri::command]
-pub fn update_file(
-    uid: String,
-    title: String,
-    dir_uid: Option<String>,
-    workspace_uid: String,
-    path: String,
-    links: Vec<Link>,
-    tags: Vec<String>,
-    database: State<Database>,
-) -> Option<Files> {
-    let conn = &database.get_connection();
-    let file = match Files::list(conn, workspace_uid, dir_uid.clone()) {
-        Ok(f) => f.into_iter().find(|f| f.uid == uid),
-        Err(e) => {
-            eprintln!("[Files] Failed to get for update! {}", e);
-            None
-        }
-    };
-
-    if let Some(mut file) = file {
-        file.title = title;
-        file.dir_uid = dir_uid;
-        file.path = path;
-        file.links = links;
-        file.tags = tags;
-        file.updated_at = Utc::now().to_rfc3339();
-
-        match file.update(conn) {
-            Ok(_) => {
-                return Some(file);
-            }
-            Err(e) => {
-                eprintln!("[Files] Failed to update! {}", e);
-                return None;
-            }
-        }
-    }
-
-    None
 }

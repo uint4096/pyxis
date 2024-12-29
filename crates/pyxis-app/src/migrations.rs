@@ -17,7 +17,7 @@ use snapshots::SnapshotsMigration;
 use updates::UpdatesMigration;
 use workspaces::WorkspaceMigration;
 
-use crate::database::Database;
+use pyxis_db::database::Database;
 
 pub trait MigrationsTrait: Migrations + ToSql + Debug {}
 

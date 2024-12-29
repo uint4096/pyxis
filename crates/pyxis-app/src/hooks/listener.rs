@@ -1,6 +1,5 @@
+use pyxis_db::entities::queue::ListenerQueue;
 use rusqlite::{Connection, Error};
-
-use crate::entities::queue::ListenerQueue;
 
 pub trait Listener {
     fn insert_into_queue(

@@ -1,7 +1,5 @@
+use pyxis_db::entities::updates::Updates;
 use rusqlite::{Connection, Error};
-
-use crate::entities::updates::Updates;
-
 use super::listener::Listener;
 
 pub struct UpdatesListener {

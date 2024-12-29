@@ -1,20 +1,17 @@
 use chrono::Utc;
 use nanoid::nanoid;
 use rusqlite::{Connection, Error, Result, Row};
-use tauri::State;
-
-use crate::database::Database;
 
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct Directory {
-    id: Option<i32>,
-    uid: String,
-    name: String,
-    workspace_uid: String,
-    created_at: String,
-    updated_at: String,
-    path: String,
-    parent_uid: Option<String>,
+    pub id: Option<i32>,
+    pub uid: String,
+    pub name: String,
+    pub workspace_uid: String,
+    pub created_at: String,
+    pub updated_at: String,
+    pub path: String,
+    pub parent_uid: Option<String>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -30,7 +27,7 @@ pub struct DirectoryRaw {
 }
 
 impl Directory {
-    fn new(
+    pub fn new(
         name: String,
         workspace_uid: String,
         path: String,
@@ -51,7 +48,7 @@ impl Directory {
         }
     }
 
-    fn create(&self, conn: &Connection) -> Result<(), Error> {
+    pub fn create(&self, conn: &Connection) -> Result<(), Error> {
         let workspace_id: i32 = {
             let mut workspace_sql = conn.prepare("SELECT id FROM workspaces WHERE uid = ?1")?;
             workspace_sql.query_row(&[&self.workspace_uid], |row| -> Result<i32> {
@@ -78,7 +75,7 @@ impl Directory {
         Ok(())
     }
 
-    fn list(
+    pub fn list(
         conn: &Connection,
         workspace_uid: String,
         parent_uid: Option<String>,
@@ -141,7 +138,7 @@ impl Directory {
         Ok(directories)
     }
 
-    fn update(&self, conn: &Connection) -> Result<(), Error> {
+    pub fn update(&self, conn: &Connection) -> Result<(), Error> {
         let mut workspace_sql = conn.prepare("SELECT id FROM workspaces WHERE uid = ?1")?;
 
         let workspace_id: i32 = workspace_sql
@@ -168,94 +165,10 @@ impl Directory {
         Ok(())
     }
 
-    fn delete(uid: String, conn: &Connection) -> Result<(), Error> {
+    pub fn delete(uid: String, conn: &Connection) -> Result<(), Error> {
         let sql = "DELETE FROM directories WHERE uid = (?1)";
         conn.execute(sql, (uid,))?;
 
         Ok(())
     }
-}
-
-#[tauri::command]
-pub fn create_dir(
-    name: String,
-    workspace_uid: String,
-    path: String,
-    parent_uid: Option<String>,
-    database: State<Database>,
-) -> Option<Directory> {
-    let directory = Directory::new(name, workspace_uid, path, parent_uid, None);
-
-    match directory.create(&database.get_connection()) {
-        Ok(_) => Some(directory),
-        Err(e) => {
-            eprintln!("[Directories] Failed to create! {}", e);
-            None
-        }
-    }
-}
-
-#[tauri::command]
-pub fn list_dirs(
-    workspace_uid: String,
-    parent_uid: Option<String>,
-    database: State<Database>,
-) -> Option<Vec<Directory>> {
-    match Directory::list(&database.get_connection(), workspace_uid, parent_uid) {
-        Ok(directories) => Some(directories),
-        Err(e) => {
-            eprintln!("[Directories] Failed to fetch! Error: {e}");
-            None
-        }
-    }
-}
-
-#[tauri::command]
-pub fn delete_dir(uid: String, database: State<Database>) -> bool {
-    match Directory::delete(uid, &database.get_connection()) {
-        Ok(_) => true,
-        Err(e) => {
-            eprintln!("[Directories] Failed to delete! {}", e);
-            false
-        }
-    }
-}
-
-#[tauri::command]
-pub fn update_dir(
-    id: i32,
-    name: String,
-    workspace_uid: String,
-    path: String,
-    parent_uid: Option<String>,
-    database: State<Database>,
-) -> Option<Directory> {
-    let conn = &database.get_connection();
-    let directory = match Directory::list(conn, workspace_uid.clone(), parent_uid.clone()) {
-        Ok(w) => w.into_iter().find(|w| w.id == Some(id)),
-        Err(e) => {
-            eprintln!("[Directories] Failed to get for update! {}", e);
-            None
-        }
-    };
-
-    if let Some(mut dir) = directory {
-        dir.name = name;
-        dir.workspace_uid = workspace_uid;
-        dir.path = path;
-        dir.parent_uid = parent_uid;
-        dir.updated_at = Utc::now().to_rfc3339();
-
-        match dir.update(conn) {
-            Ok(_) => {
-                return Some(dir);
-            }
-            Err(e) => {
-                eprintln!("[Directories] Failed to update! {}", e);
-                return None;
-            }
-        }
-    }
-
-    None
 }

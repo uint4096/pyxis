@@ -1,8 +1,6 @@
+use pyxis_db::entities::workspaces::Workspace;
 use rusqlite::{Connection, Error};
 use serde_json::json;
-
-use crate::entities::workspaces::Workspace;
-
 use super::listener::Listener;
 
 pub struct WorkspacesListener {

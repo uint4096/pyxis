@@ -1,17 +1,16 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-mod database;
-mod entities;
 mod hooks;
 mod migrations;
+mod handlers;
 
-use database::{ConfigDatabase, Database};
-use entities::config::{add_user_data, get_config, remove_user_data};
-use entities::directories::{create_dir, delete_dir, list_dirs, update_dir};
-use entities::files::{create_file, delete_file, list_files, update_file};
-use entities::snapshots::{get_snapshot, update_snapshot};
-use entities::updates::{get_updates, insert_updates};
-use entities::workspaces::{create_workspace, delete_workspace, list_workspaces, update_workspace};
+use pyxis_db::database::{ConfigDatabase, Database};
+use handlers::config::{add_user_data, get_config, remove_user_data};
+use handlers::directories::{create_dir, delete_dir, list_dirs, update_dir};
+use handlers::files::{create_file, delete_file, list_files, update_file};
+use handlers::snapshots::{get_snapshot, update_snapshot};
+use handlers::updates::{get_updates, insert_updates};
+use handlers::workspaces::{create_workspace, delete_workspace, list_workspaces, update_workspace};
 use hooks::content_hook;
 use migrations::{run_migrations, run_config_migrations};
 use tauri::{App, Manager};

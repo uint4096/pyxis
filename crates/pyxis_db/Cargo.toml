@@ -1,0 +1,15 @@
+[package]
+name = "pyxis_db"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+nanoid = "0.4.0"
+rusqlite = { version = "0.32.1", features = ["hooks"] }
+chrono = "0.4.31"
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_with = "3.0.0"
+dirs = "5.0"
+machineid-rs = "1.2.4"
+uuid = { version = "1.11.0", features = ["v4", "v5", "serde"] }

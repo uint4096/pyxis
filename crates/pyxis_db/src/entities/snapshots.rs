@@ -1,8 +1,6 @@
-use crate::database::Database;
 use chrono::Utc;
 use rusqlite::{Connection, Error};
 use serde::{Deserialize, Serialize};
-use tauri::State;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Snapshots {
@@ -14,7 +12,7 @@ pub struct Snapshots {
 }
 
 impl Snapshots {
-    fn new(file_id: i32, content: Vec<u8>, id: Option<i32>, snapshot_id: i32) -> Self {
+    pub fn new(file_id: i32, content: Vec<u8>, id: Option<i32>, snapshot_id: i32) -> Self {
         let current_time = Utc::now().to_rfc3339();
 
         Self {
@@ -26,7 +24,7 @@ impl Snapshots {
         }
     }
 
-    fn get(file_id: &i32, conn: &Connection) -> Result<Snapshots, Error> {
+    pub fn get(file_id: &i32, conn: &Connection) -> Result<Snapshots, Error> {
         let mut sql = conn.prepare(
             "SELECT content, snapshot_id, file_id, updated_at, id FROM snapshots WHERE file_id=?1",
         )?;
@@ -42,7 +40,7 @@ impl Snapshots {
         })
     }
 
-    fn update(&self, conn: &Connection) -> Result<(), Error> {
+    pub fn update(&self, conn: &Connection) -> Result<(), Error> {
         let sql = "INSERT INTO snapshots (file_id, content, updated_at, snapshot_id) VALUES (?1, ?2, ?3, ?4) \
                          ON CONFLICT(file_id) \
                          DO UPDATE SET content=?2, updated_at=?3, snapshot_id=snapshot_id+1";
@@ -58,29 +56,5 @@ impl Snapshots {
         )?;
 
         Ok(())
-    }
-}
-
-#[tauri::command]
-pub fn update_snapshot(file_id: i32, content: Vec<u8>, database: State<Database>) -> Option<bool> {
-    let content = Snapshots::new(file_id, content, None, 1);
-
-    match content.update(&database.get_connection()) {
-        Ok(_) => Some(true),
-        Err(e) => {
-            eprintln!("[Snapshots] Failed to update! {}", e);
-            Some(false)
-        }
-    }
-}
-
-#[tauri::command]
-pub fn get_snapshot(file_id: i32, database: State<Database>) -> Option<Snapshots> {
-    match Snapshots::get(&file_id, &database.get_connection()) {
-        Ok(snapshot) => Some(snapshot),
-        Err(e) => {
-            eprintln!("[Snapshots] Failed to fetch! {}", e);
-            None
-        }
     }
 }

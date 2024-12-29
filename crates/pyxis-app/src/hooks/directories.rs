@@ -1,7 +1,7 @@
+use pyxis_db::entities::directories::DirectoryRaw;
 use rusqlite::{Connection, Error};
 use serde_json::json;
 
-use crate::entities::directories::DirectoryRaw;
 
 use super::listener::Listener;
 

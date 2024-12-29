@@ -2,7 +2,8 @@
 
 members = [
     "crates/pyxis-app",
-    "crates/pyxis-auth"
+    "crates/pyxis-auth",
+    "crates/pyxis_db"
 ]
 
 resolver = "2"

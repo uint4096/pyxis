@@ -1,11 +1,8 @@
 use std::str::FromStr;
-
-use crate::database::ConfigDatabase;
 use machineid_rs::{Encryption, HWIDComponent, IdBuilder};
 use rusqlite::{Connection, Error};
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
-use tauri::State;
 use uuid::Uuid;
 
 #[serde_as]
@@ -30,7 +27,7 @@ fn get_machine_id() -> Uuid {
 }
 
 impl Configuration {
-    fn new(user_token: Option<String>, user_id: Option<String>, username: Option<String>) -> Self {
+    pub fn new(user_token: Option<String>, user_id: Option<String>, username: Option<String>) -> Self {
         Self {
             device_id: Some(get_machine_id()),
             user_token,
@@ -45,7 +42,7 @@ impl Configuration {
         }
     }
 
-    fn get(conn: &Connection) -> Result<Configuration, Error> {
+    pub fn get(conn: &Connection) -> Result<Configuration, Error> {
         let mut stmt = conn.prepare("SELECT config FROM configuration")?;
         let config = stmt.query_row([], |row| {
             let json_str: String = row.get(0)?;
@@ -58,7 +55,7 @@ impl Configuration {
         config
     }
 
-    fn add(&self, conn: &Connection) -> Result<(), Error> {
+    pub fn add(&self, conn: &Connection) -> Result<(), Error> {
         let json_payload = serde_json::json!({
             "device_id": self.device_id,
             "user_token": self.user_token,
@@ -71,50 +68,5 @@ impl Configuration {
         conn.execute(&update_sql, (&json_payload.to_string(),))?;
 
         Ok(())
-    }
-}
-
-#[tauri::command]
-pub fn add_user_data(
-    username: String,
-    user_token: String,
-    user_id: String,
-    config_database: State<ConfigDatabase>,
-) -> Option<bool> {
-    let content = Configuration::new(Some(user_token), Some(user_id), Some(username));
-
-    match content.add(&config_database.0.get_connection()) {
-        Ok(_) => Some(true),
-        Err(e) => {
-            eprintln!("[Configuration] Failed to add user data to config! {}", e);
-            Some(false)
-        }
-    }
-}
-
-#[tauri::command]
-pub fn remove_user_data(config_database: State<ConfigDatabase>) -> Option<bool> {
-    let content = Configuration::new(None, None, None);
-
-    match content.add(&config_database.0.get_connection()) {
-        Ok(_) => Some(true),
-        Err(e) => {
-            eprintln!(
-                "[Configuration] Failed to remove user data from config! {}",
-                e
-            );
-            Some(false)
-        }
-    }
-}
-
-#[tauri::command]
-pub fn get_config(config_database: State<ConfigDatabase>) -> Option<Configuration> {
-    match Configuration::get(&config_database.0.get_connection()) {
-        Ok(content) => Some(content),
-        Err(e) => {
-            eprintln!("[Configuration] Failed to fetch! {}", e);
-            None
-        }
     }
 }
