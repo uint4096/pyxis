@@ -1,0 +1,8 @@
+[workspace]
+
+members = [
+    "crates/pyxis-app",
+    "crates/pyxis-auth"
+]
+
+resolver = "2"

@@ -4,17 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build:ws": "pnpm --filter 'ws' build",
-    "watch:ws": "pnpm --filter 'ws' build:w",
-    "start:ws": "pnpm --filter 'ws' start",
-    "start:auth": "pnpm --filter 'auth' start",
+    "start:auth": "cargo run -p pyxis-auth",
     "build:client": "pnpm --filter 'client' build",
     "start:client": "pnpm --filter 'client' dev",
-    "start:app": "pnpm --filter 'app' dev",
-    "build:app": "pnpm --filter app build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start:app": "pnpm tauri dev",
+    "build:app": "pnpm tauri build",
+  	"tauri": "tauri"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+		"@tauri-apps/cli": "^2.1.0"
+	}
 }
