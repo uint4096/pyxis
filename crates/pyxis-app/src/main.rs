@@ -1,10 +1,9 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+mod handlers;
 mod hooks;
 mod migrations;
-mod handlers;
 
-use pyxis_db::database::{ConfigDatabase, Database};
 use handlers::config::{add_user_data, get_config, remove_user_data};
 use handlers::directories::{create_dir, delete_dir, list_dirs, update_dir};
 use handlers::files::{create_file, delete_file, list_files, update_file};
@@ -12,7 +11,8 @@ use handlers::snapshots::{get_snapshot, update_snapshot};
 use handlers::updates::{get_updates, insert_updates};
 use handlers::workspaces::{create_workspace, delete_workspace, list_workspaces, update_workspace};
 use hooks::content_hook;
-use migrations::{run_migrations, run_config_migrations};
+use migrations::{run_config_migrations, run_migrations};
+use pyxis_db::database::{ConfigDatabase, Database};
 use tauri::{App, Manager};
 
 fn main() {
@@ -21,7 +21,7 @@ fn main() {
     /*
      * SQLite locks the database file during inserts and updates. Hence, a different
      * database to handle queue operations
-     */ 
+     */
     let mut config_database = ConfigDatabase(Database::create_connection("pyxis_config"));
 
     match run_migrations(&mut database) {

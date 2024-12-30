@@ -1,9 +1,10 @@
 [workspace]
 
 members = [
+    "crates/pyxis_db",
     "crates/pyxis-app",
     "crates/pyxis-auth",
-    "crates/pyxis_db"
+    "crates/pyxis-sync"
 ]
 
 resolver = "2"

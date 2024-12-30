@@ -2,7 +2,6 @@ use chrono::Utc;
 use pyxis_db::{database::Database, entities::directories::Directory};
 use tauri::State;
 
-
 #[tauri::command]
 pub fn create_dir(
     name: String,

@@ -1,11 +1,9 @@
 use std::sync::Arc;
 
 use axum::{extract::State, http::StatusCode, Extension};
+use pyxis_db::dynamo_client::Dynamo;
 
-use crate::database::{
-    connection::Dynamo,
-    token_repository::{Claims, TokenRepository},
-};
+use crate::database::token_repository::{Claims, TokenRepository};
 
 #[axum_macros::debug_handler]
 pub async fn sign_out(

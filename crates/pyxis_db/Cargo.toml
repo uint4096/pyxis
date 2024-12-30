@@ -13,3 +13,5 @@ serde_with = "3.0.0"
 dirs = "5.0"
 machineid-rs = "1.2.4"
 uuid = { version = "1.11.0", features = ["v4", "v5", "serde"] }
+aws-config = "1.5.12"
+aws-sdk-dynamodb = "1.57.0"

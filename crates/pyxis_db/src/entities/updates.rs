@@ -54,4 +54,3 @@ impl Updates {
         Ok(())
     }
 }
-

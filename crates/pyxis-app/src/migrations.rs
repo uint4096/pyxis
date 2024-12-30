@@ -1,10 +1,10 @@
 mod config;
 mod directories;
 mod files;
+mod listener_queue;
 mod snapshots;
 mod updates;
 mod workspaces;
-mod listener_queue;
 
 use std::{collections::HashMap, fmt::Debug, rc::Rc};
 
@@ -190,7 +190,7 @@ pub fn run_migrations(database: &mut Database) -> Result<(), Error> {
             }),
             Box::new(UpdatesMigration {
                 name: String::from("updates_migration"),
-            })
+            }),
         ]),
     };
 
@@ -215,7 +215,7 @@ pub fn run_config_migrations(database: &mut Database) -> Result<(), Error> {
             }),
             Box::new(ConfigurationMigration {
                 name: String::from("configuration_migration"),
-            })
+            }),
         ]),
     };
 
@@ -223,11 +223,14 @@ pub fn run_config_migrations(database: &mut Database) -> Result<(), Error> {
     println!("Migration init successful (config)");
 
     let migrations_to_run = migration.list_migrations_to_run(database);
-    println!("Migrations to run (config): {:?}", migrations_to_run.entites);
+    println!(
+        "Migrations to run (config): {:?}",
+        migrations_to_run.entites
+    );
 
     for entity in migrations_to_run.entites.iter() {
         migration.run(entity, database)?;
     }
 
-    Ok(()) 
+    Ok(())
 }

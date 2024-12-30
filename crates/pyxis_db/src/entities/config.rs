@@ -1,17 +1,17 @@
-use std::str::FromStr;
 use machineid_rs::{Encryption, HWIDComponent, IdBuilder};
 use rusqlite::{Connection, Error};
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
+use std::str::FromStr;
 use uuid::Uuid;
 
 #[serde_as]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Configuration {
-    device_id: Option<Uuid>,
-    user_token: Option<String>,
-    user_id: Option<Uuid>,
-    username: Option<String>,
+    pub device_id: Option<Uuid>,
+    pub user_token: Option<String>,
+    pub user_id: Option<Uuid>,
+    pub username: Option<String>,
 }
 
 fn get_machine_id() -> Uuid {
@@ -27,7 +27,11 @@ fn get_machine_id() -> Uuid {
 }
 
 impl Configuration {
-    pub fn new(user_token: Option<String>, user_id: Option<String>, username: Option<String>) -> Self {
+    pub fn new(
+        user_token: Option<String>,
+        user_id: Option<String>,
+        username: Option<String>,
+    ) -> Self {
         Self {
             device_id: Some(get_machine_id()),
             user_token,

@@ -1,13 +1,18 @@
+use super::listener::Listener;
 use pyxis_db::entities::updates::Updates;
 use rusqlite::{Connection, Error};
-use super::listener::Listener;
 
 pub struct UpdatesListener {
     pub name: String,
 }
 
 impl Listener for UpdatesListener {
-    fn insert(&self, connection: &Connection, config_connection: &Connection, row_id: i64) -> Result<(), Error> {
+    fn insert(
+        &self,
+        connection: &Connection,
+        config_connection: &Connection,
+        row_id: i64,
+    ) -> Result<(), Error> {
         let mut sql = connection.prepare(
             "SELECT content, snapshot_id, file_id, updated_at, id from updates where id=?1",
         )?;

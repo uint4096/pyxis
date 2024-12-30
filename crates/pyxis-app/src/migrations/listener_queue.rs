@@ -38,7 +38,6 @@ impl Migrations for ListenerQueueMigration {
             payload   TEXT
         )";
 
-
         transaction.execute(&sql, ())
     }
 

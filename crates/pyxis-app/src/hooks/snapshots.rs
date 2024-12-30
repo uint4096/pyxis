@@ -1,6 +1,6 @@
+use super::listener::Listener;
 use pyxis_db::entities::snapshots::Snapshots;
 use rusqlite::{Connection, Error};
-use super::listener::Listener;
 
 pub struct SnapshotsListener {
     pub name: String,
@@ -24,17 +24,27 @@ impl SnapshotsListener {
 }
 
 impl Listener for SnapshotsListener {
-    fn insert(&self, connection: &Connection, config_connection: &Connection, row_id: i64) -> Result<(), Error> {
+    fn insert(
+        &self,
+        connection: &Connection,
+        config_connection: &Connection,
+        row_id: i64,
+    ) -> Result<(), Error> {
         let payload = serde_json::to_string(&SnapshotsListener::get_data(connection, row_id)?)
             .expect("[Snapshot Listener] Failed to serialize to json!");
-    
+
         self.insert_into_queue(config_connection, payload, "insert", &self.name)
     }
 
-    fn update(&self, connection: &Connection, config_connection: &Connection, row_id: i64) -> Result<(), Error> {
+    fn update(
+        &self,
+        connection: &Connection,
+        config_connection: &Connection,
+        row_id: i64,
+    ) -> Result<(), Error> {
         let payload = serde_json::to_string(&SnapshotsListener::get_data(connection, row_id)?)
             .expect("[Snapshot Listener] Failed to serialize to json!");
-    
+
         self.insert_into_queue(config_connection, payload, "update", &self.name)
     }
 

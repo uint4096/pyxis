@@ -11,7 +11,13 @@ pub struct ListenerQueue {
 }
 
 impl ListenerQueue {
-    pub fn new(id: Option<i32>, status: String, source: String, operation: String, payload: String) -> Self {
+    pub fn new(
+        id: Option<i32>,
+        status: String,
+        source: String,
+        operation: String,
+        payload: String,
+    ) -> Self {
         Self {
             id,
             status,
@@ -25,7 +31,10 @@ impl ListenerQueue {
         let insert_sql =
             "INSERT INTO listener_queue (status, source, operation, payload) VALUES (?1, ?2, ?3, ?4)";
 
-        conn.execute(insert_sql, ("init", &self.source, &self.operation, &self.payload))?;
+        conn.execute(
+            insert_sql,
+            ("init", &self.source, &self.operation, &self.payload),
+        )?;
 
         Ok(())
     }
@@ -46,7 +55,10 @@ impl ListenerQueue {
         })?;
 
         if let Some(id) = entry.id {
-            let updated_count = conn.execute("UPDATE listener_queue SET status = 'picked' WHERE id=(?1)", (&id,))?;
+            let updated_count = conn.execute(
+                "UPDATE listener_queue SET status = 'picked' WHERE id=(?1)",
+                (&id,),
+            )?;
 
             if updated_count != 0 {
                 println!("Failed to dequeue! Already picked.");
@@ -64,7 +76,10 @@ impl ListenerQueue {
     }
 
     pub fn requeue(&self, conn: &Connection) -> Result<(), Error> {
-        conn.execute("UPDATE listener_queue SET status = 'failed' WHERE id=(?1)", (&self.id,))?;
+        conn.execute(
+            "UPDATE listener_queue SET status = 'failed' WHERE id=(?1)",
+            (&self.id,),
+        )?;
 
         Ok(())
     }

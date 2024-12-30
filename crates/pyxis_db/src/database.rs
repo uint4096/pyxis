@@ -79,7 +79,7 @@ impl Database {
                             &update.table_name,
                             update.row_id,
                             &conn,
-                            &config_conn
+                            &config_conn,
                         );
                     }
                 }
