@@ -3,7 +3,7 @@
 members = [
     "crates/pyxis_db",
     "crates/pyxis-app",
-    "crates/pyxis-auth",
+    "crates/pyxis-server",
     "crates/pyxis-sync"
 ]
 
