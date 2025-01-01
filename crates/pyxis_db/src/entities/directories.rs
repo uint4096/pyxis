@@ -14,18 +14,6 @@ pub struct Directory {
     pub parent_uid: Option<String>,
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
-pub struct DirectoryRaw {
-    pub id: Option<i32>,
-    pub uid: String,
-    pub name: String,
-    pub workspace_id: i32,
-    pub created_at: String,
-    pub updated_at: String,
-    pub path: String,
-    pub parent_uid: Option<String>,
-}
-
 impl Directory {
     pub fn new(
         name: String,
@@ -46,6 +34,36 @@ impl Directory {
             created_at: String::from(&current_time),
             updated_at: String::from(&current_time),
         }
+    }
+
+    pub fn get(conn: &Connection, id: i64) -> Result<Directory, Error> {
+        let mut sql = conn.prepare(
+            "SELECT \
+                d.id, \
+                d.uid, \
+                d.name, \
+                w.uid as workspace_uid, \
+                d.path, \
+                d.parent_uid, \
+                d.created_at, \
+                d.updated_at \
+                FROM directories d \
+                INNER JOIN workspaces w ON d.workspace_id = w.id \
+                WHERE d.id = ?1",
+        )?;
+
+        sql.query_row(&[&id], |row| -> Result<Directory, Error> {
+            Ok(Directory {
+                id: row.get(0)?,
+                uid: row.get(1)?,
+                name: row.get(2)?,
+                workspace_uid: row.get(3)?,
+                path: row.get(4)?,
+                parent_uid: row.get(5)?,
+                created_at: row.get(6)?,
+                updated_at: row.get(7)?,
+            })
+        })
     }
 
     pub fn create(&self, conn: &Connection) -> Result<(), Error> {

@@ -1,11 +1,49 @@
+use std::str::FromStr;
+
 use rusqlite::{Connection, Error};
 use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Debug)]
+pub enum Source {
+    Workspace,
+    Directory,
+    File,
+    Snapshot,
+    Update
+}
+
+impl FromStr for Source {
+    type Err = ();
+
+    fn from_str(input: &str) -> Result<Source, Self::Err> {
+        match input {
+            "workspaces"  => Ok(Source::Workspace),
+            "directories" => Ok(Source::Directory),
+            "files" => Ok(Source::File),
+            "snapshots" => Ok(Source::Snapshot),
+            "updates" => Ok(Source::Update),
+            _      => Err(()),
+        }
+    }
+}
+
+impl ToString for Source {
+    fn to_string(&self) -> String {
+        match self {
+            Source::Workspace => String::from("workspaces"),
+            Source::File => String::from("files"),
+            Source::Directory => String::from("directories"),
+            Source::Snapshot => String::from("snapshots"),
+            Source::Update => String::from("updates")
+        }
+    }
+}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ListenerQueue {
     pub id: Option<i32>,
     pub status: String,
-    pub source: String,
+    pub source: Source,
     pub operation: String,
     pub payload: String,
 }
@@ -21,7 +59,7 @@ impl ListenerQueue {
         Self {
             id,
             status,
-            source,
+            source: Source::from_str(&source).expect("Failed to convert source from string"),
             operation,
             payload,
         }
@@ -33,7 +71,7 @@ impl ListenerQueue {
 
         conn.execute(
             insert_sql,
-            ("init", &self.source, &self.operation, &self.payload),
+            ("init", &self.source.to_string(), &self.operation, &self.payload),
         )?;
 
         Ok(())
@@ -41,14 +79,16 @@ impl ListenerQueue {
 
     pub fn dequeue(conn: &Connection) -> Result<ListenerQueue, Error> {
         let mut sql = conn.prepare(
-            "SELECT id, status, source, operation, payload FROM listener_queue ORDER BY ROWID ASC LIMIT 1",
+            "SELECT id, status, source, operation, payload FROM listener_queue ORDER BY ROWID ASC LIMIT 1 WHERE status in ('failed', 'init')",
         )?;
 
         let entry = sql.query_row([], |row| -> Result<ListenerQueue, Error> {
+            let source_str: String = row.get(2)?;
+
             Ok(ListenerQueue {
                 id: row.get(0)?,
                 status: row.get(1)?,
-                source: row.get(2)?,
+                source: Source::from_str(&source_str).expect("Failed to convert source from string!"),
                 operation: row.get(3)?,
                 payload: row.get(4)?,
             })

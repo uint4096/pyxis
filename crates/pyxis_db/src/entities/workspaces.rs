@@ -26,6 +26,23 @@ impl Workspace {
         }
     }
 
+    pub fn get(connection: &Connection, id: i64) -> Result<Workspace, Error> {
+        let mut sql = connection.prepare(
+            "SELECT id, uid, name, selected, created_at, updated_at from workspaces WHERE id=?1",
+        )?;
+
+        sql.query_row(&[&id], |row| -> Result<Workspace, Error> {
+            Ok(Workspace {
+                id: row.get(0)?,
+                uid: row.get(1)?,
+                name: row.get(2)?,
+                selected: row.get(3)?,
+                created_at: row.get(4)?,
+                updated_at: row.get(5)?,
+            })
+        })
+    }
+
     pub fn create(&self, conn: &Connection) -> Result<(), Error> {
         if self.selected {
             let update_sql = "UPDATE workspaces SET selected = 0 WHERE selected = 1";

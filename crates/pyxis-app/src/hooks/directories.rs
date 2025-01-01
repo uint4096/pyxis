@@ -1,4 +1,4 @@
-use pyxis_db::entities::directories::DirectoryRaw;
+use pyxis_db::entities::directories::Directory;
 use rusqlite::{Connection, Error};
 use serde_json::json;
 
@@ -8,26 +8,6 @@ pub struct DirectoryListener {
     pub name: String,
 }
 
-impl DirectoryListener {
-    fn get_data(connection: &Connection, row_id: i64) -> Result<DirectoryRaw, Error> {
-        let mut sql = connection
-                .prepare("SELECT id, uid, name, workspace_id, path, parent_uid, created_at, updated_at from directories WHERE id=?1")?;
-
-        sql.query_row(&[&row_id], |row| -> Result<DirectoryRaw, Error> {
-            Ok(DirectoryRaw {
-                id: row.get(0)?,
-                uid: row.get(1)?,
-                name: row.get(2)?,
-                workspace_id: row.get(3)?,
-                path: row.get(4)?,
-                parent_uid: row.get(5)?,
-                created_at: row.get(6)?,
-                updated_at: row.get(7)?,
-            })
-        })
-    }
-}
-
 impl Listener for DirectoryListener {
     fn insert(
         &self,
@@ -35,7 +15,7 @@ impl Listener for DirectoryListener {
         config_connection: &Connection,
         row_id: i64,
     ) -> Result<(), Error> {
-        let payload = serde_json::to_string(&DirectoryListener::get_data(connection, row_id)?)
+        let payload = serde_json::to_string(&Directory::get(connection, row_id)?)
             .expect("[Files Listener] Failed to serialize to json!");
 
         self.insert_into_queue(config_connection, payload, "insert", &self.name)
@@ -47,7 +27,7 @@ impl Listener for DirectoryListener {
         config_connection: &Connection,
         row_id: i64,
     ) -> Result<(), Error> {
-        let payload = serde_json::to_string(&DirectoryListener::get_data(connection, row_id)?)
+        let payload = serde_json::to_string(&Directory::get(connection, row_id)?)
             .expect("[Files Listener] Failed to serialize to json!");
 
         self.insert_into_queue(config_connection, payload, "update", &self.name)

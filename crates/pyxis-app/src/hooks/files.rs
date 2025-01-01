@@ -1,32 +1,10 @@
 use super::listener::Listener;
-use pyxis_db::entities::files::FilesRaw;
+use pyxis_db::entities::files::Files;
 use rusqlite::{Connection, Error};
 use serde_json::json;
 
 pub struct FilesListener {
     pub name: String,
-}
-
-impl FilesListener {
-    fn get_data(connection: &Connection, row_id: i64) -> Result<FilesRaw, Error> {
-        let mut sql = connection
-                .prepare("SELECT id, uid, dir_id, workspace_id, path, title, created_at, updated_at, links, tags from files WHERE id=?1")?;
-
-        sql.query_row(&[&row_id], |row| -> Result<FilesRaw, Error> {
-            Ok(FilesRaw {
-                id: row.get(0)?,
-                uid: row.get(1)?,
-                dir_id: row.get(2)?,
-                workspace_id: row.get(3)?,
-                path: row.get(4)?,
-                title: row.get(5)?,
-                created_at: row.get(6)?,
-                updated_at: row.get(7)?,
-                links: row.get(8)?,
-                tags: row.get(9)?,
-            })
-        })
-    }
 }
 
 impl Listener for FilesListener {
@@ -36,7 +14,7 @@ impl Listener for FilesListener {
         config_connection: &Connection,
         row_id: i64,
     ) -> Result<(), Error> {
-        let payload = serde_json::to_string(&FilesListener::get_data(connection, row_id)?)
+        let payload = serde_json::to_string(&Files::get(connection, row_id)?)
             .expect("[Files Listener] Failed to serialize to json!");
 
         self.insert_into_queue(config_connection, payload, "insert", &self.name)
@@ -48,7 +26,7 @@ impl Listener for FilesListener {
         config_connection: &Connection,
         row_id: i64,
     ) -> Result<(), Error> {
-        let payload = serde_json::to_string(&FilesListener::get_data(connection, row_id)?)
+        let payload = serde_json::to_string(&Files::get(connection, row_id)?)
             .expect("[Files Listener] Failed to serialize to json!");
 
         self.insert_into_queue(config_connection, payload, "update", &self.name)

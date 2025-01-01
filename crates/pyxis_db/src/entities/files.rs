@@ -23,20 +23,6 @@ pub struct Files {
     pub links: Vec<Link>,
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
-pub struct FilesRaw {
-    pub id: Option<i32>,
-    pub uid: String,
-    pub dir_id: Option<i32>,
-    pub title: String,
-    pub path: String,
-    pub created_at: String,
-    pub updated_at: String,
-    pub tags: String,
-    pub workspace_id: i32,
-    pub links: String,
-}
-
 pub fn val_or_else<'a, T>(val: &'a Option<T>, value: &'a str, else_value: &'a str) -> &'a str {
     if let Some(_) = val {
         value
@@ -69,6 +55,47 @@ impl Files {
             links,
             tags,
         }
+    }
+
+    pub fn get(conn: &Connection, id: i64) -> Result<Files, Error> {
+        let mut stmt = conn.prepare(&format!(
+            "SELECT \
+                f.id, \
+                f.uid, \
+                w.uid as workspace_uid, \
+                f.path, \
+                f.title, \
+                f.created_at, \
+                f.updated_at, \
+                f.links, \
+                f.tags \
+                d.uid as dir_uid \
+                FROM files f \
+                INNER JOIN workspaces w ON f.workspace_id = w.id \
+                INNER JOIN directories d ON f.dir_id = d.id \
+                WHERE f.id = ?1"
+        ))?;
+
+        stmt.query_row(&[&id], |row| -> Result<Files, Error> {
+            let links: String = row.get(7)?;
+            let links: Vec<Link> = from_str(&links).expect("[Files] Unable to get links");
+
+            let tags: String = row.get(8)?;
+            let tags: Vec<String> = from_str(&tags).expect("[Files] Unable to get tags");
+
+            Ok(Files {
+                id: row.get(0)?,
+                uid: row.get(1)?,
+                dir_uid: row.get(2)?,
+                workspace_uid: row.get(3)?,
+                path: row.get(4)?,
+                title: row.get(5)?,
+                created_at: row.get(6)?,
+                updated_at: row.get(7)?,
+                links,
+                tags,
+            })
+        })
     }
 
     pub fn create(&self, conn: &Connection) -> Result<(), Error> {

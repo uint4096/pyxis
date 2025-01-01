@@ -24,6 +24,21 @@ impl Snapshots {
         }
     }
 
+    pub fn get_by_id(connection: &Connection, id: i64) -> Result<Snapshots, Error> {
+        let mut sql = connection
+                .prepare("SELECT id, uid, dir_id, workspace_id, path, title, created_at, updated_at, links, tags from files WHERE id=?1")?;
+
+        sql.query_row(&[&id], |row| -> Result<Snapshots, Error> {
+            Ok(Snapshots {
+                content: row.get(0)?,
+                snapshot_id: row.get(1)?,
+                file_id: row.get(2)?,
+                updated_at: row.get(3)?,
+                id: row.get(4)?,
+            })
+        })
+    }
+
     pub fn get(file_id: &i32, conn: &Connection) -> Result<Snapshots, Error> {
         let mut sql = conn.prepare(
             "SELECT content, snapshot_id, file_id, updated_at, id FROM snapshots WHERE file_id=?1",

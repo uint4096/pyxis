@@ -7,25 +7,6 @@ pub struct WorkspacesListener {
     pub name: String,
 }
 
-impl WorkspacesListener {
-    fn get_data(connection: &Connection, row_id: i64) -> Result<Workspace, Error> {
-        let mut sql = connection.prepare(
-            "SELECT id, uid, name, selected, created_at, updated_at from workspaces WHERE id=?1",
-        )?;
-
-        sql.query_row(&[&row_id], |row| -> Result<Workspace, Error> {
-            Ok(Workspace {
-                id: row.get(0)?,
-                uid: row.get(1)?,
-                name: row.get(2)?,
-                selected: row.get(3)?,
-                created_at: row.get(4)?,
-                updated_at: row.get(5)?,
-            })
-        })
-    }
-}
-
 impl Listener for WorkspacesListener {
     fn insert(
         &self,
@@ -33,7 +14,7 @@ impl Listener for WorkspacesListener {
         config_connection: &Connection,
         row_id: i64,
     ) -> Result<(), Error> {
-        let payload = serde_json::to_string(&WorkspacesListener::get_data(connection, row_id)?)
+        let payload = serde_json::to_string(&Workspace::get(connection, row_id)?)
             .expect("[Workspaces Listener] Failed to serialize to json!");
 
         self.insert_into_queue(config_connection, payload, "insert", &self.name)
@@ -45,7 +26,7 @@ impl Listener for WorkspacesListener {
         config_connection: &Connection,
         row_id: i64,
     ) -> Result<(), Error> {
-        let payload = serde_json::to_string(&WorkspacesListener::get_data(connection, row_id)?)
+        let payload = serde_json::to_string(&Workspace::get(connection, row_id)?)
             .expect("[Workspaces Listener] Failed to serialize to json!");
 
         self.insert_into_queue(config_connection, payload, "update", &self.name)

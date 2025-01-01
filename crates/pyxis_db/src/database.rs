@@ -7,7 +7,7 @@ use std::{
 use rusqlite::{hooks::Action, Connection};
 
 pub struct Database {
-    conn: Arc<Mutex<Connection>>,
+    pub conn: Arc<Mutex<Connection>>,
 }
 
 struct HookPayload {

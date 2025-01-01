@@ -10,44 +10,45 @@ use std::collections::HashMap;
 use directories::DirectoryListener;
 use files::FilesListener;
 use listener::Listener;
+use pyxis_db::entities::queue::Source;
 use rusqlite::{hooks::Action, Connection, Error};
 use snapshots::SnapshotsListener;
 use updates::UpdatesListener;
 use workspaces::WorkspacesListener;
 
-type ListenerMap = HashMap<&'static str, Box<dyn Listener>>;
+type ListenerMap = HashMap<String, Box<dyn Listener>>;
 
 fn create_listeners() -> ListenerMap {
     let mut listeners: ListenerMap = HashMap::new();
 
     listeners.insert(
-        "updates",
+        Source::Update.to_string(),
         Box::new(UpdatesListener {
-            name: "updates".into(),
+            name: Source::Update.to_string(),
         }),
     );
     listeners.insert(
-        "snapshots",
+        Source::Snapshot.to_string(),
         Box::new(SnapshotsListener {
-            name: "snapshots".into(),
+            name: Source::Snapshot.to_string(),
         }),
     );
     listeners.insert(
-        "workspaces",
+        Source::Workspace.to_string(),
         Box::new(WorkspacesListener {
-            name: "workspaces".into(),
+            name: Source::Workspace.to_string(),
         }),
     );
     listeners.insert(
-        "files",
+        Source::File.to_string(),
         Box::new(FilesListener {
-            name: "files".into(),
+            name: Source::File.to_string(),
         }),
     );
     listeners.insert(
-        "directories",
+        Source::Directory.to_string(),
         Box::new(DirectoryListener {
-            name: "directories".into(),
+            name: Source::Directory.to_string(),
         }),
     );
 
