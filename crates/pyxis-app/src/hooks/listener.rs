@@ -20,6 +20,7 @@ pub trait Listener {
             file_id,
             snapshot_id,
         );
+
         elem.enqueue(connection)?;
 
         Ok(())

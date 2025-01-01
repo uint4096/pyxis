@@ -2,9 +2,8 @@ use std::{error::Error, sync::Arc};
 
 use aws_sdk_dynamodb::{self as DynamoDB, types::AttributeValue};
 use chrono::Utc;
+use pyxis_db::entities::queue::Source;
 use serde::{Deserialize, Serialize};
-
-static TABLE_NAME: &str = "documents_sync";
 
 #[derive(Serialize, Deserialize)]
 pub struct Document {
@@ -23,7 +22,7 @@ impl DocumentRepository {
         Self { client }
     }
 
-    pub async fn create(&self, document: Document) -> Result<i64, Box<dyn Error>> {
+    pub async fn create(&self, document: Document, source: Source) -> Result<i64, Box<dyn Error>> {
         let timestamp = Utc::now().timestamp();
         let Document {
             pk,
@@ -38,9 +37,15 @@ impl DocumentRepository {
         let op_av = AttributeValue::S(operation);
         let timestamp_av = AttributeValue::N(timestamp.to_string());
 
+        let table_name = if source == Source::Snapshot {
+            "snapshots_sync"
+        } else {
+            "documents_sync"
+        };
+
         self.client
             .put_item()
-            .table_name(TABLE_NAME)
+            .table_name(table_name)
             .item("pk", pk_av)
             .item("sk", sk_av)
             .item("payload", payload_av)

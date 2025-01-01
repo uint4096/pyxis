@@ -46,6 +46,7 @@ pub async fn sync_worker(conn: &Connection) -> Result<(), Error> {
             let res = document_writer
                 .write(&client, &queue_element, config.user_token.unwrap())
                 .await;
+
             let is_err = res.is_err();
             DocumentWriter::post_write(
                 &conn,

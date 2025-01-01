@@ -1,7 +1,7 @@
-use std::sync::Arc;
+use std::{str::FromStr, sync::Arc};
 
 use axum::{extract::State, http::StatusCode, Extension, Json};
-use pyxis_db::{dynamo_client::Dynamo, payload::DocumentWritePayload};
+use pyxis_db::{dynamo_client::Dynamo, entities::queue::Source, payload::DocumentWritePayload};
 use serde_json::Value;
 
 use crate::database::{
@@ -28,6 +28,7 @@ pub async fn document_write(
         record_id,
         payload,
         operation,
+        source
     } = document;
 
     let doc = Document {
@@ -37,7 +38,8 @@ pub async fn document_write(
         operation,
     };
 
-    let write_response = document_repository.create(doc).await;
+    let source = Source::from_str(&source).expect("Failed to serialize source from string");
+    let write_response = document_repository.create(doc, source).await;
 
     if let Err(e) = write_response {
         println!("Error while writing documents! {}", e);

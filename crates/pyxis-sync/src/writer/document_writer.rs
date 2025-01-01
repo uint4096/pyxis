@@ -29,9 +29,15 @@ impl<'a> SyncWriter for DocumentWriter<'a> {
         queue_element: &ListenerQueue,
         token: String,
     ) -> Result<Response, Error> {
+        let sources = if queue_element.source == Source::Snapshot {
+            [Source::Snapshot].to_vec()
+        } else {
+            [Source::Directory, Source::File, Source::Workspace].to_vec()
+        };
+
         let last_record = Tracker::get(
             self.conn,
-            [Source::Directory, Source::File, Source::Workspace].to_vec(),
+            sources,
             self.device_id,
         )
         .expect("Failed to get last sync record!");
@@ -40,6 +46,7 @@ impl<'a> SyncWriter for DocumentWriter<'a> {
             payload: queue_element.payload.clone(),
             record_id: last_record.record_id + 1,
             operation: queue_element.operation.clone(),
+            source: queue_element.source.to_string()
         };
 
         //@todo use env vars
