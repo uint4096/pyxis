@@ -31,11 +31,13 @@ impl FromSql for ListenerQueueMigration {
 impl Migrations for ListenerQueueMigration {
     fn run(&self, transaction: &Transaction) -> Result<usize, rusqlite::Error> {
         let sql = "CREATE TABLE IF NOT EXISTS listener_queue (
-            id        INTEGER PRIMARY KEY AUTOINCREMENT,
-            status    TEXT,
-            source    TEXT,
-            operation TEXT,
-            payload   TEXT
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            status      TEXT NOT NULL,
+            source      TEXT NOT NULL,
+            operation   TEXT NOT NULL,
+            payload     TEXT NOT NULL,
+            file_id     INTEGER
+            snapshot_id INTEGER
         )";
 
         transaction.execute(&sql, ())

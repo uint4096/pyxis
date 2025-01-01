@@ -3,7 +3,7 @@ use std::str::FromStr;
 use rusqlite::{Connection, Error};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub enum Source {
     Workspace,
     Directory,
@@ -46,6 +46,8 @@ pub struct ListenerQueue {
     pub source: Source,
     pub operation: String,
     pub payload: String,
+    pub file_id: Option<i64>,
+    pub snapshot_id: Option<i64>,
 }
 
 impl ListenerQueue {
@@ -55,6 +57,8 @@ impl ListenerQueue {
         source: String,
         operation: String,
         payload: String,
+        file_id: Option<i64>,
+        snapshot_id: Option<i64>,
     ) -> Self {
         Self {
             id,
@@ -62,12 +66,14 @@ impl ListenerQueue {
             source: Source::from_str(&source).expect("Failed to convert source from string"),
             operation,
             payload,
+            file_id,
+            snapshot_id,
         }
     }
 
     pub fn enqueue(&self, conn: &Connection) -> Result<(), Error> {
         let insert_sql =
-            "INSERT INTO listener_queue (status, source, operation, payload) VALUES (?1, ?2, ?3, ?4)";
+            "INSERT INTO listener_queue (status, source, operation, payload, file_id, snapshot_id) VALUES (?1, ?2, ?3, ?4, ?5, ?6)";
 
         conn.execute(
             insert_sql,
@@ -76,6 +82,8 @@ impl ListenerQueue {
                 &self.source.to_string(),
                 &self.operation,
                 &self.payload,
+                &self.file_id,
+                &self.snapshot_id,
             ),
         )?;
 
@@ -84,7 +92,7 @@ impl ListenerQueue {
 
     pub fn dequeue(conn: &Connection) -> Result<ListenerQueue, Error> {
         let mut sql = conn.prepare(
-            "SELECT id, status, source, operation, payload FROM listener_queue ORDER BY ROWID ASC LIMIT 1 WHERE status in ('failed', 'init')",
+            "SELECT id, status, source, operation, file_id, snapshot_id payload FROM listener_queue ORDER BY ROWID ASC LIMIT 1 WHERE status in ('failed', 'init')",
         )?;
 
         let entry = sql.query_row([], |row| -> Result<ListenerQueue, Error> {
@@ -97,6 +105,8 @@ impl ListenerQueue {
                     .expect("Failed to convert source from string!"),
                 operation: row.get(3)?,
                 payload: row.get(4)?,
+                file_id: row.get(5)?,
+                snapshot_id: row.get(6)?,
             })
         })?;
 

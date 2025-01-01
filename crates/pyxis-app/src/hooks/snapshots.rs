@@ -16,7 +16,7 @@ impl Listener for SnapshotsListener {
         let payload = serde_json::to_string(&Snapshots::get_by_id(connection, row_id)?)
             .expect("[Snapshot Listener] Failed to serialize to json!");
 
-        self.insert_into_queue(config_connection, payload, "insert", &self.name)
+        self.insert_into_queue(config_connection, payload, "insert", &self.name, None, None)
     }
 
     fn update(
@@ -28,7 +28,7 @@ impl Listener for SnapshotsListener {
         let payload = serde_json::to_string(&Snapshots::get_by_id(connection, row_id)?)
             .expect("[Snapshot Listener] Failed to serialize to json!");
 
-        self.insert_into_queue(config_connection, payload, "update", &self.name)
+        self.insert_into_queue(config_connection, payload, "update", &self.name, None, None)
     }
 
     fn delete(&self, _: &Connection, _: &Connection, _: i64) -> Result<(), Error> {

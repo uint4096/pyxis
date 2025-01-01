@@ -8,6 +8,8 @@ pub trait Listener {
         payload: String,
         op: &str,
         source: &str,
+        file_id: Option<i64>,
+        snapshot_id: Option<i64>,
     ) -> Result<(), Error> {
         let elem = ListenerQueue::new(
             None,
@@ -15,6 +17,8 @@ pub trait Listener {
             source.to_owned(),
             op.to_owned(),
             payload,
+            file_id,
+            snapshot_id,
         );
         elem.enqueue(connection)?;
 

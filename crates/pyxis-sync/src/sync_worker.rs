@@ -1,24 +1,52 @@
-mod sync;
-mod workspaces;
+use std::{thread::sleep, time::Duration};
 
-use aws_sdk_dynamodb as DynamoDB;
-use pyxis_db::entities::{config::Configuration, queue::ListenerQueue};
+use pyxis_db::entities::{
+    config::Configuration,
+    queue::{ListenerQueue, Source},
+};
 use rusqlite::{Connection, Error};
 
-pub fn sync_worker(
-    conn: &Connection,
-    dynamoClient: &DynamoDB::client::Client,
-) -> Result<(), Error> {
+use crate::writer::{
+    document_writer::DocumentWriter, sync_writer::SyncWriter, update_writer::UpdateWriter,
+};
+
+pub async fn sync_worker(conn: &Connection) -> Result<(), Error> {
+    let client = reqwest::Client::new();
+    let mut sleep_duration = 30;
+
     loop {
+        sleep_duration = if sleep_duration > 300 {
+            300
+        } else {
+            sleep_duration
+        };
+
         let config = Configuration::get(conn)?;
         let queue_element = ListenerQueue::dequeue(conn)?;
+
+        if config.user_token.is_none() {
+            //@todo: handle expired tokens
+            sleep(Duration::from_secs(sleep_duration));
+            sleep_duration += sleep_duration;
+            continue;
+        }
+
+        let success = if queue_element.source == Source::Update {
+            UpdateWriter::write(&client, &queue_element, config.user_token.unwrap()).await.is_err()
+        } else {
+            let res =
+                DocumentWriter::write(&client, &queue_element, config.user_token.unwrap()).await;
+            let is_err = res.is_err();
+            DocumentWriter::post_write(res.unwrap()).await?;
+            is_err
+        };
+
+        if success {
+            queue_element.remove(conn)?;
+        } else {
+            queue_element.requeue(conn)?;
+            sleep(Duration::from_secs(sleep_duration));
+            sleep_duration += sleep_duration;
+        }
     }
 }
-
-/*
- * - Move DynamoDB module from auth to shared
- * - Remove all usages of FilesRaw and DirectoriesRaw. They are not needed
- * - Add `get` methods for all entities to get one of the data based on row_id.
- *   It should use the same joins as the `list` methods
- * - Use the `get` method created in the previous step in all the hooks
- */

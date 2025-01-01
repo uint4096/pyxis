@@ -23,7 +23,7 @@ pub fn create_route(connection: Arc<Dynamo>) -> Router {
             post(document_write.layer(middleware::from_fn(check_token))),
         )
         .route(
-            "/updates/write",
+            "/update/write",
             post(updates_write.layer(middleware::from_fn(check_token))),
         );
 

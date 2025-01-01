@@ -18,7 +18,7 @@ impl Listener for DirectoryListener {
         let payload = serde_json::to_string(&Directory::get(connection, row_id)?)
             .expect("[Files Listener] Failed to serialize to json!");
 
-        self.insert_into_queue(config_connection, payload, "insert", &self.name)
+        self.insert_into_queue(config_connection, payload, "insert", &self.name, None, None)
     }
 
     fn update(
@@ -30,7 +30,7 @@ impl Listener for DirectoryListener {
         let payload = serde_json::to_string(&Directory::get(connection, row_id)?)
             .expect("[Files Listener] Failed to serialize to json!");
 
-        self.insert_into_queue(config_connection, payload, "update", &self.name)
+        self.insert_into_queue(config_connection, payload, "update", &self.name, None, None)
     }
 
     fn delete(
@@ -43,6 +43,13 @@ impl Listener for DirectoryListener {
             "id": row_id
         });
 
-        self.insert_into_queue(config_connection, payload.to_string(), "delete", &self.name)
+        self.insert_into_queue(
+            config_connection,
+            payload.to_string(),
+            "delete",
+            &self.name,
+            None,
+            None,
+        )
     }
 }

@@ -3,8 +3,8 @@ use tauri::State;
 
 #[tauri::command]
 pub fn insert_updates(
-    file_id: i32,
-    snapshot_id: i32,
+    file_id: i64,
+    snapshot_id: i64,
     content: Vec<u8>,
     database: State<Database>,
 ) -> Option<bool> {
@@ -21,8 +21,8 @@ pub fn insert_updates(
 
 #[tauri::command]
 pub fn get_updates(
-    file_id: i32,
-    snapshot_id: i32,
+    file_id: i64,
+    snapshot_id: i64,
     database: State<Database>,
 ) -> Option<Vec<Vec<u8>>> {
     match Updates::get(&file_id, &snapshot_id, &database.get_connection()) {

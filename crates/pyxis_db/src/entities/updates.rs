@@ -4,15 +4,15 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Updates {
-    pub id: Option<i32>,
+    pub id: Option<i64>,
     pub content: Vec<u8>,
-    pub file_id: i32,
+    pub file_id: i64,
     pub updated_at: String,
-    pub snapshot_id: i32,
+    pub snapshot_id: i64,
 }
 
 impl Updates {
-    pub fn new(file_id: i32, content: Vec<u8>, id: Option<i32>, snapshot_id: i32) -> Self {
+    pub fn new(file_id: i64, content: Vec<u8>, id: Option<i64>, snapshot_id: i64) -> Self {
         let current_time = Utc::now().to_rfc3339();
 
         Self {
@@ -24,7 +24,7 @@ impl Updates {
         }
     }
 
-    pub fn get(file_id: &i32, snapshot_id: &i32, conn: &Connection) -> Result<Vec<Vec<u8>>, Error> {
+    pub fn get(file_id: &i64, snapshot_id: &i64, conn: &Connection) -> Result<Vec<Vec<u8>>, Error> {
         let mut sql =
             conn.prepare("SELECT content FROM updates WHERE file_id=?1 AND snapshot_id=?2")?;
         let updates_iter = sql.query_map([&file_id, &snapshot_id], |row| {

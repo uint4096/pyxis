@@ -1,20 +1,12 @@
 use std::sync::Arc;
 
 use axum::{extract::State, http::StatusCode, Extension, Json};
-use pyxis_db::dynamo_client::Dynamo;
-use serde::Deserialize;
+use pyxis_db::{dynamo_client::Dynamo, payload::UpdateWritePayload};
 
 use crate::database::{
     token_repository::Claims,
     updates_repository::{Update, UpdateRepository},
 };
-
-#[derive(Deserialize)]
-pub struct UpdateWritePayload {
-    payload: String,
-    file_id: i64,
-    snapshot_id: i64,
-}
 
 #[axum_macros::debug_handler]
 pub async fn updates_write(
