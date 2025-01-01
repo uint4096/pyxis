@@ -3,10 +3,11 @@ use reqwest::{Client, Error, Response};
 
 use super::sync_writer::SyncWriter;
 
-pub struct UpdateWriter;
+pub struct UpdateWriter {}
 
 impl SyncWriter for UpdateWriter {
     async fn write(
+        &self,
         client: &Client,
         queue_element: &ListenerQueue,
         token: String,

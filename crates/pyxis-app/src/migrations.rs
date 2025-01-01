@@ -3,6 +3,7 @@ mod directories;
 mod files;
 mod listener_queue;
 mod snapshots;
+mod tracker;
 mod updates;
 mod workspaces;
 
@@ -14,6 +15,7 @@ use files::FilesMigration;
 use listener_queue::ListenerQueueMigration;
 use rusqlite::{types::ToSqlOutput, Error, Row, ToSql, Transaction};
 use snapshots::SnapshotsMigration;
+use tracker::TrackerMigration;
 use updates::UpdatesMigration;
 use workspaces::WorkspaceMigration;
 
@@ -215,6 +217,9 @@ pub fn run_config_migrations(database: &mut Database) -> Result<(), Error> {
             }),
             Box::new(ConfigurationMigration {
                 name: String::from("configuration_migration"),
+            }),
+            Box::new(TrackerMigration {
+                name: String::from("tracker_migration"),
             }),
         ]),
     };

@@ -1,6 +1,6 @@
 mod writer;
 
-use pyxis_db::{database::Database, dynamo_client::Dynamo};
+use pyxis_db::database::Database;
 use rusqlite::Error;
 use sync_worker::sync_worker;
 

@@ -24,7 +24,7 @@ pub async fn sync_worker(conn: &Connection) -> Result<(), Error> {
         let config = Configuration::get(conn)?;
         let queue_element = ListenerQueue::dequeue(conn)?;
 
-        if config.user_token.is_none() {
+        if config.user_token.is_none() || config.device_id.is_none() {
             //@todo: handle expired tokens
             sleep(Duration::from_secs(sleep_duration));
             sleep_duration += sleep_duration;
@@ -32,12 +32,28 @@ pub async fn sync_worker(conn: &Connection) -> Result<(), Error> {
         }
 
         let success = if queue_element.source == Source::Update {
-            UpdateWriter::write(&client, &queue_element, config.user_token.unwrap()).await.is_err()
+            let update_writer = UpdateWriter {};
+            update_writer
+                .write(&client, &queue_element, config.user_token.unwrap())
+                .await
+                .is_err()
         } else {
-            let res =
-                DocumentWriter::write(&client, &queue_element, config.user_token.unwrap()).await;
+            let document_writer = DocumentWriter {
+                conn: &conn,
+                device_id: config.device_id.unwrap(),
+            };
+
+            let res = document_writer
+                .write(&client, &queue_element, config.user_token.unwrap())
+                .await;
             let is_err = res.is_err();
-            DocumentWriter::post_write(res.unwrap()).await?;
+            DocumentWriter::post_write(
+                &conn,
+                res.unwrap(),
+                config.device_id.unwrap(),
+                queue_element.source.clone(),
+            )
+            .await?;
             is_err
         };
 

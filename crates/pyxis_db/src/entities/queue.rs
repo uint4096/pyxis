@@ -3,7 +3,7 @@ use std::str::FromStr;
 use rusqlite::{Connection, Error};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum Source {
     Workspace,
     Directory,
