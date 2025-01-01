@@ -9,7 +9,7 @@ pub enum Source {
     Directory,
     File,
     Snapshot,
-    Update
+    Update,
 }
 
 impl FromStr for Source {
@@ -17,12 +17,12 @@ impl FromStr for Source {
 
     fn from_str(input: &str) -> Result<Source, Self::Err> {
         match input {
-            "workspaces"  => Ok(Source::Workspace),
+            "workspaces" => Ok(Source::Workspace),
             "directories" => Ok(Source::Directory),
             "files" => Ok(Source::File),
             "snapshots" => Ok(Source::Snapshot),
             "updates" => Ok(Source::Update),
-            _      => Err(()),
+            _ => Err(()),
         }
     }
 }
@@ -34,7 +34,7 @@ impl ToString for Source {
             Source::File => String::from("files"),
             Source::Directory => String::from("directories"),
             Source::Snapshot => String::from("snapshots"),
-            Source::Update => String::from("updates")
+            Source::Update => String::from("updates"),
         }
     }
 }
@@ -71,7 +71,12 @@ impl ListenerQueue {
 
         conn.execute(
             insert_sql,
-            ("init", &self.source.to_string(), &self.operation, &self.payload),
+            (
+                "init",
+                &self.source.to_string(),
+                &self.operation,
+                &self.payload,
+            ),
         )?;
 
         Ok(())
@@ -88,7 +93,8 @@ impl ListenerQueue {
             Ok(ListenerQueue {
                 id: row.get(0)?,
                 status: row.get(1)?,
-                source: Source::from_str(&source_str).expect("Failed to convert source from string!"),
+                source: Source::from_str(&source_str)
+                    .expect("Failed to convert source from string!"),
                 operation: row.get(3)?,
                 payload: row.get(4)?,
             })

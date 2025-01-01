@@ -3481,6 +3481,7 @@ dependencies = [
  "pwhash",
  "pyxis_db",
  "serde",
+ "serde_json",
  "serde_with",
  "tokio",
  "uuid",
