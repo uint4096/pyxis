@@ -1,4 +1,4 @@
-use std::{thread::sleep, time::Duration};
+use std::{cmp::min, thread::sleep, time::Duration};
 
 use pyxis_db::entities::{
     config::Configuration,
@@ -10,60 +10,75 @@ use crate::writer::{
     document_writer::DocumentWriter, sync_writer::SyncWriter, update_writer::UpdateWriter,
 };
 
+const MAX_SLEEP_DURATION: u64 = 300;
+
 pub async fn sync_worker(conn: &Connection) -> Result<(), Error> {
     let client = reqwest::Client::new();
     let mut sleep_duration = 30;
 
     loop {
-        sleep_duration = if sleep_duration > 300 {
-            300
-        } else {
-            sleep_duration
-        };
+        sleep_duration = min(sleep_duration, MAX_SLEEP_DURATION);
 
         let config = Configuration::get(conn)?;
-        let queue_element = ListenerQueue::dequeue(conn)?;
-
-        if config.user_token.is_none() || config.device_id.is_none() {
-            //@todo: handle expired tokens
-            sleep(Duration::from_secs(sleep_duration));
-            sleep_duration += sleep_duration;
-            continue;
-        }
-
-        let success = if queue_element.source == Source::Update {
-            let update_writer = UpdateWriter {};
-            update_writer
-                .write(&client, &queue_element, config.user_token.unwrap())
-                .await
-                .is_err()
-        } else {
-            let document_writer = DocumentWriter {
-                conn: &conn,
-                device_id: config.device_id.unwrap(),
-            };
-
-            let res = document_writer
-                .write(&client, &queue_element, config.user_token.unwrap())
-                .await;
-
-            let is_err = res.is_err();
-            DocumentWriter::post_write(
-                &conn,
-                res.unwrap(),
-                config.device_id.unwrap(),
-                queue_element.source.clone(),
-            )
-            .await?;
-            is_err
+        let queue_element = match ListenerQueue::dequeue(conn) {
+            Ok(elem) => elem,
+            Err(Error::QueryReturnedNoRows) => {
+                continue;
+            }
+            Err(e) => {
+                println!("Failed to dequeue. Error: {}", e);
+                sleep(Duration::from_secs(sleep_duration));
+                sleep_duration *= 2;
+                continue;
+            }
         };
 
-        if success {
-            queue_element.remove(conn)?;
-        } else {
-            queue_element.requeue(conn)?;
-            sleep(Duration::from_secs(sleep_duration));
-            sleep_duration += sleep_duration;
+        let (user_token, device_id) = match (config.user_token, config.device_id) {
+            (Some(token), Some(id)) => (token, id),
+            _ => {
+                sleep(Duration::from_secs(sleep_duration));
+                sleep_duration *= 2;
+                continue;
+            }
+        };
+
+        let processing_result: Result<(), Error> = match queue_element.source {
+            Source::Update => {
+                let _ = UpdateWriter {}
+                    .write(&client, &queue_element, user_token)
+                    .await;
+
+                Ok(())
+            }
+            _ => {
+                let document_writer = DocumentWriter { conn, device_id };
+
+                let write_result = document_writer
+                    .write(&client, &queue_element, user_token)
+                    .await;
+
+                let _ = DocumentWriter::post_write(
+                    conn,
+                    write_result.unwrap(),
+                    device_id,
+                    queue_element.source.clone(),
+                )
+                .await?;
+
+                Ok(())
+            }
+        };
+
+        match processing_result {
+            Ok(_) => {
+                queue_element.remove(conn)?;
+                sleep_duration = 30;
+            }
+            Err(_) => {
+                queue_element.requeue(conn)?;
+                sleep(Duration::from_secs(sleep_duration));
+                sleep_duration *= 2;
+            }
         }
     }
 }

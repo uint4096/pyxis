@@ -92,11 +92,13 @@ impl ListenerQueue {
 
     pub fn dequeue(conn: &Connection) -> Result<ListenerQueue, Error> {
         let mut sql = conn.prepare(
-            "SELECT id, status, source, operation, file_id, snapshot_id payload FROM listener_queue ORDER BY ROWID ASC LIMIT 1 WHERE status in ('failed', 'init')",
+            "SELECT id, status, source, operation, payload, file_id, snapshot_id payload FROM listener_queue WHERE status in ('failed', 'init') ORDER BY ROWID ASC LIMIT 1",
         )?;
 
         let entry = sql.query_row([], |row| -> Result<ListenerQueue, Error> {
             let source_str: String = row.get(2)?;
+            let file_id: Option<i64> = row.get(5)?;
+            let snapshot_id: Option<i64> = row.get(6)?;
 
             Ok(ListenerQueue {
                 id: row.get(0)?,
@@ -105,8 +107,8 @@ impl ListenerQueue {
                     .expect("Failed to convert source from string!"),
                 operation: row.get(3)?,
                 payload: row.get(4)?,
-                file_id: row.get(5)?,
-                snapshot_id: row.get(6)?,
+                file_id,
+                snapshot_id,
             })
         })?;
 
@@ -116,7 +118,7 @@ impl ListenerQueue {
                 (&id,),
             )?;
 
-            if updated_count != 0 {
+            if updated_count == 0 {
                 println!("Failed to dequeue! Already picked.");
                 return Err(Error::QueryReturnedNoRows);
             }

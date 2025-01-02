@@ -35,18 +35,30 @@ impl<'a> SyncWriter for DocumentWriter<'a> {
             [Source::Directory, Source::File, Source::Workspace].to_vec()
         };
 
-        let last_record = Tracker::get(
-            self.conn,
-            sources,
-            self.device_id,
-        )
-        .expect("Failed to get last sync record!");
+        let last_record = match Tracker::get(self.conn, sources, self.device_id) {
+            Ok(record) => record,
+            Err(rusqlite::Error::QueryReturnedNoRows) => Tracker {
+                record_id: 0,
+                device_id: self.device_id,
+                id: None,
+                source: queue_element.source.clone(),
+            },
+            Err(e) => {
+                println!("Error while trying to get tracked records {}", e);
+                Tracker {
+                    record_id: 0,
+                    device_id: self.device_id,
+                    id: None,
+                    source: queue_element.source.clone(),
+                }
+            }
+        };
 
         let update_payload = DocumentWritePayload {
             payload: queue_element.payload.clone(),
             record_id: last_record.record_id + 1,
             operation: queue_element.operation.clone(),
-            source: queue_element.source.to_string()
+            source: queue_element.source.to_string(),
         };
 
         //@todo use env vars

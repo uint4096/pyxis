@@ -68,7 +68,7 @@ impl Files {
                 f.created_at, \
                 f.updated_at, \
                 f.links, \
-                f.tags \
+                f.tags, \
                 d.uid as dir_uid \
                 FROM files f \
                 INNER JOIN workspaces w ON f.workspace_id = w.id \

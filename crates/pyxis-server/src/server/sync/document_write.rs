@@ -28,7 +28,7 @@ pub async fn document_write(
         record_id,
         payload,
         operation,
-        source
+        source,
     } = document;
 
     let doc = Document {

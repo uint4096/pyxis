@@ -32,7 +32,7 @@ impl Tracker {
         let placeholders: Vec<String> = (0..sources.len()).map(|i| format!("?{}", i + 2)).collect();
         let placeholders = placeholders.join(",");
 
-        let query = format!("SELECT (id, record_id, device_id, source) FROM tracker WHERE device_id=?1 AND source in ({}) ORDER_BY record_id DESC LIMIT 1", placeholders);
+        let query = format!("SELECT id, record_id, device_id, source FROM tracker WHERE device_id=?1 AND source in ({}) ORDER BY record_id DESC LIMIT 1", placeholders);
         let mut stmt = conn.prepare(&query)?;
 
         let mut params: Vec<Box<dyn ToSql>> = vec![Box::new(device_id.to_string())];
