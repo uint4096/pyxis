@@ -3,6 +3,7 @@
 mod handlers;
 mod hooks;
 mod migrations;
+mod sidecar;
 
 use handlers::config::{add_user_data, get_config, remove_user_data};
 use handlers::directories::{create_dir, delete_dir, list_dirs, update_dir};
@@ -13,8 +14,8 @@ use handlers::workspaces::{create_workspace, delete_workspace, list_workspaces, 
 use hooks::content_hook;
 use migrations::{run_config_migrations, run_migrations};
 use pyxis_db::database::{ConfigDatabase, Database};
+use sidecar::start_sync_worker;
 use tauri::{App, Manager};
-
 fn main() {
     let mut database = Database::create_connection("pyxis");
 
@@ -38,6 +39,7 @@ fn main() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_shell::init())
         .manage(database)
         .manage(config_database)
         .invoke_handler(tauri::generate_handler![
@@ -67,6 +69,7 @@ fn main() {
                 .expect("Failed to get main window!");
             // Doing this in tauri config does not allow super + arrow keys to work
             let _ = window.maximize();
+            start_sync_worker(app, window);
             // window.open_devtools();
             Ok(())
         })

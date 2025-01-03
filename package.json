@@ -5,10 +5,12 @@
   "main": "index.js",
   "scripts": {
     "start:auth": "cargo run -p pyxis-auth",
+    "start:sync": "cargo run -p pyxis_sync",
+    "build:sync": "cargo build -p pyxis-sync --release",
     "build:client": "pnpm --filter 'client' build",
     "start:client": "pnpm --filter 'client' dev",
-    "start:app": "pnpm tauri dev",
-    "build:app": "pnpm tauri build",
+    "start:app": "pnpm build:sync && pnpm tauri dev",
+    "build:app": "pnpm build:sync && pnpm tauri build",
   	"tauri": "tauri"
   },
   "keywords": [],
