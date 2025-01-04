@@ -13,6 +13,7 @@ use crate::database::{
 pub struct SignInPayload {
     password: String,
     username: String,
+    device_id: String
 }
 
 #[axum_macros::debug_handler]
@@ -20,12 +21,12 @@ pub async fn sign_in(
     State(db): State<Arc<Dynamo>>,
     Json(user): Json<SignInPayload>,
 ) -> Result<Json<UserToken>, StatusCode> {
-    let SignInPayload { password, username } = user;
+    let SignInPayload { password, username, device_id} = user;
 
     let user_repository = UserRepository::new(db.connection.clone());
     let token_repository = TokenRepository::new(db.connection.clone());
 
-    let user = match user_repository.verify(username, password).await {
+    let user = match user_repository.verify(username, password, device_id).await {
         Ok(user) => user,
         Err(e) => {
             println!("Error while verifying password: {}", e);
