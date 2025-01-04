@@ -11,6 +11,7 @@ pub struct Document {
     pub sk: i64,
     pub payload: String,
     pub operation: String,
+    pub source: Source
 }
 
 pub struct DocumentRepository {
@@ -22,13 +23,14 @@ impl DocumentRepository {
         Self { client }
     }
 
-    pub async fn create(&self, document: Document, source: Source) -> Result<i64, Box<dyn Error>> {
+    pub async fn create(&self, document: Document) -> Result<i64, Box<dyn Error>> {
         let timestamp = Utc::now().timestamp();
         let Document {
             pk,
             sk,
             payload,
             operation,
+            source
         } = document;
 
         let pk_av = AttributeValue::S(pk);
@@ -36,6 +38,7 @@ impl DocumentRepository {
         let payload_av = AttributeValue::S(payload);
         let op_av = AttributeValue::S(operation);
         let timestamp_av = AttributeValue::N(timestamp.to_string());
+        let source_av = AttributeValue::S(source.to_string());
 
         let table_name = if source == Source::Snapshot {
             "snapshots_sync"
@@ -51,6 +54,7 @@ impl DocumentRepository {
             .item("payload", payload_av)
             .item("operation", op_av)
             .item("timestamp", timestamp_av)
+            .item("source", source_av)
             .send()
             .await?;
 
