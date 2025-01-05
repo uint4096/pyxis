@@ -1,11 +1,11 @@
 use std::sync::Arc;
 
 use super::{
-    auth::{sign_in::sign_in, sign_out::sign_out, sign_up::sign_up},
+    auth::{get_devices::get_devices, sign_in::sign_in, sign_out::sign_out, sign_up::sign_up},
     middlewares::check_token,
     sync::{document_write::document_write, updates_write::updates_write},
 };
-use axum::{handler::Handler, middleware, routing::post, Router};
+use axum::{handler::Handler, middleware, routing::{get, post}, Router};
 use pyxis_db::dynamo_client::Dynamo;
 
 pub fn create_route(connection: Arc<Dynamo>) -> Router {
@@ -15,6 +15,10 @@ pub fn create_route(connection: Arc<Dynamo>) -> Router {
         .route(
             "/signout",
             post(sign_out.layer(middleware::from_fn(check_token))),
+        )
+        .route(
+            "/devices",
+            get(get_devices.layer(middleware::from_fn(check_token))),
         );
 
     let sync_router = Router::new()
