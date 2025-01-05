@@ -1,4 +1,5 @@
 mod config;
+mod devices;
 mod directories;
 mod files;
 mod listener_queue;
@@ -10,6 +11,7 @@ mod workspaces;
 use std::{collections::HashMap, fmt::Debug, rc::Rc};
 
 use config::ConfigurationMigration;
+use devices::DevicesMigration;
 use directories::DirectoriesMigration;
 use files::FilesMigration;
 use listener_queue::ListenerQueueMigration;
@@ -217,6 +219,9 @@ pub fn run_config_migrations(database: &mut Database) -> Result<(), Error> {
             }),
             Box::new(ConfigurationMigration {
                 name: String::from("configuration_migration"),
+            }),
+            Box::new(DevicesMigration {
+                name: String::from("devices_migration"),
             }),
             Box::new(TrackerMigration {
                 name: String::from("tracker_migration"),

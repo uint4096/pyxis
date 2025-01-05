@@ -4,3 +4,4 @@ pub mod files;
 pub mod snapshots;
 pub mod updates;
 pub mod workspaces;
+pub mod devices;

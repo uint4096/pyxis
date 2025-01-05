@@ -6,6 +6,7 @@ mod migrations;
 mod sidecar;
 
 use handlers::config::{add_user_data, get_config, remove_user_data};
+use handlers::devices::{add_devices, list_devices};
 use handlers::directories::{create_dir, delete_dir, list_dirs, update_dir};
 use handlers::files::{create_file, delete_file, list_files, update_file};
 use handlers::snapshots::{get_snapshot, update_snapshot};
@@ -16,6 +17,7 @@ use migrations::{run_config_migrations, run_migrations};
 use pyxis_db::database::{ConfigDatabase, Database};
 use sidecar::start_sync_worker;
 use tauri::{App, Manager};
+
 fn main() {
     let mut database = Database::create_connection("pyxis");
 
@@ -61,7 +63,9 @@ fn main() {
             add_user_data,
             remove_user_data,
             get_updates,
-            insert_updates
+            insert_updates,
+            add_devices,
+            list_devices
         ])
         .setup(|app: &mut App| {
             let window = app

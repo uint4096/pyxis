@@ -3,15 +3,43 @@ import "./App.css";
 import { Explorer } from "./pages/explorer";
 import "react-toastify/dist/ReactToastify.css";
 import { ConfigurationTray } from "./pages/configuration";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { useConfig } from "./store";
+import { ky } from "./utils";
+import { DeviceIds } from "./ffi";
+import { useDevices } from "./store/useDevices";
 
 function App() {
-  const { setConfig } = useConfig();
+  const { setConfig, config } = useConfig();
+  const { create: addDevices } = useDevices();
+
+  const initDevices = useCallback(
+    async (token: string) => {
+      try {
+        const { devices } = await ky
+          .get<{ devices: DeviceIds }>("/auth/devices", {
+            headers: {
+              authorization: `Bearer ${token}`,
+            },
+          })
+          .json();
+
+        await addDevices(devices);
+      } catch (e) {
+        console.error("[Device] Init failed!");
+      }
+    },
+    [addDevices],
+  );
 
   useEffect(() => {
-    (async () => await setConfig())();
-  }, [setConfig]);
+    (async () => {
+      await setConfig();
+      if (config.userToken) {
+        await initDevices(config.userToken);
+      }
+    })();
+  }, [config.userToken, initDevices, setConfig]);
 
   return (
     <>

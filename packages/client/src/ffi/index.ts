@@ -4,3 +4,4 @@ export * from "./files";
 export * from "./snapshots";
 export * from "./config";
 export * from "./updates";
+export * from "./devices";
