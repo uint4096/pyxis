@@ -1,6 +1,11 @@
 import { invoke } from "./invoke";
 
-type Sources = "workspaces" | "directories" | "files" | "snapshots" | "updates";
+export type Sources =
+  | "workspaces"
+  | "directories"
+  | "files"
+  | "snapshots"
+  | "updates";
 
 type Args = {
   last_synced_record_id: { deviceId: string; sources: Array<Sources> };
