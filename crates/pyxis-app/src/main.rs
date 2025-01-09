@@ -10,6 +10,7 @@ use handlers::devices::{add_devices, list_devices};
 use handlers::directories::{create_dir, delete_dir, list_dirs, update_dir};
 use handlers::files::{create_file, delete_file, list_files, update_file};
 use handlers::snapshots::{get_snapshot, update_snapshot};
+use handlers::tracker::last_synced_record_id;
 use handlers::updates::{get_updates, insert_updates};
 use handlers::workspaces::{create_workspace, delete_workspace, list_workspaces, update_workspace};
 use hooks::content_hook;
@@ -65,7 +66,8 @@ fn main() {
             get_updates,
             insert_updates,
             add_devices,
-            list_devices
+            list_devices,
+            last_synced_record_id
         ])
         .setup(|app: &mut App| {
             let window = app
