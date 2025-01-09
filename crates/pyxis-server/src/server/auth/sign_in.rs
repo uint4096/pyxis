@@ -13,7 +13,7 @@ use crate::database::{
 pub struct SignInPayload {
     password: String,
     username: String,
-    device_id: String
+    device_id: String,
 }
 
 #[axum_macros::debug_handler]
@@ -21,7 +21,11 @@ pub async fn sign_in(
     State(db): State<Arc<Dynamo>>,
     Json(user): Json<SignInPayload>,
 ) -> Result<Json<UserToken>, StatusCode> {
-    let SignInPayload { password, username, device_id} = user;
+    let SignInPayload {
+        password,
+        username,
+        device_id,
+    } = user;
 
     let user_repository = UserRepository::new(db.connection.clone());
     let token_repository = TokenRepository::new(db.connection.clone());

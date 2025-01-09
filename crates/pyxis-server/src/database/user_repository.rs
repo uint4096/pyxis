@@ -93,12 +93,17 @@ impl UserRepository {
     pub async fn update_devices(
         &self,
         user_id: String,
-        device_ids: Vec<String>
+        device_ids: Vec<String>,
     ) -> Result<(), Box<dyn Error>> {
         let user_id_av = AttributeValue::S(user_id.to_string());
-        let device_id_av = AttributeValue::L(device_ids.into_iter().map(|d| AttributeValue::S(d.to_string())).collect());
+        let device_id_av = AttributeValue::L(
+            device_ids
+                .into_iter()
+                .map(|d| AttributeValue::S(d.to_string()))
+                .collect(),
+        );
 
-        self.client 
+        self.client
             .update_item()
             .table_name(TABLE_NAME)
             .condition_expression("#user_id = :user_id")
@@ -162,7 +167,7 @@ impl UserRepository {
             let users: Vec<UserWithPassword> = users.iter().map(|v| v.into()).collect();
             let devices: Vec<String> = users.into_iter().flat_map(|u| u.device_ids).collect();
 
-            return Ok(devices)
+            return Ok(devices);
         }
 
         Ok(Vec::new())
@@ -172,7 +177,7 @@ impl UserRepository {
         &self,
         username: String,
         password: String,
-        device_id: String
+        device_id: String,
     ) -> Result<Option<UserWithoutPassword>, Box<dyn Error>> {
         println!("Fetching user {}", username);
 
@@ -188,10 +193,19 @@ impl UserRepository {
             let verification = bcrypt::verify(password, &pwd_hash);
 
             let is_new_device = !device_ids.clone().into_iter().any(|e| e == device_id);
-            let device_ids = if is_new_device { device_ids.iter().chain(&[device_id.clone()]).cloned().collect() } else { device_ids };
+            let device_ids = if is_new_device {
+                device_ids
+                    .iter()
+                    .chain(&[device_id.clone()])
+                    .cloned()
+                    .collect()
+            } else {
+                device_ids
+            };
 
             if is_new_device {
-                self.update_devices(user_id.clone(), device_ids.clone()).await?;
+                self.update_devices(user_id.clone(), device_ids.clone())
+                    .await?;
             }
 
             if verification {

@@ -31,14 +31,13 @@ pub async fn document_write(
         source,
     } = document;
 
-    
     let source = Source::from_str(&source).expect("Failed to serialize source from string");
     let doc = Document {
         pk,
         sk: record_id,
         payload,
         operation,
-        source
+        source,
     };
 
     let write_response = document_repository.create(doc).await;

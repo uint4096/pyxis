@@ -1,9 +1,10 @@
-use std::{error::Error, sync::Arc};
+use std::{collections::HashMap, error::Error, str::FromStr, sync::Arc};
 
 use aws_sdk_dynamodb::{self as DynamoDB, types::AttributeValue};
 use chrono::Utc;
 use pyxis_db::entities::queue::Source;
 use serde::{Deserialize, Serialize};
+use serde_json::from_str;
 
 #[derive(Serialize, Deserialize)]
 pub struct Document {
@@ -11,7 +12,44 @@ pub struct Document {
     pub sk: i64,
     pub payload: String,
     pub operation: String,
-    pub source: Source
+    pub source: Source,
+}
+
+impl From<&HashMap<String, AttributeValue>> for Document {
+    fn from(value: &HashMap<String, AttributeValue>) -> Self {
+        Document {
+            pk: value
+                .get("pk")
+                .and_then(|v| v.as_s().ok())
+                .cloned()
+                .expect("pk should exist"),
+            sk: value
+                .get("sk")
+                .and_then(|v| v.as_n().ok())
+                .cloned()
+                .expect("sk should exist")
+                .parse::<i64>()
+                .unwrap(),
+            payload: value
+                .get("payload")
+                .and_then(|v| v.as_s().ok())
+                .cloned()
+                .expect("payload should exist"),
+            operation: value
+                .get("operation")
+                .and_then(|v| v.as_s().ok())
+                .cloned()
+                .expect("operation should exist"),
+            source: Source::from_str(
+                &value
+                    .get("source")
+                    .and_then(|v| v.as_s().ok())
+                    .cloned()
+                    .expect("source should exist"),
+            )
+            .unwrap(),
+        }
+    }
 }
 
 pub struct DocumentRepository {
@@ -30,7 +68,7 @@ impl DocumentRepository {
             sk,
             payload,
             operation,
-            source
+            source,
         } = document;
 
         let pk_av = AttributeValue::S(pk);
@@ -59,5 +97,41 @@ impl DocumentRepository {
             .await?;
 
         Ok(sk)
+    }
+
+    pub async fn list_by_record_id(
+        &self,
+        user_id: String,
+        device_id: String,
+        record_id: i64,
+        is_snapshot: bool,
+    ) -> Result<Vec<Document>, Box<dyn Error>> {
+        let table_name = if is_snapshot {
+            "snapshot_sync"
+        } else {
+            "documents_sync"
+        };
+
+        let records_iter = self
+            .client
+            .query()
+            .table_name(table_name)
+            .key_condition_expression("#pk = :pk AND #record_id > :record_id")
+            .expression_attribute_names("#record_id", "sk")
+            .expression_attribute_names("#pk", "pk")
+            .expression_attribute_values(":record_id", AttributeValue::N(record_id.to_string()))
+            .expression_attribute_values(
+                ":pk",
+                AttributeValue::S(format!("{}/{}", user_id, device_id)),
+            )
+            .send()
+            .await?;
+
+        let items = records_iter
+            .items
+            .expect("[Documents] Failed to get synced documents");
+        let records: Vec<Document> = items.iter().map(|v| v.into()).collect();
+
+        Ok(records)
     }
 }
