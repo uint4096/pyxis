@@ -75,3 +75,15 @@ pub fn update_workspace(
 
     None
 }
+
+#[tauri::command]
+pub fn get_workspace_id(name: String, database: State<Database>) -> Option<i64> {
+    match Workspace::get_by_name(&database.get_connection(), name) {
+        Ok(workspace_id) => Some(workspace_id),
+        Err(e) => {
+            eprintln!("[Workspaces] Failed to get id! Error: {e}");
+            None
+        }
+    }
+}
+

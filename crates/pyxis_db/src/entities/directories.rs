@@ -189,4 +189,19 @@ impl Directory {
 
         Ok(())
     }
+
+    pub fn get_by_path(conn: &Connection, path: String, workspace_uid: String) -> Result<i64, Error> {
+        let mut stmt = conn.prepare(&format!(
+            "SELECT \
+                d.id, \
+                FROM directories d \
+                INNER JOIN workspaces w ON d.workspace_id = w.id \
+                WHERE d.path = ?1 \
+                AND w.uid = ?2"
+        ))?;
+
+        stmt.query_row(&[&path, &workspace_uid], |row| -> Result<i64, Error> {
+            Ok(row.get(0)?)
+        })
+    }
 }

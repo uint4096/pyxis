@@ -116,4 +116,17 @@ impl Workspace {
 
         Ok(())
     }
+
+    pub fn get_by_name(conn: &Connection, name: String) -> Result<i64, Error> {
+        let mut stmt = conn.prepare(&format!(
+            "SELECT \
+                id, \
+                FROM workspaces \
+                WHERE w.name = ?1"
+        ))?;
+
+        stmt.query_row(&[&name], |row| -> Result<i64, Error> {
+            Ok(row.get(0)?)
+        })
+    }
 }

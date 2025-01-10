@@ -224,6 +224,21 @@ impl Files {
         Ok(())
     }
 
+    pub fn get_by_path(conn: &Connection, path: String, workspace_uid: String) -> Result<i64, Error> {
+        let mut stmt = conn.prepare(&format!(
+            "SELECT \
+                f.id, \
+                FROM files f \
+                INNER JOIN workspaces w ON f.workspace_id = w.id \
+                WHERE f.path = ?1 \
+                AND w.uid = ?2"
+        ))?;
+
+        stmt.query_row(&[&path, &workspace_uid], |row| -> Result<i64, Error> {
+            Ok(row.get(0)?)
+        })
+    }
+
     pub fn delete(uid: String, conn: &Connection) -> Result<(), Error> {
         let sql = "DELETE FROM files WHERE uid = (?1)";
         conn.execute(sql, (uid,))?;

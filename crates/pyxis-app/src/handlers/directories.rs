@@ -85,3 +85,18 @@ pub fn update_dir(
 
     None
 }
+
+#[tauri::command]
+pub fn get_directory_id(
+    path: String,
+    workspace_uid: String,
+    database: State<Database>,
+) -> Option<i64> {
+    match Directory::get_by_path(&database.get_connection(), path, workspace_uid) {
+        Ok(directory_id) => Some(directory_id),
+        Err(e) => {
+            eprintln!("[Directory] Failed to fetch id! Error: {e}");
+            None
+        }
+    }
+}
