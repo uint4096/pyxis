@@ -29,6 +29,10 @@ type Args = {
     links: Array<Link>;
     tags: Array<string>;
   };
+  get_file_id: {
+    path: string;
+    workspaceUid: string;
+  };
   delete_file: { uid: string };
   update_file: {
     uid: string;
@@ -86,6 +90,17 @@ export const getFiles = async (workspaceUid: string, dirUid?: string) => {
   } catch (e) {
     console.error("[File] Failed to fetch!", e);
     throw e;
+  }
+};
+
+export const getByPath = async (path: string, workspaceUid: string) => {
+  try {
+    return await invoke<Args, number | undefined>()("get_file_id", {
+      workspaceUid,
+      path,
+    });
+  } catch (e) {
+    console.error("[File] Failed to fetch by path!", e);
   }
 };
 

@@ -8,6 +8,7 @@ import {
   getSnapshot,
   insertUpdates,
   getUpdates,
+  getByPath,
 } from "../ffi";
 import type { StateCreator } from "zustand";
 import { toast } from "../utils";
@@ -44,6 +45,11 @@ export const fileSlice: StateCreator<
 
   selectedFile: undefined,
   doc: { snapshot: undefined, updates: [] },
+
+  isDuplicateFile: async (path, workspaceUid) => {
+    const fileId = await getByPath(path, workspaceUid);
+    return !!fileId;
+  },
 
   selectFile: async (file) => {
     if (!file?.id) {

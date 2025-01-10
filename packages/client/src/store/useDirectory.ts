@@ -1,4 +1,4 @@
-import { createDir, updateDir, getDirs, deleteDir } from "../ffi";
+import { createDir, updateDir, getDirs, deleteDir, getByPath } from "../ffi";
 import type { StateCreator } from "zustand";
 import type { DirectoryState, DirWithChildren, FileState } from "./types";
 
@@ -55,5 +55,10 @@ export const dirSlice: StateCreator<
     await updateDir(uid, name, workspace_uid, path, parent_uid);
 
     await get().createTree(directory.workspace_uid);
+  },
+
+  isDuplicateDirectory: async (path, workspaceUid) => {
+    const directoryId = await getByPath(path, workspaceUid);
+    return !!directoryId;
   },
 });

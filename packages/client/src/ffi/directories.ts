@@ -14,6 +14,7 @@ export type Directory = {
 
 type Args = {
   list_dirs: { workspaceUid: string; parentUid?: string };
+  get_directory_id: { workspaceUid: string; path: string };
   create_dir: {
     name: string;
     workspaceUid: string;
@@ -87,6 +88,17 @@ export const deleteDir = async (uid: string) => {
   } catch (e) {
     console.error("[Directory] Failed to delete!", e);
     toast("Failed to delete directory!");
+  }
+};
+
+export const getByPath = async (path: string, workspaceUid: string) => {
+  try {
+    return await invoke<Args, number | undefined>()("get_directory_id", {
+      workspaceUid,
+      path,
+    });
+  } catch (e) {
+    console.error("[Directory] Failed to fetch by path!", e);
   }
 };
 

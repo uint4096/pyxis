@@ -3,6 +3,7 @@ import {
   deleteWorkspace,
   getWorkspaces,
   updateWorkspace,
+  getByName,
   type Workspace,
 } from "../ffi";
 import { create } from "zustand";
@@ -15,6 +16,7 @@ interface WorkspaceState {
   delete: (uid: string) => Promise<void>;
   list: () => Promise<Array<Workspace>>;
   updateSelection: (workspace: Workspace) => Promise<void>;
+  isDuplicate: (name: string) => Promise<boolean>;
 }
 
 export const useWorkspace = create<WorkspaceState>((set, get) => ({
@@ -67,5 +69,10 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
     await updateWorkspace(workspace.uid, workspace.name, true);
     const { list } = get();
     await list();
+  },
+
+  isDuplicate: async (name) => {
+    const workspaceId = await getByName(name);
+    return !!workspaceId;
   },
 }));

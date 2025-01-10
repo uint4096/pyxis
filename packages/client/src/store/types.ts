@@ -5,6 +5,10 @@ export type ArrayElement<T> = T extends Array<infer X> ? X : never;
 export type DirWithChildren = Directory & { children: Array<DirWithChildren> };
 
 export interface DirectoryState {
+  isDuplicateDirectory: (
+    path: string,
+    workspaceUid: string,
+  ) => Promise<boolean>;
   createDir: (
     name: string,
     workspaceUid: string,
@@ -29,6 +33,7 @@ export interface FileState {
   doc: { snapshot: Snapshot | undefined; updates: Array<Uint8Array> };
   selectFile: (file: File | undefined) => void;
   findNode: (uid: string, tree?: Array<Node>) => Node | undefined;
+  isDuplicateFile: (path: string, workspaceUid: string) => Promise<boolean>;
   createFile: (
     title: string,
     workspaceUid: string,

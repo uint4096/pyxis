@@ -15,6 +15,7 @@ type Args = {
   create_workspace: { name: string; selected: boolean };
   delete_workspace: { uid: string };
   update_workspace: { uid: string; name: string; selected: boolean };
+  get_workspace_id: { name: string };
 };
 
 export const createWorkspace = async (name: string, selected: boolean) => {
@@ -93,5 +94,15 @@ export const updateWorkspace = async (
   } catch (e) {
     console.error("[Workspace] Failed to update!", e);
     toast("Failed to update workspace!");
+  }
+};
+
+export const getByName = async (name: string) => {
+  try {
+    return await invoke<Args, number>()("get_workspace_id", {
+      name,
+    });
+  } catch (e) {
+    console.error("[Workspace] Failed to get by name!", e);
   }
 };
