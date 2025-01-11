@@ -69,7 +69,17 @@ export const fileSlice: StateCreator<
     });
   },
 
-  createFile: async (title, workspaceUid, path, links, tags, dirUid) => {
+  createFile: async (
+    title,
+    workspaceUid,
+    path,
+    links,
+    tags,
+    dirUid,
+    uid?: string,
+    createdAt?: string,
+    updatedAt?: string,
+  ) => {
     const file = await createFile(
       title,
       workspaceUid,
@@ -77,6 +87,9 @@ export const fileSlice: StateCreator<
       links,
       tags,
       dirUid,
+      uid,
+      createdAt,
+      updatedAt,
     );
     if (!file) {
       return;

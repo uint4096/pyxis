@@ -12,17 +12,32 @@ export type Workspace = {
 
 type Args = {
   list_workspaces: never;
-  create_workspace: { name: string; selected: boolean };
+  create_workspace: {
+    name: string;
+    selected: boolean;
+    uid?: string;
+    created_at?: string;
+    updated_at?: string;
+  };
   delete_workspace: { uid: string };
   update_workspace: { uid: string; name: string; selected: boolean };
   get_workspace_id: { name: string };
 };
 
-export const createWorkspace = async (name: string, selected: boolean) => {
+export const createWorkspace = async (
+  name: string,
+  selected: boolean,
+  uid?: string,
+  createdAt?: string,
+  updatedAt?: string,
+) => {
   try {
     const workspace = await invoke<Args, Workspace>()("create_workspace", {
       name,
       selected,
+      uid,
+      created_at: createdAt,
+      updated_at: updatedAt,
     });
 
     if (!workspace) {

@@ -20,6 +20,9 @@ type Args = {
     workspaceUid: string;
     path: string;
     parentUid?: string;
+    uid?: string;
+    created_at?: string;
+    updated_at?: string;
   };
   delete_dir: { uid: string };
   update_dir: {
@@ -36,6 +39,9 @@ export const createDir = async (
   workspaceUid: string,
   path: string,
   parentUid?: string,
+  uid?: string,
+  createdAt?: string,
+  updatedAt?: string,
 ) => {
   try {
     const directory = await invoke<Args, Directory | null>()("create_dir", {
@@ -43,6 +49,9 @@ export const createDir = async (
       path,
       workspaceUid,
       parentUid,
+      uid,
+      created_at: createdAt,
+      updated_at: updatedAt,
     });
 
     if (!directory) {

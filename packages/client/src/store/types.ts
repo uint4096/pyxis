@@ -14,6 +14,9 @@ export interface DirectoryState {
     workspaceUid: string,
     path: string,
     parentUid?: string,
+    uid?: string,
+    createdAt?: string,
+    updatedAt?: string,
   ) => Promise<Directory | undefined>;
   buildDir: (
     workspaceUid: string,
@@ -41,6 +44,9 @@ export interface FileState {
     links: Array<Link>,
     tags: Array<string>,
     dirUid?: string,
+    uid?: string,
+    createdAt?: string,
+    updatedAt?: string,
   ) => Promise<File | undefined>;
 
   deleteFile: (file: File) => Promise<void>;

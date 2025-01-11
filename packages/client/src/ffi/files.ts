@@ -28,6 +28,9 @@ type Args = {
     dirUid?: string;
     links: Array<Link>;
     tags: Array<string>;
+    uid?: string;
+    created_at?: string;
+    updated_at?: string;
   };
   get_file_id: {
     path: string;
@@ -52,6 +55,9 @@ export const createFile = async (
   links: Array<Link>,
   tags: Array<string>,
   dirUid?: string,
+  uid?: string,
+  createdAt?: string,
+  updatedAt?: string,
 ) => {
   try {
     const file = await invoke<Args, File | null>()("create_file", {
@@ -61,6 +67,9 @@ export const createFile = async (
       links,
       tags,
       dirUid,
+      uid,
+      created_at: createdAt,
+      updated_at: updatedAt,
     });
 
     if (!file) {
@@ -93,7 +102,7 @@ export const getFiles = async (workspaceUid: string, dirUid?: string) => {
   }
 };
 
-export const getByPath = async (path: string, workspaceUid: string) => {
+export const getFileByPath = async (path: string, workspaceUid: string) => {
   try {
     return await invoke<Args, number | undefined>()("get_file_id", {
       workspaceUid,

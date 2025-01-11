@@ -8,8 +8,24 @@ export const dirSlice: StateCreator<
   [],
   DirectoryState
 > = (_, get) => ({
-  createDir: async (name, workspaceUid, path, parentUid) => {
-    const dirs = await createDir(name, workspaceUid, path, parentUid);
+  createDir: async (
+    name,
+    workspaceUid,
+    path,
+    parentUid,
+    uid,
+    createdAt,
+    updatedAt,
+  ) => {
+    const dirs = await createDir(
+      name,
+      workspaceUid,
+      path,
+      parentUid,
+      uid,
+      createdAt,
+      updatedAt,
+    );
     if (!dirs) {
       return;
     }
