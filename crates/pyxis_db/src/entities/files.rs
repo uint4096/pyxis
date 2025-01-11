@@ -40,18 +40,21 @@ impl Files {
         links: Vec<Link>,
         workspace_uid: String,
         id: Option<i32>,
+        created_at: Option<String>,
+        updated_at: Option<String>,
+        uid: Option<String>,
     ) -> Self {
         let current_time = Utc::now().to_rfc3339();
 
         Self {
             id,
-            uid: nanoid!(10),
+            uid: uid.or(Some(nanoid!(10))).unwrap(),
             dir_uid,
             workspace_uid,
             path,
             title,
-            created_at: String::from(&current_time),
-            updated_at: String::from(&current_time),
+            created_at: created_at.or(Some(String::from(&current_time))).unwrap(),
+            updated_at: updated_at.or(Some(String::from(&current_time))).unwrap(),
             links,
             tags,
         }
@@ -224,7 +227,11 @@ impl Files {
         Ok(())
     }
 
-    pub fn get_by_path(conn: &Connection, path: String, workspace_uid: String) -> Result<i64, Error> {
+    pub fn get_by_path(
+        conn: &Connection,
+        path: String,
+        workspace_uid: String,
+    ) -> Result<i64, Error> {
         let mut stmt = conn.prepare(&format!(
             "SELECT \
                 f.id, \

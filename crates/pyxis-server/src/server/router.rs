@@ -3,7 +3,9 @@ use std::sync::Arc;
 use super::{
     auth::{get_devices::get_devices, sign_in::sign_in, sign_out::sign_out, sign_up::sign_up},
     middlewares::check_token,
-    sync::{document_list::document_list, document_write::document_write, updates_write::updates_write},
+    sync::{
+        document_list::document_list, document_write::document_write, updates_write::updates_write,
+    },
 };
 use axum::{
     handler::Handler,

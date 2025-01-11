@@ -13,9 +13,12 @@ pub fn create_file(
     workspace_uid: String,
     links: Vec<Link>,
     tags: Vec<String>,
+    created_at: Option<String>,
+    updated_at: Option<String>,
+    uid: Option<String>,
     database: State<Database>,
 ) -> Option<Files> {
-    let file = Files::new(dir_uid, path, title, tags, links, workspace_uid, None);
+    let file = Files::new(dir_uid, path, title, tags, links, workspace_uid, None, created_at, updated_at, uid);
 
     match file.create(&database.get_connection()) {
         Ok(_) => Some(file),
@@ -95,11 +98,7 @@ pub fn update_file(
 }
 
 #[tauri::command]
-pub fn get_file_id(
-    path: String,
-    workspace_uid: String,
-    database: State<Database>,
-) -> Option<i64> {
+pub fn get_file_id(path: String, workspace_uid: String, database: State<Database>) -> Option<i64> {
     match Files::get_by_path(&database.get_connection(), path, workspace_uid) {
         Ok(file_id) => Some(file_id),
         Err(e) => {

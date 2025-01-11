@@ -12,7 +12,9 @@ use handlers::files::{create_file, delete_file, get_file_id, list_files, update_
 use handlers::snapshots::{get_snapshot, update_snapshot};
 use handlers::tracker::last_synced_record_id;
 use handlers::updates::{get_updates, insert_updates};
-use handlers::workspaces::{create_workspace, delete_workspace, get_workspace_id, list_workspaces, update_workspace};
+use handlers::workspaces::{
+    create_workspace, delete_workspace, get_workspace_id, list_workspaces, update_workspace,
+};
 use hooks::content_hook;
 use migrations::{run_config_migrations, run_migrations};
 use pyxis_db::database::{ConfigDatabase, Database};

@@ -13,16 +13,23 @@ pub struct Workspace {
 }
 
 impl Workspace {
-    pub fn new(name: String, selected: bool, id: Option<i32>) -> Self {
+    pub fn new(
+        name: String,
+        selected: bool,
+        id: Option<i32>,
+        created_at: Option<String>,
+        updated_at: Option<String>,
+        uid: Option<String>,
+    ) -> Self {
         let current_time = Utc::now().to_rfc3339();
 
         Self {
             id,
             selected,
-            uid: nanoid!(10),
+            uid: uid.or(Some(nanoid!(10))).unwrap(),
             name,
-            created_at: String::from(&current_time),
-            updated_at: String::from(&current_time),
+            created_at: created_at.or(Some(String::from(&current_time))).unwrap(),
+            updated_at: updated_at.or(Some(String::from(&current_time))).unwrap(),
         }
     }
 
@@ -125,8 +132,6 @@ impl Workspace {
                 WHERE w.name = ?1"
         ))?;
 
-        stmt.query_row(&[&name], |row| -> Result<i64, Error> {
-            Ok(row.get(0)?)
-        })
+        stmt.query_row(&[&name], |row| -> Result<i64, Error> { Ok(row.get(0)?) })
     }
 }

@@ -6,9 +6,12 @@ use tauri::State;
 pub fn create_workspace(
     name: String,
     selected: bool,
+    created_at: Option<String>,
+    updated_at: Option<String>,
+    uid: Option<String>,
     database: State<Database>,
 ) -> Option<Workspace> {
-    let workspace = Workspace::new(name, selected, None);
+    let workspace = Workspace::new(name, selected, None, created_at, updated_at, uid);
 
     match workspace.create(&database.get_connection()) {
         Ok(_) => Some(workspace),

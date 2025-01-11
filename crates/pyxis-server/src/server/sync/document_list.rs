@@ -1,6 +1,10 @@
 use std::sync::Arc;
 
-use axum::{extract::{Query, State}, http::StatusCode, Extension, Json};
+use axum::{
+    extract::{Query, State},
+    http::StatusCode,
+    Extension, Json,
+};
 use pyxis_db::dynamo_client::Dynamo;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -27,7 +31,10 @@ pub async fn document_list(
 
     let document_repository = DocumentRepository::new(db.connection.clone());
 
-    let DocumentListQueries { record_id, is_snapshot } = request;
+    let DocumentListQueries {
+        record_id,
+        is_snapshot,
+    } = request;
 
     let documents_response = document_repository
         .list_by_record_id(

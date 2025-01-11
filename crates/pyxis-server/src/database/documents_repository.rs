@@ -4,7 +4,6 @@ use aws_sdk_dynamodb::{self as DynamoDB, types::AttributeValue};
 use chrono::Utc;
 use pyxis_db::entities::queue::Source;
 use serde::{Deserialize, Serialize};
-use serde_json::from_str;
 
 #[derive(Serialize, Deserialize)]
 pub struct Document {

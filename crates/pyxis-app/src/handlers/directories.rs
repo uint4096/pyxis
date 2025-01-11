@@ -8,9 +8,12 @@ pub fn create_dir(
     workspace_uid: String,
     path: String,
     parent_uid: Option<String>,
+    created_at: Option<String>,
+    updated_at: Option<String>,
+    uid: Option<String>,
     database: State<Database>,
 ) -> Option<Directory> {
-    let directory = Directory::new(name, workspace_uid, path, parent_uid, None);
+    let directory = Directory::new(name, workspace_uid, path, parent_uid, None, created_at, updated_at, uid);
 
     match directory.create(&database.get_connection()) {
         Ok(_) => Some(directory),
