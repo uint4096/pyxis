@@ -10,7 +10,7 @@ use handlers::devices::{add_devices, list_devices};
 use handlers::directories::{create_dir, delete_dir, get_directory_id, list_dirs, update_dir};
 use handlers::files::{create_file, delete_file, get_file_id, list_files, update_file};
 use handlers::snapshots::{get_snapshot, update_snapshot};
-use handlers::tracker::last_synced_record_id;
+use handlers::tracker::{add_record, last_synced_record_id};
 use handlers::updates::{get_updates, insert_updates};
 use handlers::workspaces::{
     create_workspace, delete_workspace, get_workspace_id, list_workspaces, update_workspace,
@@ -72,7 +72,8 @@ fn main() {
             last_synced_record_id,
             get_file_id,
             get_directory_id,
-            get_workspace_id
+            get_workspace_id,
+            add_record
         ])
         .setup(|app: &mut App| {
             let window = app

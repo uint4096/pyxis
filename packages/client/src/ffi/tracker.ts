@@ -9,6 +9,7 @@ export type Sources =
 
 type Args = {
   last_synced_record_id: { deviceId: string; sources: Array<Sources> };
+  add_record: { deviceId: string; source: Sources; recordId: number };
 };
 
 export const getLastSyncedRecordId = async (
@@ -22,5 +23,25 @@ export const getLastSyncedRecordId = async (
     });
   } catch (e) {
     console.error("[Tracker] Failed to add devices!", e);
+  }
+};
+
+export const addSyncedRecord = async (
+  deviceId: string,
+  source: Sources,
+  recordId: number,
+) => {
+  try {
+    const success = await invoke<Args, boolean>()("add_record", {
+      deviceId,
+      source,
+      recordId,
+    });
+
+    if (!success) {
+      throw new Error("[Tracker] Failed to add record! Handler failed.");
+    }
+  } catch (e) {
+    console.error("[Tracker] Failed to add record!", e);
   }
 };
