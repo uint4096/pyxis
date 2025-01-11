@@ -22,6 +22,7 @@ interface WorkspaceState {
   list: () => Promise<Array<Workspace>>;
   updateSelection: (workspace: Workspace) => Promise<void>;
   isDuplicate: (name: string) => Promise<boolean>;
+  updateWorkspace: (uid: string, name: string) => Promise<void>;
 }
 
 export const useWorkspace = create<WorkspaceState>((set, get) => ({
@@ -85,5 +86,10 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
   isDuplicate: async (name) => {
     const workspaceId = await getByName(name);
     return !!workspaceId;
+  },
+
+  updateWorkspace: async (uid, name) => {
+    const currentWorkspace = get().workspaces?.find((w) => w.uid === uid);
+    await updateWorkspace(uid, name, !!currentWorkspace?.selected);
   },
 }));

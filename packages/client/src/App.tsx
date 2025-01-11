@@ -4,32 +4,40 @@ import { Explorer } from "./pages/explorer";
 import "react-toastify/dist/ReactToastify.css";
 import { ConfigurationTray } from "./pages/configuration";
 import { useEffect } from "react";
-import { useConfig } from "./store";
+import { useConfig, useDevices } from "./store";
 import { useSync } from "./hooks";
+import { DeviceIds } from "./ffi";
+import { ky } from "./utils";
 
 function App() {
   const { setConfig, config } = useConfig();
-  const { initDevices, getDocuments } = useSync();
+  const { create: addDevices } = useDevices();
+  const { status: syncStatus } = useSync();
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { devices } = await ky
+          .get<{ devices: DeviceIds }>("/auth/devices", {
+            headers: {
+              authorization: `Bearer ${config.userToken}`,
+            },
+          })
+          .json();
+
+        await addDevices(devices);
+        return devices;
+      } catch (e) {
+        console.error("[Device] Init failed!");
+      }
+    })();
+  }, [addDevices, config.userToken]);
 
   useEffect(() => {
     (async () => {
       await setConfig();
     })();
   }, [setConfig]);
-
-  useEffect(() => {
-    (async () => {
-      if (!config.userToken) {
-        return;
-      }
-
-      const devices = await initDevices();
-      const documents = await Promise.all(
-        (devices ?? [])?.map(async (device) => await getDocuments(device)),
-      );
-      console.log(documents);
-    })();
-  }, [config.userToken, getDocuments, initDevices]);
 
   return (
     <>

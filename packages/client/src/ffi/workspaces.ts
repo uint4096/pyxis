@@ -95,17 +95,11 @@ export const updateWorkspace = async (
   selected: boolean,
 ) => {
   try {
-    const workspace = await invoke<Args, Workspace>()("update_workspace", {
+    return await invoke<Args, void>()("update_workspace", {
       uid,
       name,
       selected,
     });
-
-    if (!workspace) {
-      toast("Failed to update workspace!");
-    }
-
-    return workspace;
   } catch (e) {
     console.error("[Workspace] Failed to update!", e);
     toast("Failed to update workspace!");
