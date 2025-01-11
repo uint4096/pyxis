@@ -5,3 +5,4 @@ export * from "./snapshots";
 export * from "./config";
 export * from "./updates";
 export * from "./devices";
+export * from "./tracker";
