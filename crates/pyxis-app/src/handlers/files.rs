@@ -18,7 +18,18 @@ pub fn create_file(
     uid: Option<String>,
     database: State<Database>,
 ) -> Option<Files> {
-    let file = Files::new(dir_uid, path, title, tags, links, workspace_uid, None, created_at, updated_at, uid);
+    let file = Files::new(
+        dir_uid,
+        path,
+        title,
+        tags,
+        links,
+        workspace_uid,
+        None,
+        created_at,
+        updated_at,
+        uid,
+    );
 
     match file.create(&database.get_connection()) {
         Ok(_) => Some(file),

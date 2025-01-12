@@ -171,7 +171,7 @@ export const fileSlice: StateCreator<
 
   getContent: async (fileId: number) => {
     const snapshot = await getSnapshot(fileId);
-    const snapshotId = snapshot?.snapshot_id ? snapshot?.snapshot_id + 1 : 1;
+    const snapshotId = snapshot?.snapshot_id ?? 1;
     const updates = await getUpdates(fileId, snapshotId);
 
     return {

@@ -36,9 +36,14 @@ pub fn add_record(
     config_database: State<ConfigDatabase>,
     source: String,
     device_id: String,
-    record_id: i64
+    record_id: i64,
 ) -> Option<bool> {
-    let record = Tracker::new(None, Uuid::from_str(&device_id).unwrap(), Source::from_str(&source).unwrap(), record_id);
+    let record = Tracker::new(
+        None,
+        Uuid::from_str(&device_id).unwrap(),
+        Source::from_str(&source).unwrap(),
+        record_id,
+    );
 
     match record.add(&config_database.0.get_connection()) {
         Ok(_) => Some(true),

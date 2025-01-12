@@ -12,7 +12,6 @@
     "copyright": "",
     "targets": "all",
     "externalBin": [
-      "../../target/release/pyxis-sync"
     ],
     "icon": [
       "icons/32x32.png"
