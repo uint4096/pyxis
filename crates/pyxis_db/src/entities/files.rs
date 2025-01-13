@@ -89,12 +89,12 @@ impl Files {
             Ok(Files {
                 id: row.get(0)?,
                 uid: row.get(1)?,
-                dir_uid: row.get(2)?,
-                workspace_uid: row.get(3)?,
-                path: row.get(4)?,
-                title: row.get(5)?,
-                created_at: row.get(6)?,
-                updated_at: row.get(7)?,
+                workspace_uid: row.get(2)?,
+                path: row.get(3)?,
+                title: row.get(4)?,
+                created_at: row.get(5)?,
+                updated_at: row.get(6)?,
+                dir_uid: row.get(9)?,
                 links,
                 tags,
             })

@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use axum::{extract::State, http::StatusCode, Extension, Json};
 use pyxis_db::{dynamo_client::Dynamo, payload::UpdateWritePayload};
+use uuid::Uuid;
 
 use crate::database::{
     token_repository::Claims,
@@ -29,7 +30,7 @@ pub async fn updates_write(
     } = update;
 
     let pk = format!("{}/{}", user.user_id, user.device_id);
-    let sk = format!("{}/{}", snapshot_id, file_id);
+    let sk = format!("{}/{}/{}", snapshot_id, file_id, Uuid::new_v4());
 
     let update = Update { pk, sk, payload };
 

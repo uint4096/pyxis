@@ -11,7 +11,7 @@ pub struct Document {
     pub sk: i64,
     pub payload: String,
     pub operation: String,
-    pub source: Source,
+    pub source: String,
 }
 
 impl From<&HashMap<String, AttributeValue>> for Document {
@@ -39,14 +39,11 @@ impl From<&HashMap<String, AttributeValue>> for Document {
                 .and_then(|v| v.as_s().ok())
                 .cloned()
                 .expect("operation should exist"),
-            source: Source::from_str(
-                &value
-                    .get("source")
-                    .and_then(|v| v.as_s().ok())
-                    .cloned()
-                    .expect("source should exist"),
-            )
-            .unwrap(),
+            source: value
+                .get("source")
+                .and_then(|v| v.as_s().ok())
+                .cloned()
+                .expect("source should exist"),
         }
     }
 }
@@ -77,7 +74,7 @@ impl DocumentRepository {
         let timestamp_av = AttributeValue::N(timestamp.to_string());
         let source_av = AttributeValue::S(source.to_string());
 
-        let table_name = if source == Source::Snapshot {
+        let table_name = if Source::from_str(&source).unwrap() == Source::Snapshot {
             "snapshots_sync"
         } else {
             "documents_sync"

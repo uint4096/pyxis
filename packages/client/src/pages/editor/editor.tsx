@@ -304,17 +304,21 @@ const Editor = ({
     ],
   );
 
+  const writeSnapshots = useCallback(async () => {
+    await snapshotWriter(fileId, doc.export({ mode: "snapshot" }));
+    setSnapshotId((snapshotId) => snapshotId + 1);
+  }, [doc, fileId, snapshotWriter]);
+
   useEffect(() => {
+    (async () => await writeSnapshots())();
+
     const interval = setInterval(
-      async () => {
-        await snapshotWriter(fileId, doc.export({ mode: "snapshot" }));
-        setSnapshotId((snapshotId) => snapshotId + 1);
-      },
+      async () => await writeSnapshots(),
       15 * 60 * 1000,
     );
 
     return () => clearInterval(interval);
-  }, [doc, fileId, snapshotWriter, version]);
+  }, [doc, fileId, snapshotWriter, version, writeSnapshots]);
 
   useEffect(() => {
     if (!fileId || textRef.current === debouncedText) {
@@ -326,7 +330,7 @@ const Editor = ({
     (async () =>
       await updatesWriter(
         fileId!,
-        snapshotId + 1,
+        snapshotId,
         doc.export({ mode: "update", from: version }),
       ))();
   }, [debouncedText, doc, fileId, snapshotId, updatesWriter, version]);
