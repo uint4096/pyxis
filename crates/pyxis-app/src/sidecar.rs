@@ -13,7 +13,7 @@ pub fn start_sync_worker(app: &App, window: WebviewWindow) {
                             if let CommandEvent::Stdout(line_bytes) = event {
                                 let line = String::from_utf8_lossy(&line_bytes);
                                 window
-                                    .emit("[Sidecar] Message", Some(format!("'{}'", line)))
+                                    .emit("Sidecar_Message", Some(format!("'{}'", line)))
                                     .expect("[Sidecar] failed to emit event");
                             }
                         }
