@@ -15,6 +15,7 @@ use crate::database::{documents_repository::DocumentRepository, token_repository
 pub struct DocumentListQueries {
     pub record_id: i64,
     pub is_snapshot: bool,
+    pub device_id: String,
 }
 
 #[axum_macros::debug_handler]
@@ -34,15 +35,11 @@ pub async fn document_list(
     let DocumentListQueries {
         record_id,
         is_snapshot,
+        device_id,
     } = request;
 
     let documents_response = document_repository
-        .list_by_record_id(
-            user.user_id.to_string(),
-            user.device_id.to_string(),
-            record_id,
-            is_snapshot,
-        )
+        .list_by_record_id(user.user_id.to_string(), device_id, record_id, is_snapshot)
         .await;
 
     if let Ok(documents) = documents_response {

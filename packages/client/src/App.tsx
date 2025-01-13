@@ -17,6 +17,10 @@ function App() {
   useEffect(() => {
     (async () => {
       try {
+        if (!config?.userToken) {
+          return;
+        }
+
         const { devices } = await ky
           .get<{ devices: DeviceIds }>("/auth/devices", {
             headers: {
@@ -26,7 +30,6 @@ function App() {
           .json();
 
         await addDevices(devices);
-        return devices;
       } catch (e) {
         console.error("[Device] Init failed!");
       }

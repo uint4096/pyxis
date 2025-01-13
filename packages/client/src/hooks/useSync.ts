@@ -208,14 +208,15 @@ export const useSync = () => {
         return;
       }
 
-      const { payload: documents } = await ky
-        .get<{ payload: Array<Document> }>("/sync/document/list", {
+      const { documents } = await ky
+        .get<{ documents: Array<Document> }>("/sync/document/list", {
           headers: {
             authorization: `Bearer ${userToken}`,
           },
           searchParams: {
             record_id: lastSyncedRecordId,
             is_snapshot: false,
+            device_id: deviceId,
           },
         })
         .json();
@@ -229,7 +230,9 @@ export const useSync = () => {
     (async () => {
       try {
         const documents = await Promise.all(
-          deviceIds.map((device) => getDocuments(device)),
+          deviceIds
+            .filter((id) => id !== config.deviceId)
+            .map((device) => getDocuments(device)),
         );
 
         // @todo: handle unsynced documents
