@@ -2,7 +2,7 @@ use pyxis_db::{database::Database, entities::snapshots::Snapshots};
 use tauri::State;
 
 #[tauri::command]
-pub fn update_snapshot(file_id: i32, content: Vec<u8>, database: State<Database>) -> Option<bool> {
+pub fn update_snapshot(file_id: i64, content: Vec<u8>, database: State<Database>) -> Option<bool> {
     let content = Snapshots::new(file_id, content, None, 1);
 
     match content.update(&database.get_connection()) {

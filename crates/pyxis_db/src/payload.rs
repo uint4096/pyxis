@@ -13,4 +13,5 @@ pub struct DocumentWritePayload {
     pub operation: String,
     pub record_id: i64,
     pub source: String,
+    pub file_id: Option<i64>,
 }

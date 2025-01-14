@@ -12,6 +12,7 @@ pub struct Document {
     pub payload: String,
     pub operation: String,
     pub source: String,
+    pub file_id: Option<i64>,
 }
 
 impl From<&HashMap<String, AttributeValue>> for Document {
@@ -44,6 +45,10 @@ impl From<&HashMap<String, AttributeValue>> for Document {
                 .and_then(|v| v.as_s().ok())
                 .cloned()
                 .expect("source should exist"),
+            file_id: value
+                .get("file_id")
+                .and_then(|v| v.as_n().ok())
+                .and_then(|s| s.parse().ok()),
         }
     }
 }
@@ -65,6 +70,7 @@ impl DocumentRepository {
             payload,
             operation,
             source,
+            file_id,
         } = document;
 
         let pk_av = AttributeValue::S(pk);
@@ -80,7 +86,8 @@ impl DocumentRepository {
             "documents_sync"
         };
 
-        self.client
+        let query = self
+            .client
             .put_item()
             .table_name(table_name)
             .item("pk", pk_av)
@@ -88,9 +95,14 @@ impl DocumentRepository {
             .item("payload", payload_av)
             .item("operation", op_av)
             .item("timestamp", timestamp_av)
-            .item("source", source_av)
-            .send()
-            .await?;
+            .item("source", source_av);
+
+        if let Some(file_id) = file_id {
+            let file_id_av = AttributeValue::N(file_id.to_string());
+            query.item("file_id", file_id_av).send().await?;
+        } else {
+            query.send().await?;
+        }
 
         Ok(sk)
     }

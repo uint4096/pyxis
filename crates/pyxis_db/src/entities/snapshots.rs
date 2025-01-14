@@ -6,13 +6,13 @@ use serde::{Deserialize, Serialize};
 pub struct Snapshots {
     pub id: Option<i32>,
     pub content: Vec<u8>,
-    pub file_id: i32,
+    pub file_id: i64,
     pub updated_at: String,
     pub snapshot_id: i32,
 }
 
 impl Snapshots {
-    pub fn new(file_id: i32, content: Vec<u8>, id: Option<i32>, snapshot_id: i32) -> Self {
+    pub fn new(file_id: i64, content: Vec<u8>, id: Option<i32>, snapshot_id: i32) -> Self {
         let current_time = Utc::now().to_rfc3339();
 
         Self {

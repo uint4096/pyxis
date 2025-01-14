@@ -59,6 +59,7 @@ impl<'a> SyncWriter for DocumentWriter<'a> {
             record_id: last_record.record_id + 1,
             operation: queue_element.operation.clone(),
             source: queue_element.source.to_string(),
+            file_id: queue_element.file_id,
         };
 
         //@todo use env vars
