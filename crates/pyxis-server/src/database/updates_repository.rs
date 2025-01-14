@@ -1,4 +1,4 @@
-use std::{error::Error, sync::Arc};
+use std::{collections::HashMap, error::Error, sync::Arc};
 
 use aws_sdk_dynamodb::{self as DynamoDB, types::AttributeValue};
 use chrono::Utc;
@@ -11,6 +11,28 @@ pub struct Update {
     pub pk: String, // user_id/device_id
     pub sk: String, // snapshot_id/file_id
     pub payload: String,
+}
+
+impl From<&HashMap<String, AttributeValue>> for Update {
+    fn from(value: &HashMap<String, AttributeValue>) -> Self {
+        Update {
+            pk: value
+                .get("pk")
+                .and_then(|v| v.as_s().ok())
+                .cloned()
+                .expect("pk should exist"),
+            sk: value
+                .get("sk")
+                .and_then(|v| v.as_s().ok())
+                .cloned()
+                .expect("sk should exist"),
+            payload: value
+                .get("payload")
+                .and_then(|v| v.as_s().ok())
+                .cloned()
+                .expect("payload should exist"),
+        }
+    }
 }
 
 pub struct UpdateRepository {
@@ -42,5 +64,42 @@ impl UpdateRepository {
             .await?;
 
         Ok(())
+    }
+
+    pub async fn get_by_snapshot_id(
+        &self,
+        user_id: String,
+        device_id: String,
+        file_id: i64,
+        snapshot_id: i64,
+    ) -> Result<Vec<Update>, Box<dyn Error>> {
+        let table_name = "updates";
+
+        let records_iter = self
+            .client
+            .query()
+            .table_name(table_name)
+            .key_condition_expression("#pk = :pk AND begins_with(#sk, :file_snapshot)")
+            .expression_attribute_names("#sk", "sk")
+            .expression_attribute_names("#pk", "pk")
+            .expression_attribute_values(
+                ":file_snapshot",
+                AttributeValue::S(format!(
+                    "{}/{}",
+                    snapshot_id.to_string(),
+                    file_id.to_string()
+                )),
+            )
+            .expression_attribute_values(
+                ":pk",
+                AttributeValue::S(format!("{}/{}", user_id, device_id)),
+            )
+            .send()
+            .await?;
+
+        let items = records_iter.items.expect("[Updates] Failed to list!");
+        let records: Vec<Update> = items.iter().map(|v| v.into()).collect();
+
+        Ok(records)
     }
 }
