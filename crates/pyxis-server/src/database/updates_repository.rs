@@ -9,7 +9,7 @@ static TABLE_NAME: &str = "updates_sync";
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Update {
     pub pk: String, // user_id/device_id
-    pub sk: String, // snapshot_id/file_id
+    pub sk: String, // snapshot_id/file_uid
     pub payload: String,
 }
 
@@ -70,7 +70,7 @@ impl UpdateRepository {
         &self,
         user_id: String,
         device_id: String,
-        file_id: i64,
+        file_uid: String,
         snapshot_id: i64,
     ) -> Result<Vec<Update>, Box<dyn Error>> {
         let table_name = "updates_sync";
@@ -87,7 +87,7 @@ impl UpdateRepository {
                 AttributeValue::S(format!(
                     "{}/{}",
                     snapshot_id.to_string(),
-                    file_id.to_string()
+                    file_uid
                 )),
             )
             .expression_attribute_values(

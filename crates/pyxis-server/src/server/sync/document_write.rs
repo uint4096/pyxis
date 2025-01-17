@@ -29,7 +29,7 @@ pub async fn document_write(
         payload,
         operation,
         source,
-        file_id,
+        file_uid,
     } = document;
 
     let doc = Document {
@@ -38,7 +38,7 @@ pub async fn document_write(
         payload,
         operation,
         source,
-        file_id,
+        file_uid,
     };
 
     let write_response = document_repository.create(doc).await;

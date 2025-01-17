@@ -24,13 +24,13 @@ pub async fn updates_write(
     let update_repository = UpdateRepository::new(db.connection.clone());
 
     let UpdateWritePayload {
-        file_id,
+        file_uid,
         snapshot_id,
         payload,
     } = update;
 
     let pk = format!("{}/{}", user.user_id, user.device_id);
-    let sk = format!("{}/{}/{}", snapshot_id, file_id, Uuid::new_v4());
+    let sk = format!("{}/{}/{}", snapshot_id, file_uid, Uuid::new_v4());
 
     let update = Update { pk, sk, payload };
 

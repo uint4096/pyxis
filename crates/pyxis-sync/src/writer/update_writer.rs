@@ -13,8 +13,9 @@ impl SyncWriter for UpdateWriter {
         token: String,
     ) -> Result<Response, Error> {
         let update_payload = UpdateWritePayload {
-            file_id: queue_element
-                .file_id
+            file_uid: queue_element
+                .file_uid
+                .clone()
                 .expect("No file id associated with the update"),
             payload: queue_element.payload.clone(),
             snapshot_id: queue_element

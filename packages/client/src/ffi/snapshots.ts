@@ -4,21 +4,21 @@ import { invoke } from "./invoke";
 export type Snapshot = {
   id?: number;
   content?: Uint8Array;
-  file_id: number;
+  file_uid: number;
   updated_at: string;
   snapshot_id: number;
 };
 
 type Args = {
-  update_snapshot: { fileId: number; content: Uint8Array };
-  get_snapshot: { fileId: number };
+  update_snapshot: { fileUid: string; content: Uint8Array };
+  get_snapshot: { fileUid: string };
 };
 
-export const updateSnapshot = async (fileId: number, content: Uint8Array) => {
+export const updateSnapshot = async (fileUid: string, content: Uint8Array) => {
   try {
     if (
       !(await invoke<Args, boolean>()("update_snapshot", {
-        fileId,
+        fileUid,
         content,
       }))
     ) {
@@ -30,11 +30,11 @@ export const updateSnapshot = async (fileId: number, content: Uint8Array) => {
   }
 };
 
-export const getSnapshot = async (fileId: number) => {
+export const getSnapshot = async (fileUid: string) => {
   try {
     return (
       (await invoke<Args, Snapshot>()("get_snapshot", {
-        fileId,
+        fileUid,
       })) ?? new Uint8Array()
     );
   } catch (e) {

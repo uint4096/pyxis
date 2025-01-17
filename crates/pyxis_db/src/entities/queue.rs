@@ -46,7 +46,7 @@ pub struct ListenerQueue {
     pub source: Source,
     pub operation: String,
     pub payload: String,
-    pub file_id: Option<i64>,
+    pub file_uid: Option<String>,
     pub snapshot_id: Option<i64>,
 }
 
@@ -57,7 +57,7 @@ impl ListenerQueue {
         source: String,
         operation: String,
         payload: String,
-        file_id: Option<i64>,
+        file_uid: Option<String>,
         snapshot_id: Option<i64>,
     ) -> Self {
         Self {
@@ -66,14 +66,14 @@ impl ListenerQueue {
             source: Source::from_str(&source).expect("Failed to convert source from string"),
             operation,
             payload,
-            file_id,
+            file_uid,
             snapshot_id,
         }
     }
 
     pub fn enqueue(&self, conn: &Connection) -> Result<(), Error> {
         let insert_sql =
-            "INSERT INTO listener_queue (status, source, operation, payload, file_id, snapshot_id) VALUES (?1, ?2, ?3, ?4, ?5, ?6)";
+            "INSERT INTO listener_queue (status, source, operation, payload, file_uid, snapshot_id) VALUES (?1, ?2, ?3, ?4, ?5, ?6)";
 
         conn.execute(
             insert_sql,
@@ -82,7 +82,7 @@ impl ListenerQueue {
                 &self.source.to_string(),
                 &self.operation,
                 &self.payload,
-                &self.file_id,
+                &self.file_uid,
                 &self.snapshot_id,
             ),
         )?;
@@ -92,12 +92,12 @@ impl ListenerQueue {
 
     pub fn dequeue(conn: &Connection) -> Result<ListenerQueue, Error> {
         let mut sql = conn.prepare(
-            "SELECT id, status, source, operation, payload, file_id, snapshot_id payload FROM listener_queue ORDER BY ROWID ASC LIMIT 1",
+            "SELECT id, status, source, operation, payload, file_uid, snapshot_id payload FROM listener_queue ORDER BY ROWID ASC LIMIT 1",
         )?;
 
         let entry = sql.query_row([], |row| -> Result<ListenerQueue, Error> {
             let source_str: String = row.get(2)?;
-            let file_id: Option<i64> = row.get(5)?;
+            let file_uid: Option<String> = row.get(5)?;
             let snapshot_id: Option<i64> = row.get(6)?;
 
             Ok(ListenerQueue {
@@ -107,7 +107,7 @@ impl ListenerQueue {
                     .expect("Failed to convert source from string!"),
                 operation: row.get(3)?,
                 payload: row.get(4)?,
-                file_id,
+                file_uid,
                 snapshot_id,
             })
         })?;

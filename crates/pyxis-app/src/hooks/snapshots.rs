@@ -22,7 +22,7 @@ impl Listener for SnapshotsListener {
             payload,
             "insert",
             &self.name,
-            Some(snapshot.file_id),
+            Some(snapshot.file_uid),
             None,
         )
     }
@@ -33,10 +33,11 @@ impl Listener for SnapshotsListener {
         config_connection: &Connection,
         row_id: i64,
     ) -> Result<(), Error> {
-        let payload = serde_json::to_string(&Snapshots::get_by_id(connection, row_id)?)
+        let snapshot = Snapshots::get_by_id(connection, row_id)?;
+        let payload = serde_json::to_string(&snapshot)
             .expect("[Snapshot Listener] Failed to serialize to json!");
 
-        self.insert_into_queue(config_connection, payload, "update", &self.name, None, None)
+        self.insert_into_queue(config_connection, payload, "update", &self.name, Some(snapshot.file_uid), None)
     }
 
     fn delete(&self, _: &Connection, _: &Connection, _: i64) -> Result<(), Error> {

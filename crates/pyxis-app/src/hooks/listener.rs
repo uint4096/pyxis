@@ -8,7 +8,7 @@ pub trait Listener {
         payload: String,
         op: &str,
         source: &str,
-        file_id: Option<i64>,
+        file_uid: Option<String>,
         snapshot_id: Option<i64>,
     ) -> Result<(), Error> {
         let elem = ListenerQueue::new(
@@ -17,7 +17,7 @@ pub trait Listener {
             source.to_owned(),
             op.to_owned(),
             payload,
-            file_id,
+            file_uid,
             snapshot_id,
         );
 

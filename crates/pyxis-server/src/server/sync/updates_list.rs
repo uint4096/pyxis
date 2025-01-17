@@ -14,7 +14,7 @@ use crate::database::{token_repository::Claims, updates_repository::UpdateReposi
 #[derive(Serialize, Deserialize)]
 pub struct UpdatesListQuery {
     pub snapshot_id: i64,
-    pub file_id: i64,
+    pub file_uid: String,
     pub device_id: String,
 }
 
@@ -34,12 +34,12 @@ pub async fn updates_list(
 
     let UpdatesListQuery {
         snapshot_id,
-        file_id,
+        file_uid,
         device_id,
     } = request;
 
     let updates_response = updates_repository
-        .get_by_snapshot_id(user.user_id.to_string(), device_id, file_id, snapshot_id)
+        .get_by_snapshot_id(user.user_id.to_string(), device_id, file_uid, snapshot_id)
         .await;
 
     if let Ok(updates) = updates_response {

@@ -36,7 +36,7 @@ impl Migrations for ListenerQueueMigration {
             source      TEXT NOT NULL,
             operation   TEXT NOT NULL,
             payload     TEXT NOT NULL,
-            file_id     INTEGER,
+            file_uid    TEXT,
             snapshot_id INTEGER
         )";
 

@@ -12,7 +12,7 @@ pub struct Document {
     pub payload: String,
     pub operation: String,
     pub source: String,
-    pub file_id: Option<i64>,
+    pub file_uid: Option<String>,
 }
 
 impl From<&HashMap<String, AttributeValue>> for Document {
@@ -45,10 +45,10 @@ impl From<&HashMap<String, AttributeValue>> for Document {
                 .and_then(|v| v.as_s().ok())
                 .cloned()
                 .expect("source should exist"),
-            file_id: value
-                .get("file_id")
-                .and_then(|v| v.as_n().ok())
-                .and_then(|s| s.parse().ok()),
+            file_uid: value
+                .get("file_uid")
+                .and_then(|v| v.as_s().ok())
+                .cloned()
         }
     }
 }
@@ -70,7 +70,7 @@ impl DocumentRepository {
             payload,
             operation,
             source,
-            file_id,
+            file_uid,
         } = document;
 
         let pk_av = AttributeValue::S(pk);
@@ -97,9 +97,9 @@ impl DocumentRepository {
             .item("timestamp", timestamp_av)
             .item("source", source_av);
 
-        if let Some(file_id) = file_id {
-            let file_id_av = AttributeValue::N(file_id.to_string());
-            query.item("file_id", file_id_av).send().await?;
+        if let Some(file_uid) = file_uid {
+            let file_uid_av = AttributeValue::S(file_uid);
+            query.item("file_uid", file_uid_av).send().await?;
         } else {
             query.send().await?;
         }

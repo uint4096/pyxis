@@ -13,22 +13,7 @@ impl Listener for UpdatesListener {
         config_connection: &Connection,
         row_id: i64,
     ) -> Result<(), Error> {
-        let mut sql = connection.prepare(
-            "SELECT content, snapshot_id, file_id, updated_at, id from updates where id=?1",
-        )?;
-
-        let update = sql.query_row(&[&row_id], |row| -> Result<Updates, Error> {
-            let update = Updates {
-                content: row.get(0)?,
-                snapshot_id: row.get(1)?,
-                file_id: row.get(2)?,
-                updated_at: row.get(3)?,
-                id: row.get(4)?,
-            };
-
-            Ok(update)
-        })?;
-
+        let update = Updates::get_by_id(row_id, connection)?;
         let payload = serde_json::to_string(&update)
             .expect("[Updates Listener] Failed to serialize to json!");
 
@@ -37,7 +22,7 @@ impl Listener for UpdatesListener {
             payload,
             "insert",
             &self.name,
-            Some(update.file_id),
+            Some(update.file_uid),
             Some(update.snapshot_id),
         )
     }

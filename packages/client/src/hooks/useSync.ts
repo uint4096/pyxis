@@ -24,6 +24,7 @@ export type Document = {
   payload: string;
   operation: "insert" | "update" | "delete";
   source: DocumentSources;
+  file_uid?: string;
 };
 
 type DocumentSource<T extends DocumentSources> = T extends "files"
@@ -274,7 +275,13 @@ export const useSync = () => {
         setStatus(false);
       }
     })();
-  }, [deviceIds, getDocuments, operationHandlers, updateRecord]);
+  }, [
+    config.deviceId,
+    deviceIds,
+    getDocuments,
+    operationHandlers,
+    updateRecord,
+  ]);
 
   return { status };
 };
