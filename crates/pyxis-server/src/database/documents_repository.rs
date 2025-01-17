@@ -5,7 +5,7 @@ use chrono::Utc;
 use pyxis_db::entities::queue::Source;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Document {
     pub pk: String,
     pub sk: i64,
@@ -115,7 +115,7 @@ impl DocumentRepository {
         is_snapshot: bool,
     ) -> Result<Vec<Document>, Box<dyn Error>> {
         let table_name = if is_snapshot {
-            "snapshot_sync"
+            "snapshots_sync"
         } else {
             "documents_sync"
         };

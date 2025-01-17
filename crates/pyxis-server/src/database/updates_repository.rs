@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 static TABLE_NAME: &str = "updates_sync";
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Update {
     pub pk: String, // user_id/device_id
     pub sk: String, // snapshot_id/file_id
@@ -73,7 +73,7 @@ impl UpdateRepository {
         file_id: i64,
         snapshot_id: i64,
     ) -> Result<Vec<Update>, Box<dyn Error>> {
-        let table_name = "updates";
+        let table_name = "updates_sync";
 
         let records_iter = self
             .client
