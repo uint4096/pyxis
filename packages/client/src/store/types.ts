@@ -30,10 +30,14 @@ export type Node = File | (Directory & { children: Array<Node> });
 
 export type Document = "file" | "dir";
 
+export type FileContent = {
+  snapshot: Snapshot | undefined;
+  updates: Array<Uint8Array>;
+};
+
 export interface FileState {
   tree: Array<Node>;
   selectedFile: File | undefined;
-  doc: { snapshot: Snapshot | undefined; updates: Array<Uint8Array> };
   selectFile: (file: File | undefined) => void;
   findNode: (uid: string, tree?: Array<Node>) => Node | undefined;
   isDuplicateFile: (path: string, workspaceUid: string) => Promise<boolean>;
@@ -55,14 +59,12 @@ export interface FileState {
 
   buildTree: (workspaceId: string) => Promise<Array<Node>>;
   createTree: (workspaceId: string) => Promise<Array<Node>>;
-  updateSnapshots: (fileId: number, content: Uint8Array) => Promise<void>;
+  updateSnapshots: (fileUid: string, content: Uint8Array) => Promise<void>;
   insertUpdates: (
-    fileId: number,
+    fileUid: string,
     snapshotId: number,
     content: Uint8Array,
   ) => Promise<void>;
-  getContent: (
-    fileId: number,
-  ) => Promise<{ snapshot: Snapshot | undefined; updates: Array<Uint8Array> }>;
+  getContent: (fileUid: string) => Promise<FileContent>;
   isFileInDir: (fileUid: string, dir: DirWithChildren) => boolean;
 }

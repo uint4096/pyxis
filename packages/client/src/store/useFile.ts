@@ -55,17 +55,13 @@ export const fileSlice: StateCreator<
     if (!file?.id) {
       set({
         selectedFile: undefined,
-        doc: undefined,
       });
 
       return;
     }
 
-    const content = await get().getContent(file.id);
-
     set({
       selectedFile: file,
-      doc: content,
     });
   },
 
@@ -159,20 +155,20 @@ export const fileSlice: StateCreator<
   },
 
   updateSnapshots: async (
-    fileId: number,
+    fileUid: string,
     content: Uint8Array = new Uint8Array(),
-  ) => await updateSnapshot(fileId, content),
+  ) => await updateSnapshot(fileUid, content),
 
   insertUpdates: async (
-    fileId: number,
+    fileUid: string,
     snapshotId: number,
     content: Uint8Array = new Uint8Array(),
-  ) => await insertUpdates(fileId, snapshotId, content),
+  ) => await insertUpdates(fileUid, snapshotId, content),
 
-  getContent: async (fileId: number) => {
-    const snapshot = await getSnapshot(fileId);
+  getContent: async (fileUid: string) => {
+    const snapshot = await getSnapshot(fileUid);
     const snapshotId = snapshot?.snapshot_id ?? 1;
-    const updates = await getUpdates(fileId, snapshotId);
+    const updates = await getUpdates(fileUid, snapshotId);
 
     return {
       snapshot: snapshot,

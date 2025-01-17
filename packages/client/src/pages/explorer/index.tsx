@@ -4,20 +4,42 @@ import { WorkspaceSelection, CreateWorkspace } from "./forms";
 import { useTreeStore, useWorkspace } from "../../store";
 import { Tree } from "../tree";
 import Editor from "../editor/editor";
+import { type FormattedContent, useContentSync } from "../../hooks";
 
 export const Explorer = () => {
   const { workspaces, list, currentWorkspace } = useWorkspace();
-  const { selectedFile, updateSnapshots, insertUpdates, doc } = useTreeStore();
+  const { selectedFile, updateSnapshots, insertUpdates } = useTreeStore();
+  const { getFileContent } = useContentSync();
 
   const [showWorkspaceForm, setWorkspaceForm] = useState<boolean>(false);
   const [showWorkspaceSelectionForm, setWorkspaceSelectionForm] =
     useState<boolean>(false);
+  const [formattedContent, setFormattedContent] = useState<FormattedContent>();
 
   const [showEditor, setEditor] = useState<boolean>(false);
 
   useEffect(() => {
     (async () => await list())();
   }, [list]);
+
+  useEffect(() => {
+    if (selectedFile?.uid) {
+      (async () => {
+        const { fileContent, snapshotId } =
+          (await getFileContent(selectedFile.uid!)) ?? {};
+
+        if (fileContent?.length && snapshotId != null) {
+          setFormattedContent({ fileContent, snapshotId });
+        } else {
+          setFormattedContent({ fileContent: [], snapshotId: 0 });
+        }
+      })();
+    } else {
+      setFormattedContent(undefined);
+    }
+
+    return () => setFormattedContent(undefined);
+  }, [getFileContent, selectedFile?.uid]);
 
   useEffect(() => {
     if (!workspaces || !workspaces.length) {
@@ -39,11 +61,11 @@ export const Explorer = () => {
       <ExplorerWrapper>
         {currentWorkspace && <Tree />}
 
-        {showEditor && selectedFile?.id && (
+        {showEditor && selectedFile?.id && formattedContent && (
           <Editor
             key={selectedFile.id}
-            fileId={selectedFile.id}
-            content={doc}
+            fileUid={selectedFile.uid}
+            content={formattedContent}
             updatesWriter={insertUpdates}
             snapshotWriter={updateSnapshots}
           />

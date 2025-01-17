@@ -23,10 +23,9 @@ import {
   insertTextAtPosition,
   textLength,
 } from "../../utils";
-import { useDebounce } from "../../hooks";
+import { type FormattedContent, useDebounce } from "../../hooks";
 import { LoroDoc, LoroList, LoroText, VersionVector } from "loro-crdt";
 import fastDiff from "fast-diff";
-import { Snapshot } from "../../ffi";
 
 type EditorText = {
   text: string | undefined;
@@ -34,11 +33,11 @@ type EditorText = {
 };
 
 type EditorProps = {
-  fileId: number;
-  content: { snapshot: Snapshot | undefined; updates: Array<Uint8Array> };
-  snapshotWriter: (fileId: number, content: Uint8Array) => Promise<void>;
+  fileUid: string;
+  content: FormattedContent;
+  snapshotWriter: (fileUid: string, content: Uint8Array) => Promise<void>;
   updatesWriter: (
-    fileId: number,
+    fileUid: string,
     snapshotId: number,
     content: Uint8Array,
   ) => Promise<void>;
@@ -47,7 +46,7 @@ type EditorProps = {
 const CONTAINER_ID = "pyxis_doc";
 
 const Editor = ({
-  fileId,
+  fileUid,
   content,
   updatesWriter,
   snapshotWriter,
@@ -57,9 +56,7 @@ const Editor = ({
     caret: { start: 0, end: 0, collapsed: true },
   });
 
-  const [snapshotId, setSnapshotId] = useState<number>(
-    content.snapshot?.snapshot_id ?? 0,
-  );
+  const [snapshotId, setSnapshotId] = useState<number>(content.snapshotId ?? 0);
   const [version, setVersion] = useState<VersionVector>();
 
   const formatCaret = useCallback((loroList: LoroList, caret: Caret) => {
@@ -84,14 +81,9 @@ const Editor = ({
     loroCaret,
   }: { doc: LoroDoc; loroText: LoroText; loroCaret: LoroList } = useMemo(() => {
     const doc = new LoroDoc();
-    const { snapshot, updates } = content ?? {};
 
-    if (snapshot?.content?.length) {
-      doc.import(snapshot.content);
-    }
-
-    if (updates?.length) {
-      doc.importBatch(updates);
+    if (content?.fileContent?.length) {
+      doc.importBatch(content.fileContent);
     }
 
     setVersion(doc.version());
@@ -305,9 +297,9 @@ const Editor = ({
   );
 
   const writeSnapshots = useCallback(async () => {
-    await snapshotWriter(fileId, doc.export({ mode: "snapshot" }));
+    await snapshotWriter(fileUid, doc.export({ mode: "snapshot" }));
     setSnapshotId((snapshotId) => snapshotId + 1);
-  }, [doc, fileId, snapshotWriter]);
+  }, [doc, fileUid, snapshotWriter]);
 
   useEffect(() => {
     (async () => await writeSnapshots())();
@@ -318,10 +310,10 @@ const Editor = ({
     );
 
     return () => clearInterval(interval);
-  }, [doc, fileId, snapshotWriter, version, writeSnapshots]);
+  }, [doc, snapshotWriter, version, writeSnapshots]);
 
   useEffect(() => {
-    if (!fileId || textRef.current === debouncedText) {
+    if (!fileUid || textRef.current === debouncedText) {
       return;
     }
 
@@ -329,11 +321,11 @@ const Editor = ({
 
     (async () =>
       await updatesWriter(
-        fileId!,
+        fileUid!,
         snapshotId,
         doc.export({ mode: "update", from: version }),
       ))();
-  }, [debouncedText, doc, fileId, snapshotId, updatesWriter, version]);
+  }, [debouncedText, doc, fileUid, snapshotId, updatesWriter, version]);
 
   useEffect(() => {
     if (!renderControl.current.html) {
