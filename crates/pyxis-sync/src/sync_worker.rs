@@ -44,26 +44,41 @@ pub async fn sync_worker(conn: &Connection) -> Result<(), Error> {
 
         let processing_result: Result<(), Error> = match queue_element.source {
             Source::Update => {
-                let _ = UpdateWriter {}
-                    .write(&client, &queue_element, user_token)
-                    .await;
+                let _ = match (UpdateWriter {}).write(&client, &queue_element, user_token)
+                .await {
+                    Ok(_) => (),
+                    Err(_) => {
+                        queue_element.requeue(conn)?;
+                        sleep(Duration::from_secs(sleep_duration));
+                        sleep_duration *= 2;
+                        continue; 
+                    }
+                };
 
                 Ok(())
             }
             _ => {
                 let document_writer = DocumentWriter { conn, device_id };
 
-                let write_result = document_writer
-                    .write(&client, &queue_element, user_token)
-                    .await;
-
-                let _ = DocumentWriter::post_write(
-                    conn,
-                    write_result.unwrap(),
-                    device_id,
-                    queue_element.source.clone(),
-                )
-                .await?;
+                match document_writer
+                .write(&client, &queue_element, user_token)
+                .await  {
+                    Ok(write_result) => {
+                        DocumentWriter::post_write(
+                            conn,
+                            write_result,
+                            device_id,
+                            queue_element.source.clone(),
+                        )
+                        .await?
+                    },
+                    Err(_) => {
+                        queue_element.requeue(conn)?;
+                        sleep(Duration::from_secs(sleep_duration));
+                        sleep_duration *= 2;
+                        continue;
+                    }
+                };
 
                 Ok(())
             }
