@@ -4,7 +4,7 @@ use super::{
     auth::{get_devices::get_devices, sign_in::sign_in, sign_out::sign_out, sign_up::sign_up},
     middlewares::check_token,
     sync::{
-        document_list::document_list, document_write::document_write, updates_list::{self, updates_list}, updates_write::updates_write
+        document_list::document_list, document_write::document_write, ping::ping, updates_list::{self, updates_list}, updates_write::updates_write
     },
 };
 use axum::{
@@ -29,6 +29,10 @@ pub fn create_route(connection: Arc<Dynamo>) -> Router {
         );
 
     let sync_router = Router::new()
+        .route(
+            "/ping",
+            get(ping)
+        )
         .route(
             "/document/write",
             post(document_write.layer(middleware::from_fn(check_token))),

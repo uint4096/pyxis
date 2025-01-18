@@ -10,6 +10,11 @@ interface DevicesState {
 export const useDevices = create<DevicesState>((set) => ({
   deviceIds: [],
   create: async (deviceIds) => {
+    if (!deviceIds.length) {
+      set({ deviceIds: [] });
+      return;
+    }
+
     await addDevices(deviceIds);
     set({ deviceIds });
   },
