@@ -5,6 +5,7 @@ use pyxis_db::entities::{
     queue::{ListenerQueue, Source},
 };
 use rusqlite::{Connection, Error};
+use uuid::Uuid;
 
 use crate::writer::{
     document_writer::DocumentWriter, sync_writer::SyncWriter, update_writer::UpdateWriter,
@@ -19,81 +20,86 @@ pub async fn sync_worker(conn: &Connection) -> Result<(), Error> {
     loop {
         sleep_duration = min(sleep_duration, MAX_SLEEP_DURATION);
 
-        let config = Configuration::get(conn)?;
+        let (user_token, device_id) = match get_valid_configuration(conn)? {
+            Some(config) => config,
+            None => {
+                eprintln!("Invalid configuration!");
+                handle_backoff(&mut sleep_duration);
+                continue;
+            }
+        };
+
         let queue_element = match ListenerQueue::dequeue(conn) {
             Ok(elem) => elem,
             Err(Error::QueryReturnedNoRows) => {
                 continue;
             }
             Err(e) => {
-                println!("Failed to dequeue. Error: {}", e);
-                sleep(Duration::from_secs(sleep_duration));
-                sleep_duration *= 2;
+                eprintln!("Failed to dequeue. Error: {}", e);
+                handle_backoff(&mut sleep_duration);
                 continue;
             }
         };
 
-        let (user_token, device_id) = match (config.user_token, config.device_id) {
-            (Some(token), Some(id)) => (token, id),
-            _ => {
-                sleep(Duration::from_secs(sleep_duration));
-                sleep_duration *= 2;
-                continue;
-            }
-        };
-
-        let processing_result: Result<(), Error> = match queue_element.source {
+        let processing_result = match queue_element.source {
             Source::Update => {
-                let _ = match (UpdateWriter {}).write(&client, &queue_element, user_token)
-                .await {
-                    Ok(_) => (),
-                    Err(_) => {
-                        queue_element.requeue(conn)?;
-                        sleep(Duration::from_secs(sleep_duration));
-                        sleep_duration *= 2;
-                        continue; 
-                    }
-                };
-
-                Ok(())
+                (UpdateWriter {})
+                    .write(&client, &queue_element, user_token)
+                    .await
             }
             _ => {
-                let document_writer = DocumentWriter { conn, device_id };
-
-                match document_writer
-                .write(&client, &queue_element, user_token)
-                .await  {
-                    Ok(write_result) => {
-                        DocumentWriter::post_write(
-                            conn,
-                            write_result,
-                            device_id,
-                            queue_element.source.clone(),
-                        )
-                        .await?
-                    },
-                    Err(_) => {
-                        queue_element.requeue(conn)?;
-                        sleep(Duration::from_secs(sleep_duration));
-                        sleep_duration *= 2;
-                        continue;
-                    }
-                };
-
-                Ok(())
+                (DocumentWriter { conn, device_id })
+                    .write(&client, &queue_element, user_token)
+                    .await
             }
         };
 
-        match processing_result {
+        println!("Processing result: {:?}", processing_result);
+        let post_write_result: Result<(), rusqlite::Error> = match processing_result {
+            Ok(write_result) => {
+                if queue_element.source != Source::Update {
+                    DocumentWriter::post_write(
+                        conn,
+                        write_result,
+                        device_id,
+                        queue_element.source.clone(),
+                    )
+                    .await?
+                }
+
+                Ok(())
+            }
+            Err(e) => {
+                eprintln!("[Post Write] Error: {}", e);
+                queue_element.requeue(conn)?;
+                handle_backoff(&mut sleep_duration);
+                continue;
+            }
+        };
+
+        match post_write_result {
             Ok(_) => {
                 queue_element.remove(conn)?;
                 sleep_duration = 30;
             }
-            Err(_) => {
+            Err(e) => {
+                eprintln!("[Post Processing] Error: {}", e);
                 queue_element.requeue(conn)?;
-                sleep(Duration::from_secs(sleep_duration));
-                sleep_duration *= 2;
+                handle_backoff(&mut sleep_duration);
             }
         }
     }
+}
+
+fn get_valid_configuration(conn: &Connection) -> Result<Option<(String, Uuid)>, Error> {
+    let config = Configuration::get(conn)?;
+    match (config.user_token, config.device_id) {
+        (Some(token), Some(id)) => Ok(Some((token, id))),
+        _ => Ok(None),
+    }
+}
+
+fn handle_backoff(sleep_duration: &mut u64) {
+    sleep(Duration::from_secs(*sleep_duration));
+    *sleep_duration *= 2;
 }

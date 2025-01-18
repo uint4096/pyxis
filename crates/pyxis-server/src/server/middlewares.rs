@@ -35,7 +35,8 @@ pub async fn check_token(mut request: Request, next: Next) -> Result<Response, S
         }
         Err(e) => {
             println!(
-                "[Auth Middleware] Failed to verify token signature. Endpoint: {}, Error: {}", request.uri().to_string(),
+                "[Auth Middleware] Failed to verify token signature. Endpoint: {}, Error: {}",
+                request.uri().to_string(),
                 e
             );
             Err(StatusCode::UNAUTHORIZED)

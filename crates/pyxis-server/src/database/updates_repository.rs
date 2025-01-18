@@ -84,11 +84,7 @@ impl UpdateRepository {
             .expression_attribute_names("#pk", "pk")
             .expression_attribute_values(
                 ":file_snapshot",
-                AttributeValue::S(format!(
-                    "{}/{}",
-                    snapshot_id.to_string(),
-                    file_uid
-                )),
+                AttributeValue::S(format!("{}/{}", snapshot_id.to_string(), file_uid)),
             )
             .expression_attribute_values(
                 ":pk",

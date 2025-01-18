@@ -26,7 +26,9 @@ impl Updates {
 
     pub fn get(file_uid: &str, snapshot_id: i64, conn: &Connection) -> Result<Vec<Vec<u8>>, Error> {
         let mut files_sql = conn.prepare("SELECT id FROM files WHERE uid = ?1")?;
-        let file_id = files_sql.query_row(&[&file_uid], |row| -> Result<i32, Error> { Ok(row.get(0)?) })?;
+        let file_id = files_sql.query_row(&[&file_uid], |row| -> Result<i32, Error> {
+            Ok(row.get(0)?)
+        })?;
 
         let mut sql =
             conn.prepare("SELECT content FROM updates WHERE file_id=?1 AND snapshot_id=?2")?;
@@ -63,17 +65,14 @@ impl Updates {
 
     pub fn insert(&self, conn: &Connection) -> Result<(), Error> {
         let mut files_sql = conn.prepare("SELECT id FROM files WHERE uid = ?1")?;
-        let file_id = files_sql.query_row(&[&self.file_uid], |row| -> Result<i32, Error> { Ok(row.get(0)?) })?;
+        let file_id = files_sql.query_row(&[&self.file_uid], |row| -> Result<i32, Error> {
+            Ok(row.get(0)?)
+        })?;
 
         let sql = "INSERT INTO updates (file_id, content, updated_at, snapshot_id) VALUES (?1, ?2, ?3, ?4)";
         conn.execute(
             sql,
-            (
-                &file_id,
-                &self.content,
-                &self.updated_at,
-                &self.snapshot_id,
-            ),
+            (&file_id, &self.content, &self.updated_at, &self.snapshot_id),
         )?;
 
         Ok(())

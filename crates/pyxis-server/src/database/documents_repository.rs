@@ -45,10 +45,7 @@ impl From<&HashMap<String, AttributeValue>> for Document {
                 .and_then(|v| v.as_s().ok())
                 .cloned()
                 .expect("source should exist"),
-            file_uid: value
-                .get("file_uid")
-                .and_then(|v| v.as_s().ok())
-                .cloned()
+            file_uid: value.get("file_uid").and_then(|v| v.as_s().ok()).cloned(),
         }
     }
 }
