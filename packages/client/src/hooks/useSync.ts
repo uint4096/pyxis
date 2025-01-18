@@ -7,7 +7,6 @@ import {
   useTreeStore,
   useWorkspace,
 } from "../store";
-import { ky } from "../utils";
 import {
   deleteWorkspace,
   type Directory,
@@ -15,6 +14,7 @@ import {
   type Sources,
   type Workspace,
 } from "../ffi";
+import { useSyncRequests } from "./useSyncRequests";
 
 type DocumentSources = Exclude<Sources, "updates" | "snapshots">;
 
@@ -44,6 +44,8 @@ export const useSync = () => {
 
   const { config } = useConfig();
   const { deviceIds } = useDevices();
+  const { getDocuments: getSyncedDocs } = useSyncRequests();
+
   const {
     isDuplicate: isDuplicateWorkspace,
     create: createWorkspace,
@@ -209,22 +211,15 @@ export const useSync = () => {
         return;
       }
 
-      const { documents } = await ky
-        .get<{ documents: Array<Document> }>("/sync/document/list", {
-          headers: {
-            authorization: `Bearer ${userToken}`,
-          },
-          searchParams: {
-            record_id: lastSyncedRecordId,
-            is_snapshot: false,
-            device_id: deviceId,
-          },
-        })
-        .json();
+      const { response } = await getSyncedDocs(
+        sources,
+        lastSyncedRecordId,
+        deviceId,
+      );
 
-      return documents;
+      return response?.documents ?? [];
     },
-    [config, getSyncedRecordId],
+    [config, getSyncedDocs, getSyncedRecordId],
   );
 
   useEffect(() => {

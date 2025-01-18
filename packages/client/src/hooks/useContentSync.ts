@@ -1,14 +1,7 @@
 import { useCallback } from "react";
 import { useConfig, useDevices, useTracker, useTreeStore } from "../store";
-import { ky } from "../utils";
 import type { Snapshot, Sources, Updates } from "../ffi";
-import { Document } from "./useSync";
-
-type Update = {
-  pk: string;
-  sk: string;
-  payload: string;
-};
+import { useSyncRequests } from "./useSyncRequests";
 
 export type FormattedContent = {
   fileContent: Uint8Array[];
@@ -20,17 +13,15 @@ export const useContentSync = () => {
   const { deviceIds } = useDevices();
   const { getSyncedRecordId, updateRecord } = useTracker();
   const { getContent } = useTreeStore();
+  const { getDocuments: getSnapshots, getUpdates } = useSyncRequests();
 
   const getDocuments = useCallback(
     async (deviceId: string, fileUid: string) => {
-      const { userToken } = config ?? {};
-
-      if (!userToken) {
-        return;
+      if (!config?.userToken) {
+        return [];
       }
 
       const sources = ["snapshots"] as Array<Sources>;
-
       const lastSyncedRecordId = await getSyncedRecordId(deviceId, sources);
 
       if (lastSyncedRecordId == null) {
@@ -38,42 +29,30 @@ export const useContentSync = () => {
         return;
       }
 
-      const { documents } = await ky
-        .get<{ documents: Array<Document> }>("/sync/document/list", {
-          headers: {
-            authorization: `Bearer ${userToken}`,
-          },
-          searchParams: {
-            record_id: lastSyncedRecordId,
-            is_snapshot: true,
-            device_id: deviceId,
-          },
-        })
-        .json();
+      const { response } = await getSnapshots(
+        sources,
+        lastSyncedRecordId,
+        deviceId,
+      );
 
-      return documents.filter((document) => document.file_uid === fileUid);
+      return (response?.documents || []).filter(
+        (document) => document.file_uid === fileUid,
+      );
     },
-    [config, getSyncedRecordId],
+    [config?.userToken, getSnapshots, getSyncedRecordId],
   );
 
-  const getUpdates = useCallback(
+  const getUpdatesList = useCallback(
     async (deviceId: string, fileUid: string, snapshotId: number) => {
-      const { updates } = await ky
-        .get<{ updates: Array<Update> }>("/sync/update/list", {
-          headers: {
-            authorization: `Bearer ${config?.userToken}`,
-          },
-          searchParams: {
-            file_uid: fileUid,
-            snapshot_id: snapshotId,
-            device_id: deviceId,
-          },
-        })
-        .json();
+      if (!config?.userToken) {
+        return [];
+      }
 
-      return updates;
+      const { response } = await getUpdates(deviceId, fileUid, snapshotId);
+
+      return response?.updates ?? [];
     },
-    [config?.userToken],
+    [config?.userToken, getUpdates],
   );
 
   const getFileContent = useCallback(
@@ -98,7 +77,7 @@ export const useContentSync = () => {
             (syncedSnapshots || [])
               .filter(Boolean)
               .map((snapshot) =>
-                getUpdates(
+                getUpdatesList(
                   snapshot.pk?.split("/")?.[1] ?? "",
                   fileUid,
                   snapshot.payload?.snapshot_id,
@@ -167,7 +146,7 @@ export const useContentSync = () => {
       deviceIds,
       getContent,
       getDocuments,
-      getUpdates,
+      getUpdatesList,
       updateRecord,
     ],
   );

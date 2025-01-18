@@ -2,34 +2,36 @@ import { styled } from "@linaria/react";
 import { useCallback, useState } from "react";
 
 import { Modal, TextInput } from "../../../components";
-import { ky, toast } from "../../../utils";
+import { toast } from "../../../utils";
 import { useConfig } from "../../../store";
-import { ConfigResponse } from "../../../ffi";
 import { HTTPError } from "ky";
+import { useAuthRequests } from "../../../hooks";
 
 export const AccountForm = ({ onDone }: { onDone: () => void }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const { create, config } = useConfig();
+  const { registerOrLogin } = useAuthRequests();
 
-  const [type, setType] = useState("signin");
+  const [type, setType] = useState<"signin" | "signup">("signin");
 
   const action = useCallback(async () => {
-    const endpoint = type === "signin" ? "/auth/signin" : "/auth/signup";
-
     try {
-      const {
-        user_id,
-        user_token: token,
-        device_id,
-      } = await ky
-        .post<Required<ConfigResponse>>(endpoint, {
-          json: { username, password, device_id: config.deviceId },
-        })
-        .json();
+      const { response, status } = await registerOrLogin(type, {
+        username,
+        password,
+        device_id: config.deviceId,
+      });
 
-      await create(username, user_id, token, device_id);
+      if (status === "offline") {
+        toast(
+          "You seem to be offline. Registration or login requires network connection!",
+        );
+      }
+
+      const { user_id, device_id, user_token: token } = response ?? {};
+      await create(username, user_id!, token!, device_id!);
       onDone();
     } catch (e) {
       if (e instanceof HTTPError && /Username taken/g.test(e.message)) {
@@ -40,7 +42,15 @@ export const AccountForm = ({ onDone }: { onDone: () => void }) => {
       const message = type === "signin" ? "Signin failed!" : "Signup failed!";
       toast(message);
     }
-  }, [type, username, password, config.deviceId, create, onDone]);
+  }, [
+    registerOrLogin,
+    type,
+    username,
+    password,
+    config.deviceId,
+    create,
+    onDone,
+  ]);
 
   const body = (
     <FormWrapper>

@@ -1,18 +1,19 @@
-import { ToastContainer } from "react-toastify";
-import "./App.css";
-import { Explorer } from "./pages/explorer";
 import "react-toastify/dist/ReactToastify.css";
+import "./App.css";
+
+import { ToastContainer } from "react-toastify";
+import { Explorer } from "./pages/explorer";
 import { ConfigurationTray } from "./pages/configuration";
 import { useEffect } from "react";
 import { useConfig, useDevices } from "./store";
-import { useSync } from "./hooks";
-import { DeviceIds } from "./ffi";
-import { ky } from "./utils";
+import { useOffline, useSync, useSyncRequests } from "./hooks";
 
 function App() {
   const { setConfig, config } = useConfig();
-  const { create: addDevices } = useDevices();
+  const { create: addDevices, list: listDevices } = useDevices();
+  const { initDevices } = useSyncRequests();
   const { status: syncStatus } = useSync();
+  const { networkCall } = useOffline();
 
   useEffect(() => {
     (async () => {
@@ -21,20 +22,13 @@ function App() {
           return;
         }
 
-        const { devices } = await ky
-          .get<{ devices: DeviceIds }>("/auth/devices", {
-            headers: {
-              authorization: `Bearer ${config.userToken}`,
-            },
-          })
-          .json();
-
-        await addDevices(devices);
+        const { response } = await initDevices();
+        await addDevices(response?.devices ?? []);
       } catch (e) {
         console.error("[Device] Init failed!");
       }
     })();
-  }, [addDevices, config.userToken]);
+  }, [addDevices, config?.userToken, initDevices, listDevices, networkCall]);
 
   useEffect(() => {
     (async () => {

@@ -20,10 +20,7 @@ export const useOffline = () => {
   const networkCall = useCallback(
     async <T>(
       func: () => Promise<T>,
-      {
-        onError,
-        onOffline,
-      }: {
+      options?: {
         onError?: (e: unknown) => Promise<T | undefined>;
         onOffline?: () => Promise<T | undefined>;
       },
@@ -31,6 +28,7 @@ export const useOffline = () => {
       status: "resolved" | "rejected" | "offline";
       response: T | undefined;
     }> => {
+      const { onError, onOffline } = options ?? {};
       if (isOnline) {
         try {
           return { status: "resolved", response: await func() };

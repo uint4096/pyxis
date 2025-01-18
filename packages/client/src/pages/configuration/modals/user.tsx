@@ -2,22 +2,29 @@ import { styled } from "@linaria/react";
 import { useCallback } from "react";
 
 import { Modal } from "../../../components";
-import { ky, toast } from "../../../utils";
+import { toast } from "../../../utils";
 import { useConfig } from "../../../store";
 import { UserSquare } from "../../../icons";
+import { useAuthRequests } from "../../../hooks";
 
 export const UserDetails = ({ onDone }: { onDone: () => void }) => {
   const { config, delete: removeTokenFromStore } = useConfig();
+  const { logout } = useAuthRequests();
 
-  const logout = useCallback(async () => {
+  const signout = useCallback(async () => {
+    if (!config?.userToken) {
+      throw new Error("No token!");
+    }
+
     try {
-      await ky
-        .post<void>("/auth/signout", {
-          headers: {
-            authorization: `Bearer ${config.userToken}`,
-          },
-        })
-        .json();
+      const { status } = await logout();
+
+      if (status === "offline") {
+        toast(
+          "You seem to be offline. Signing out requires network connection!",
+        );
+        return;
+      }
 
       await removeTokenFromStore();
       onDone();
@@ -25,7 +32,7 @@ export const UserDetails = ({ onDone }: { onDone: () => void }) => {
       console.error("[Auth] Logout failed!");
       toast("Sign out failed!");
     }
-  }, [config.userToken, removeTokenFromStore, onDone]);
+  }, [config?.userToken, logout, removeTokenFromStore, onDone]);
 
   const body = (
     <Wrapper>
@@ -33,7 +40,7 @@ export const UserDetails = ({ onDone }: { onDone: () => void }) => {
         <UserSquare width={36} height={36} stroke="#808080" />
         <Username>{config.username}</Username>
       </UserContainer>
-      <LogoutButton onClick={logout}>Sign out</LogoutButton>
+      <LogoutButton onClick={signout}>Sign out</LogoutButton>
     </Wrapper>
   );
 
