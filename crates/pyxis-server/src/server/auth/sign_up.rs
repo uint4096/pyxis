@@ -6,7 +6,7 @@ use axum::{
     response::{IntoResponse, Response},
     Json,
 };
-use pyxis_db::dynamo_client::Dynamo;
+use crate::dynamo_client::Dynamo;
 use serde::Deserialize;
 use uuid::Uuid;
 

@@ -1,7 +1,8 @@
 use std::sync::Arc;
 
 use axum::{extract::State, http::StatusCode, Extension, Json};
-use pyxis_db::{dynamo_client::Dynamo, payload::UpdateWritePayload};
+use pyxis_db::payload::UpdateWritePayload;
+use crate::dynamo_client::Dynamo;
 use uuid::Uuid;
 
 use crate::database::{

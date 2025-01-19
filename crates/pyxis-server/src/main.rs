@@ -1,8 +1,9 @@
 pub mod database;
 pub mod server;
+pub mod dynamo_client;
 
 use dotenv::dotenv;
-use pyxis_db::dynamo_client::Dynamo;
+use dynamo_client::Dynamo;
 use server::router::create_route;
 use std::{error::Error, sync::Arc};
 

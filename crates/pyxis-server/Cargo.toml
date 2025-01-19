@@ -19,3 +19,4 @@ aws-config = { version = "1.1.7", features = ["behavior-version-latest"] }
 dotenv = "0.15.0"
 pyxis_db = { path = "../pyxis_db" }
 serde_json = "1.0.134"
+aws-sdk-sns = "1.55.0"

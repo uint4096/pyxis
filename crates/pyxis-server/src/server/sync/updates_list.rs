@@ -5,7 +5,7 @@ use axum::{
     http::StatusCode,
     Extension, Json,
 };
-use pyxis_db::dynamo_client::Dynamo;
+use crate::dynamo_client::Dynamo;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 

@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use axum::{extract::State, http::StatusCode, Extension, Json};
-use pyxis_db::dynamo_client::Dynamo;
+use crate::dynamo_client::Dynamo;
 use serde::Serialize;
 
 use crate::database::{token_repository::Claims, user_repository::UserRepository};

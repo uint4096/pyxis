@@ -14,7 +14,7 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use pyxis_db::dynamo_client::Dynamo;
+use crate::dynamo_client::Dynamo;
 
 pub fn create_route(connection: Arc<Dynamo>) -> Router {
     let auth_router = Router::new()
