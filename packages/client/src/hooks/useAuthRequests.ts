@@ -14,6 +14,7 @@ export const useAuthRequests = () => {
   const { networkCall } = useOffline();
   const {
     config: { userToken: token },
+    get: getConfig,
   } = useConfig();
 
   const registerOrLogin = useCallback(
@@ -45,8 +46,51 @@ export const useAuthRequests = () => {
     [networkCall, token],
   );
 
+  const requestFeatureAccess = useCallback(
+    async (key: string) =>
+      await networkCall(() =>
+        ky
+          .post<Required<ConfigResponse>>("/auth/features", {
+            json: { key, value: "requested" },
+            headers: {
+              authorization: `Bearer ${token}`,
+            },
+          })
+          .json(),
+      ),
+    [networkCall, token],
+  );
+
+  const getFeatures = useCallback(
+    async (userId: string) =>
+      await networkCall(
+        () =>
+          ky
+            .get<{ features: Record<string, string> | undefined }>(
+              "/auth/features",
+              {
+                headers: {
+                  authorization: `Bearer ${token}`,
+                },
+              },
+            )
+            .json(),
+        {
+          onError: async () => ({
+            features: (await getConfig(userId))?.features,
+          }),
+          onOffline: async () => ({
+            features: (await getConfig(userId))?.features,
+          }),
+        },
+      ),
+    [networkCall, token, getConfig],
+  );
+
   return {
     registerOrLogin,
     logout,
+    requestFeatureAccess,
+    getFeatures,
   };
 };

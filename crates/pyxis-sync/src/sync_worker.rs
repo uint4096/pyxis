@@ -2,7 +2,8 @@ use std::{cmp::min, thread::sleep, time::Duration};
 
 use pyxis_db::entities::{
     config::Configuration,
-    queue::{ListenerQueue, Source}, tracker::Tracker,
+    queue::{ListenerQueue, Source},
+    tracker::Tracker,
 };
 use rusqlite::{Connection, Error};
 use uuid::Uuid;
@@ -29,7 +30,8 @@ pub async fn sync_worker(conn: &Connection) -> Result<(), Error> {
             }
         };
 
-        let last_written_id: i64 = match Tracker::get_last_queue_entry_id(conn, device_id, user_id) {
+        let last_written_id: i64 = match Tracker::get_last_queue_entry_id(conn, device_id, user_id)
+        {
             Ok(id) => id.or(Some(0)).unwrap(),
             Err(e) => {
                 eprintln!("Failed to get last send queue entry. Error: {}", e);
@@ -56,9 +58,13 @@ pub async fn sync_worker(conn: &Connection) -> Result<(), Error> {
                     .await
             }
             _ => {
-                (DocumentWriter { conn, device_id, user_id })
-                    .write(&client, &queue_element, user_token)
-                    .await
+                (DocumentWriter {
+                    conn,
+                    device_id,
+                    user_id,
+                })
+                .write(&client, &queue_element, user_token)
+                .await
             }
         };
 

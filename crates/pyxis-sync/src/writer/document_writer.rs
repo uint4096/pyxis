@@ -38,7 +38,7 @@ impl<'a> SyncWriter for DocumentWriter<'a> {
                 id: None,
                 source: queue_element.source.clone(),
                 user_id: self.user_id,
-                queue_entry_id: queue_element.id
+                queue_entry_id: queue_element.id,
             },
             Err(e) => {
                 println!("Error while trying to get tracked records {}", e);
@@ -48,7 +48,7 @@ impl<'a> SyncWriter for DocumentWriter<'a> {
                     id: None,
                     source: queue_element.source.clone(),
                     user_id: self.user_id,
-                    queue_entry_id: queue_element.id
+                    queue_entry_id: queue_element.id,
                 }
             }
         };
@@ -80,7 +80,14 @@ impl<'a> SyncWriter for DocumentWriter<'a> {
         user_id: Uuid,
         source: Source,
     ) -> Result<(), rusqlite::Error> {
-        let record = Tracker::new(None, device_id, source, record_id, user_id, Some(queue_entry_id));
+        let record = Tracker::new(
+            None,
+            device_id,
+            source,
+            record_id,
+            user_id,
+            Some(queue_entry_id),
+        );
 
         record.add(conn)?;
 

@@ -6,14 +6,33 @@ import { Explorer } from "./pages/explorer";
 import { ConfigurationTray } from "./pages/configuration";
 import { useEffect } from "react";
 import { useConfig, useDevices } from "./store";
-import { useOffline, useSync, useSyncRequests } from "./hooks";
+import { useAuthRequests, useOffline, useSync, useSyncRequests } from "./hooks";
 
 function App() {
-  const { setConfig, config } = useConfig();
+  const { create: modifyConfig, config } = useConfig();
   const { create: addDevices, list: listDevices } = useDevices();
   const { initDevices } = useSyncRequests();
+  const { getFeatures } = useAuthRequests();
   const { status: syncStatus } = useSync();
   const { networkCall } = useOffline();
+
+  useEffect(() => {
+    const { username, userToken, userId, deviceId } = config ?? {};
+    if (!userToken || !userId || !username || !deviceId) {
+      return;
+    }
+
+    (async () => {
+      const { response } = await getFeatures(config.userId!);
+      await modifyConfig(
+        username,
+        userId,
+        userToken,
+        deviceId,
+        response?.features,
+      );
+    })();
+  }, [config, getFeatures, modifyConfig]);
 
   useEffect(() => {
     (async () => {
@@ -30,16 +49,10 @@ function App() {
     })();
   }, [addDevices, config?.userToken, initDevices, listDevices, networkCall]);
 
-  useEffect(() => {
-    (async () => {
-      await setConfig();
-    })();
-  }, [setConfig]);
-
   return (
     <>
       <ConfigurationTray />
-      <Explorer />
+      {config.userToken && <Explorer />}
       <ToastContainer
         position={"bottom-right"}
         autoClose={3000}

@@ -52,6 +52,7 @@ impl Migrations for ConfigurationMigration {
 
         let create_sql = "CREATE TABLE IF NOT EXISTS configuration (
             id      INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT NOT NULL UNIQUE,
             config  TEXT
         )";
 
