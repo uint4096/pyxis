@@ -15,7 +15,7 @@ pub struct Tracker {
     pub source: Source,
     pub record_id: i64,
     pub user_id: Uuid,
-    pub queue_entry_id: Option<i64>
+    pub queue_entry_id: Option<i64>,
 }
 
 impl Tracker {
@@ -25,7 +25,7 @@ impl Tracker {
         source: Source,
         record_id: i64,
         user_id: Uuid,
-        queue_entry_id: Option<i64>
+        queue_entry_id: Option<i64>,
     ) -> Self {
         Self {
             id,
@@ -33,14 +33,14 @@ impl Tracker {
             device_id,
             record_id,
             user_id,
-            queue_entry_id
+            queue_entry_id,
         }
     }
 
     pub fn get_last_queue_entry_id(
         conn: &Connection,
         device_id: Uuid,
-        user_id: Uuid
+        user_id: Uuid,
     ) -> Result<Option<i64>, Error> {
         let query = format!(
             "SELECT queue_entry_id\
@@ -75,7 +75,10 @@ impl Tracker {
         );
         let mut stmt = conn.prepare(&query)?;
 
-        let mut params: Vec<Box<dyn ToSql>> = vec![Box::new(device_id.to_string()), Box::new(user_id.to_string())];
+        let mut params: Vec<Box<dyn ToSql>> = vec![
+            Box::new(device_id.to_string()),
+            Box::new(user_id.to_string()),
+        ];
         params.extend(
             sources
                 .iter()
@@ -101,7 +104,8 @@ impl Tracker {
 
     pub fn add(&self, conn: &Connection) -> Result<(), Error> {
         // Unique constraint on (source, device_id). Replaced on conflict
-        let insert_sql = "INSERT INTO tracker (source, device_id, record_id, user_id) VALUES (?1, ?2, ?3, ?4)";
+        let insert_sql =
+            "INSERT INTO tracker (source, device_id, record_id, user_id) VALUES (?1, ?2, ?3, ?4)";
 
         conn.execute(
             &insert_sql,

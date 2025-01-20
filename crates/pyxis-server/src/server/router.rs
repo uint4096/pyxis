@@ -2,7 +2,8 @@ use std::sync::Arc;
 
 use super::{
     auth::{
-        get_devices::get_devices, sign_in::sign_in, sign_out::sign_out, sign_up::sign_up, subscription_get::get_subscription, subscription_request::request_subscription
+        get_devices::get_devices, sign_in::sign_in, sign_out::sign_out, sign_up::sign_up,
+        subscription_get::get_subscription, subscription_modify::modify_subscription,
     },
     middlewares::check_token,
     sync::{
@@ -21,7 +22,7 @@ use axum::{
 #[derive(Clone)]
 pub struct AWSConnectionState {
     pub dynamo: Arc<Dynamo>,
-    pub sns: Arc<SNS>
+    pub sns: Arc<SNS>,
 }
 
 pub fn create_route(dynamo: Arc<Dynamo>, sns: Arc<SNS>) -> Router {
@@ -42,7 +43,7 @@ pub fn create_route(dynamo: Arc<Dynamo>, sns: Arc<SNS>) -> Router {
         )
         .route(
             "/features",
-            post(request_subscription.layer(middleware::from_fn(check_token))),
+            post(modify_subscription.layer(middleware::from_fn(check_token))),
         );
 
     let sync_router = Router::new()

@@ -1,23 +1,33 @@
 use std::{collections::HashMap, env};
 
-use axum::{extract::State, http::StatusCode, Extension};
+use axum::{extract::State, http::StatusCode, Extension, Json};
+use serde::Deserialize;
 use serde_json::json;
 
 use crate::{
     database::{
         features_repository::{Feature, FeaturesRepository},
         token_repository::Claims,
-    }, server::router::AWSConnectionState
+    },
+    server::router::AWSConnectionState,
 };
 
+#[derive(Deserialize)]
+pub struct SubscriptionPayload {
+    pub key: String,
+    pub value: String,
+}
+
 #[axum_macros::debug_handler]
-pub async fn request_subscription(
+pub async fn modify_subscription(
     Extension(claims): Extension<Claims>,
     State(connections): State<AWSConnectionState>,
+    Json(payload): Json<SubscriptionPayload>,
 ) -> Result<StatusCode, StatusCode> {
     let AWSConnectionState { dynamo, sns } = connections;
     let client = sns.client.clone();
-    let features_repostiory: FeaturesRepository = FeaturesRepository::new(dynamo.connection.clone());
+    let features_repostiory: FeaturesRepository =
+        FeaturesRepository::new(dynamo.connection.clone());
 
     let Claims {
         user,
@@ -33,12 +43,12 @@ pub async fn request_subscription(
                     mut features,
                 } = features;
 
-                features.insert("sync".to_owned(), "requested".to_owned());
+                features.insert(payload.key, payload.value.to_string());
 
                 Feature { user_id, features }
             } else {
                 let mut features = HashMap::new();
-                features.insert("sync".to_owned(), "requested".to_owned());
+                features.insert(payload.key, payload.value.to_string());
 
                 Feature {
                     user_id: user.user_id.to_string(),
@@ -55,24 +65,26 @@ pub async fn request_subscription(
     let create_response = features_repostiory.upsert(&feature).await;
 
     if let Ok(_) = create_response {
-        match client
-            .publish()
-            .topic_arn(
-                env::var("SUBSCRIPTION_REQUEST_SNS")
-                    .expect("[Features] Subscription SNS topic should be specified"),
-            )
-            .message(json!(feature).to_string())
-            .send()
-            .await
-        {
-            Ok(_) => {
-                return Ok(StatusCode::CREATED);
-            }
-            Err(e) => {
-                eprintln!("[Features] Failed to send SNS notification! Error: {}", e);
-                return Err(StatusCode::INTERNAL_SERVER_ERROR);
-            }
-        };
+        if payload.value == String::from("requested") {
+            match client
+                .publish()
+                .topic_arn(
+                    env::var("SUBSCRIPTION_REQUEST_SNS")
+                        .expect("[Features] Subscription SNS topic should be specified"),
+                )
+                .message(json!(feature).to_string())
+                .send()
+                .await
+            {
+                Ok(_) => {
+                    return Ok(StatusCode::CREATED);
+                }
+                Err(e) => {
+                    eprintln!("[Features] Failed to send SNS notification! Error: {}", e);
+                    return Err(StatusCode::INTERNAL_SERVER_ERROR);
+                }
+            };
+        }
     }
 
     Err(StatusCode::INTERNAL_SERVER_ERROR)

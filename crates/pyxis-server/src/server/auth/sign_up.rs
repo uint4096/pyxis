@@ -1,10 +1,10 @@
+use crate::server::router::AWSConnectionState;
 use axum::{
     extract::State,
     http::StatusCode,
     response::{IntoResponse, Response},
     Json,
 };
-use crate::server::router::AWSConnectionState;
 use serde::Deserialize;
 use uuid::Uuid;
 
@@ -31,7 +31,8 @@ pub async fn sign_up(
         username,
     } = user;
 
-    let user_repository: UserRepository = UserRepository::new(connections.dynamo.connection.clone());
+    let user_repository: UserRepository =
+        UserRepository::new(connections.dynamo.connection.clone());
     let token_repository = TokenRepository::new(connections.dynamo.connection.clone());
 
     match user_repository.get(&username).await {
