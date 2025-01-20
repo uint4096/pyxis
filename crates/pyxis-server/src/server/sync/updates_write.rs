@@ -1,8 +1,6 @@
-use std::sync::Arc;
-
+use crate::server::router::AWSConnectionState;
 use axum::{extract::State, http::StatusCode, Extension, Json};
 use pyxis_db::payload::UpdateWritePayload;
-use crate::dynamo_client::Dynamo;
 use uuid::Uuid;
 
 use crate::database::{
@@ -13,7 +11,7 @@ use crate::database::{
 #[axum_macros::debug_handler]
 pub async fn updates_write(
     Extension(claims): Extension<Claims>,
-    State(db): State<Arc<Dynamo>>,
+    State(connections): State<AWSConnectionState>,
     Json(update): Json<UpdateWritePayload>,
 ) -> Result<StatusCode, StatusCode> {
     let Claims {
@@ -22,7 +20,7 @@ pub async fn updates_write(
         iat: _,
     } = claims;
 
-    let update_repository = UpdateRepository::new(db.connection.clone());
+    let update_repository = UpdateRepository::new(connections.dynamo.connection.clone());
 
     let UpdateWritePayload {
         file_uid,

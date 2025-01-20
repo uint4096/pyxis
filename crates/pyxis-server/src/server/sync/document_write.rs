@@ -1,8 +1,6 @@
-use std::sync::Arc;
-
+use crate::server::router::AWSConnectionState;
 use axum::{extract::State, http::StatusCode, Extension, Json};
 use pyxis_db::payload::DocumentWritePayload;
-use crate::dynamo_client::Dynamo;
 use serde_json::Value;
 
 use crate::database::{
@@ -13,7 +11,7 @@ use crate::database::{
 #[axum_macros::debug_handler]
 pub async fn document_write(
     Extension(claims): Extension<Claims>,
-    State(db): State<Arc<Dynamo>>,
+    State(connections): State<AWSConnectionState>,
     Json(document): Json<DocumentWritePayload>,
 ) -> Result<Json<Value>, StatusCode> {
     let Claims {
@@ -22,7 +20,7 @@ pub async fn document_write(
         iat: _,
     } = claims;
 
-    let document_repository = DocumentRepository::new(db.connection.clone());
+    let document_repository = DocumentRepository::new(connections.dynamo.connection.clone());
 
     let pk = format!("{}/{}", user.user_id, user.device_id);
     let DocumentWritePayload {

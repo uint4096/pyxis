@@ -1,14 +1,12 @@
-use std::sync::Arc;
-
+use crate::server::router::AWSConnectionState;
 use axum::{extract::State, http::StatusCode, Extension};
-use crate::dynamo_client::Dynamo;
 
 use crate::database::token_repository::{Claims, TokenRepository};
 
 #[axum_macros::debug_handler]
 pub async fn sign_out(
     Extension(claims): Extension<Claims>,
-    State(db): State<Arc<Dynamo>>,
+    State(connections): State<AWSConnectionState>,
 ) -> Result<StatusCode, StatusCode> {
     let Claims {
         user,
@@ -16,7 +14,7 @@ pub async fn sign_out(
         iat: _,
     } = claims;
 
-    let token_repository = TokenRepository::new(db.connection.clone());
+    let token_repository = TokenRepository::new(connections.dynamo.connection.clone());
 
     let delete_response = token_repository
         .delete(&user.user_id, &user.device_id)

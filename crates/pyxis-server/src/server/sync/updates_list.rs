@@ -1,11 +1,9 @@
-use std::sync::Arc;
-
+use crate::server::router::AWSConnectionState;
 use axum::{
     extract::{Query, State},
     http::StatusCode,
     Extension, Json,
 };
-use crate::dynamo_client::Dynamo;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -21,7 +19,7 @@ pub struct UpdatesListQuery {
 #[axum_macros::debug_handler]
 pub async fn updates_list(
     Extension(claims): Extension<Claims>,
-    State(db): State<Arc<Dynamo>>,
+    State(connections): State<AWSConnectionState>,
     Query(request): Query<UpdatesListQuery>,
 ) -> Result<Json<Value>, StatusCode> {
     let Claims {
@@ -30,7 +28,7 @@ pub async fn updates_list(
         iat: _,
     } = claims;
 
-    let updates_repository = UpdateRepository::new(db.connection.clone());
+    let updates_repository = UpdateRepository::new(connections.dynamo.connection.clone());
 
     let UpdatesListQuery {
         snapshot_id,

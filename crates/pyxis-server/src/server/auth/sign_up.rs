@@ -1,12 +1,10 @@
-use std::sync::Arc;
-
 use axum::{
     extract::State,
     http::StatusCode,
     response::{IntoResponse, Response},
     Json,
 };
-use crate::dynamo_client::Dynamo;
+use crate::server::router::AWSConnectionState;
 use serde::Deserialize;
 use uuid::Uuid;
 
@@ -24,7 +22,7 @@ pub struct SignUpPayload {
 
 #[axum_macros::debug_handler]
 pub async fn sign_up(
-    State(db): State<Arc<Dynamo>>,
+    State(connections): State<AWSConnectionState>,
     Json(user): Json<SignUpPayload>,
 ) -> Result<Json<UserToken>, Response> {
     let SignUpPayload {
@@ -33,8 +31,8 @@ pub async fn sign_up(
         username,
     } = user;
 
-    let user_repository = UserRepository::new(db.connection.clone());
-    let token_repository = TokenRepository::new(db.connection.clone());
+    let user_repository: UserRepository = UserRepository::new(connections.dynamo.connection.clone());
+    let token_repository = TokenRepository::new(connections.dynamo.connection.clone());
 
     match user_repository.get(&username).await {
         Ok(user) => {

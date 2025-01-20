@@ -1,7 +1,5 @@
-use std::sync::Arc;
-
+use crate::server::router::AWSConnectionState;
 use axum::{extract::State, http::StatusCode, Extension, Json};
-use crate::dynamo_client::Dynamo;
 use serde::Serialize;
 
 use crate::database::{token_repository::Claims, user_repository::UserRepository};
@@ -13,10 +11,10 @@ pub struct DevicesResponse {
 
 #[axum_macros::debug_handler]
 pub async fn get_devices(
-    State(db): State<Arc<Dynamo>>,
+    State(connections): State<AWSConnectionState>,
     Extension(claims): Extension<Claims>,
 ) -> Result<Json<DevicesResponse>, StatusCode> {
-    let user_repository = UserRepository::new(db.connection.clone());
+    let user_repository = UserRepository::new(connections.dynamo.connection.clone());
     match user_repository.get_devices(&claims.user.username).await {
         Ok(devices) => Ok(Json(DevicesResponse { devices })),
         Err(e) => {

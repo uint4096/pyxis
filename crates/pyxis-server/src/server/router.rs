@@ -1,22 +1,30 @@
 use std::sync::Arc;
 
 use super::{
-    auth::{get_devices::get_devices, sign_in::sign_in, sign_out::sign_out, sign_up::sign_up},
+    auth::{
+        get_devices::get_devices, sign_in::sign_in, sign_out::sign_out, sign_up::sign_up, subscription_get::get_subscription, subscription_request::request_subscription
+    },
     middlewares::check_token,
     sync::{
         document_list::document_list, document_write::document_write, ping::ping,
         updates_list::updates_list, updates_write::updates_write,
     },
 };
+use crate::{dynamo_client::Dynamo, sns_client::SNS};
 use axum::{
     handler::Handler,
     middleware,
     routing::{get, post},
     Router,
 };
-use crate::dynamo_client::Dynamo;
 
-pub fn create_route(connection: Arc<Dynamo>) -> Router {
+#[derive(Clone)]
+pub struct AWSConnectionState {
+    pub dynamo: Arc<Dynamo>,
+    pub sns: Arc<SNS>
+}
+
+pub fn create_route(dynamo: Arc<Dynamo>, sns: Arc<SNS>) -> Router {
     let auth_router = Router::new()
         .route("/signup", post(sign_up))
         .route("/signin", post(sign_in))
@@ -27,6 +35,14 @@ pub fn create_route(connection: Arc<Dynamo>) -> Router {
         .route(
             "/devices",
             get(get_devices.layer(middleware::from_fn(check_token))),
+        )
+        .route(
+            "/features",
+            get(get_subscription.layer(middleware::from_fn(check_token))),
+        )
+        .route(
+            "/features",
+            post(request_subscription.layer(middleware::from_fn(check_token))),
         );
 
     let sync_router = Router::new()
@@ -51,5 +67,5 @@ pub fn create_route(connection: Arc<Dynamo>) -> Router {
     Router::new()
         .nest("/auth", auth_router)
         .nest("/sync", sync_router)
-        .with_state(connection)
+        .with_state(AWSConnectionState { dynamo, sns })
 }

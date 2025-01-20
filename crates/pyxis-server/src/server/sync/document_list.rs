@@ -1,15 +1,12 @@
-use std::sync::Arc;
-
 use axum::{
     extract::{Query, State},
     http::StatusCode,
     Extension, Json,
 };
-use crate::dynamo_client::Dynamo;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::database::{documents_repository::DocumentRepository, token_repository::Claims};
+use crate::{database::{documents_repository::DocumentRepository, token_repository::Claims}, server::router::AWSConnectionState};
 
 #[derive(Serialize, Deserialize)]
 pub struct DocumentListQueries {
@@ -21,7 +18,7 @@ pub struct DocumentListQueries {
 #[axum_macros::debug_handler]
 pub async fn document_list(
     Extension(claims): Extension<Claims>,
-    State(db): State<Arc<Dynamo>>,
+    State(connections): State<AWSConnectionState>,
     Query(request): Query<DocumentListQueries>,
 ) -> Result<Json<Value>, StatusCode> {
     let Claims {
@@ -30,7 +27,7 @@ pub async fn document_list(
         iat: _,
     } = claims;
 
-    let document_repository = DocumentRepository::new(db.connection.clone());
+    let document_repository = DocumentRepository::new(connections.dynamo.connection.clone());
 
     let DocumentListQueries {
         record_id,
