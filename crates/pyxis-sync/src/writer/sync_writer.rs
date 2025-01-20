@@ -1,5 +1,5 @@
 use pyxis_db::entities::queue::{ListenerQueue, Source};
-use reqwest::{Client, Error, Response};
+use reqwest::{Client, Error};
 use rusqlite::Connection;
 use uuid::Uuid;
 
@@ -9,12 +9,14 @@ pub trait SyncWriter {
         client: &Client,
         element: &ListenerQueue,
         token: String,
-    ) -> Result<Response, Error>;
+    ) -> Result<(i64, i64), Error>;
 
     async fn post_write(
         _conn: &Connection,
-        _res: Response,
+        _record_id: i64,
+        _queue_entry_id: i64,
         _device_id: Uuid,
+        _user_id: Uuid,
         _source: Source,
     ) -> Result<(), rusqlite::Error> {
         Ok(())

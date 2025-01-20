@@ -195,7 +195,7 @@ export const useSync = () => {
   );
 
   const getDocuments = useCallback(
-    async (deviceId: string) => {
+    async (deviceId: string, userId: string) => {
       const { userToken } = config ?? {};
 
       if (!userToken) {
@@ -204,7 +204,11 @@ export const useSync = () => {
 
       const sources = ["workspaces", "files", "directories"] as Array<Sources>;
 
-      const lastSyncedRecordId = await getSyncedRecordId(deviceId, sources);
+      const lastSyncedRecordId = await getSyncedRecordId(
+        deviceId,
+        sources,
+        userId,
+      );
 
       if (lastSyncedRecordId == null) {
         console.error("Failed to fetch last record id. Aborting sync...");
@@ -224,11 +228,15 @@ export const useSync = () => {
 
   useEffect(() => {
     (async () => {
+      if (!config?.userId || !config?.deviceId) {
+        return;
+      }
+
       try {
         const documents = await Promise.all(
           deviceIds
             .filter((id) => id !== config.deviceId)
-            .map((device) => getDocuments(device)),
+            .map((device) => getDocuments(device, config.userId!)),
         );
 
         // @todo: handle unsynced documents
@@ -262,7 +270,7 @@ export const useSync = () => {
         await Promise.all(
           Object.entries(documentsRecordIdMap).map(
             ([deviceId, { source, recordId }]) =>
-              updateRecord(deviceId, source, recordId),
+              updateRecord(deviceId, source, recordId, config.userId!),
           ),
         );
       } catch (e) {
@@ -271,7 +279,8 @@ export const useSync = () => {
       }
     })();
   }, [
-    config.deviceId,
+    config?.deviceId,
+    config?.userId,
     deviceIds,
     getDocuments,
     operationHandlers,

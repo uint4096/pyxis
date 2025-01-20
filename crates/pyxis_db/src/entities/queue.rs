@@ -41,7 +41,7 @@ impl ToString for Source {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ListenerQueue {
-    pub id: Option<i32>,
+    pub id: Option<i64>,
     pub status: String,
     pub source: Source,
     pub operation: String,
@@ -52,7 +52,7 @@ pub struct ListenerQueue {
 
 impl ListenerQueue {
     pub fn new(
-        id: Option<i32>,
+        id: Option<i64>,
         status: String,
         source: String,
         operation: String,
@@ -90,12 +90,16 @@ impl ListenerQueue {
         Ok(())
     }
 
-    pub fn dequeue(conn: &Connection) -> Result<ListenerQueue, Error> {
+    pub fn dequeue(conn: &Connection, id: i64) -> Result<ListenerQueue, Error> {
         let mut sql = conn.prepare(
-            "SELECT id, status, source, operation, payload, file_uid, snapshot_id payload FROM listener_queue ORDER BY ROWID ASC LIMIT 1",
+            "SELECT id, status, source, operation, payload, file_uid, snapshot_id\
+            FROM listener_queue\
+            WHERE id>?1\
+            ORDER BY ROWID ASC\
+            LIMIT 1",
         )?;
 
-        let entry = sql.query_row([], |row| -> Result<ListenerQueue, Error> {
+        let entry = sql.query_row([&id], |row| -> Result<ListenerQueue, Error> {
             let source_str: String = row.get(2)?;
             let file_uid: Option<String> = row.get(5)?;
             let snapshot_id: Option<i64> = row.get(6)?;

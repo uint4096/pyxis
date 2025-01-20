@@ -6,7 +6,10 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::{database::{documents_repository::DocumentRepository, token_repository::Claims}, server::router::AWSConnectionState};
+use crate::{
+    database::{documents_repository::DocumentRepository, token_repository::Claims},
+    server::router::AWSConnectionState,
+};
 
 #[derive(Serialize, Deserialize)]
 pub struct DocumentListQueries {

@@ -1,5 +1,5 @@
 use pyxis_db::{entities::queue::ListenerQueue, payload::UpdateWritePayload};
-use reqwest::{Client, Error, Response};
+use reqwest::{Client, Error};
 
 use super::sync_writer::SyncWriter;
 
@@ -11,7 +11,7 @@ impl SyncWriter for UpdateWriter {
         client: &Client,
         queue_element: &ListenerQueue,
         token: String,
-    ) -> Result<Response, Error> {
+    ) -> Result<(i64, i64), Error> {
         let update_payload = UpdateWritePayload {
             file_uid: queue_element
                 .file_uid
@@ -28,6 +28,8 @@ impl SyncWriter for UpdateWriter {
             .json(&update_payload)
             .header("authorization", format!("Bearer {}", &token))
             .send()
-            .await
+            .await?;
+
+        Ok((0, queue_element.id.unwrap()))
     }
 }

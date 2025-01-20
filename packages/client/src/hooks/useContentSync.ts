@@ -17,12 +17,16 @@ export const useContentSync = () => {
 
   const getDocuments = useCallback(
     async (deviceId: string, fileUid: string) => {
-      if (!config?.userToken) {
+      if (!config?.userToken || !config?.userId) {
         return [];
       }
 
       const sources = ["snapshots"] as Array<Sources>;
-      const lastSyncedRecordId = await getSyncedRecordId(deviceId, sources);
+      const lastSyncedRecordId = await getSyncedRecordId(
+        deviceId,
+        sources,
+        config.userId,
+      );
 
       if (lastSyncedRecordId == null) {
         console.error("Failed to fetch last record id. Aborting sync...");
@@ -39,7 +43,7 @@ export const useContentSync = () => {
         (document) => document.file_uid === fileUid,
       );
     },
-    [config?.userToken, getSnapshots, getSyncedRecordId],
+    [config.userId, config?.userToken, getSnapshots, getSyncedRecordId],
   );
 
   const getUpdatesList = useCallback(
@@ -57,6 +61,10 @@ export const useContentSync = () => {
 
   const getFileContent = useCallback(
     async (fileUid: string): Promise<FormattedContent | undefined> => {
+      if (!config.userId) {
+        return;
+      }
+
       try {
         const documents = await Promise.all(
           deviceIds
@@ -129,7 +137,7 @@ export const useContentSync = () => {
 
         await Promise.all(
           Object.entries(documentsRecordIdMap).map(([deviceId, recordId]) =>
-            updateRecord(deviceId, "snapshots", recordId),
+            updateRecord(deviceId, "snapshots", recordId, config.userId!),
           ),
         );
 
@@ -143,6 +151,7 @@ export const useContentSync = () => {
     },
     [
       config.deviceId,
+      config.userId,
       deviceIds,
       getContent,
       getDocuments,

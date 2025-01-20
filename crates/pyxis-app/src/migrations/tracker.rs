@@ -31,10 +31,13 @@ impl FromSql for TrackerMigration {
 impl Migrations for TrackerMigration {
     fn run(&self, transaction: &Transaction) -> Result<usize, rusqlite::Error> {
         let sql = "CREATE TABLE IF NOT EXISTS tracker (
-            id          INTEGER PRIMARY KEY AUTOINCREMENT,
-            record_id   INTEGER NOT NULL,
-            source      TEXT NOT NULL,
-            device_id   TEXT NOT NULL
+            id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+            record_id          INTEGER NOT NULL,
+            source             TEXT NOT NULL,
+            device_id          TEXT NOT NULL,
+            user_id            TEXT NOT NULL,
+            queue_entry_id     INTEGER,
+            UNIQUE(device_id, source, user_id) ON CONFLICT REPLACE
         )";
 
         transaction.execute(&sql, ())

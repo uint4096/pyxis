@@ -12,6 +12,7 @@ pub fn last_synced_record_id(
     config_database: State<ConfigDatabase>,
     sources: Vec<String>,
     device_id: String,
+    user_id: String
 ) -> Option<i64> {
     let sources: Vec<Source> = sources
         .into_iter()
@@ -22,6 +23,7 @@ pub fn last_synced_record_id(
         &config_database.0.get_connection(),
         sources,
         Uuid::from_str(&device_id).unwrap(),
+        Uuid::from_str(&user_id).unwrap()
     ) {
         Ok(record) => Some(record.record_id),
         Err(e) => {
@@ -37,12 +39,15 @@ pub fn add_record(
     source: String,
     device_id: String,
     record_id: i64,
+    user_id: String
 ) -> Option<bool> {
     let record = Tracker::new(
         None,
         Uuid::from_str(&device_id).unwrap(),
         Source::from_str(&source).unwrap(),
         record_id,
+        Uuid::from_str(&user_id).unwrap(),
+        None
     );
 
     match record.add(&config_database.0.get_connection()) {
