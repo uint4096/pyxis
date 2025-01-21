@@ -17,7 +17,7 @@ use handlers::workspaces::{
 };
 use hooks::content_hook;
 use migrations::{run_config_migrations, run_migrations};
-use pyxis_db::database::{ConfigDatabase, Database};
+use pyxis_shared::database::{ConfigDatabase, Database};
 use sidecar::start_sync_worker;
 use tauri::{App, Manager};
 

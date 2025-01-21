@@ -1,4 +1,4 @@
-use pyxis_db::{database::Database, entities::snapshots::Snapshots};
+use pyxis_shared::{database::Database, entities::snapshots::Snapshots};
 use tauri::State;
 
 #[tauri::command]

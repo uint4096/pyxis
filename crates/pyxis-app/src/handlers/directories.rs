@@ -1,5 +1,5 @@
 use chrono::Utc;
-use pyxis_db::{database::Database, entities::directories::Directory};
+use pyxis_shared::{database::Database, entities::directories::Directory};
 use tauri::State;
 
 #[tauri::command]

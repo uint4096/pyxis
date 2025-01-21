@@ -1,7 +1,7 @@
-use std::{cmp::min, thread::sleep, time::Duration};
+use std::{cmp::min, str::FromStr, thread::sleep, time::Duration};
 
-use pyxis_db::entities::{
-    config::Configuration,
+use pyxis_shared::entities::{
+    config::ConfigEntry,
     queue::{ListenerQueue, Source},
     tracker::Tracker,
 };
@@ -107,9 +107,9 @@ pub async fn sync_worker(conn: &Connection) -> Result<(), Error> {
 }
 
 fn get_valid_configuration(conn: &Connection) -> Result<Option<(String, Uuid, Uuid)>, Error> {
-    let config = Configuration::get(conn)?;
+    let config = ConfigEntry::get_logged_in_user(conn)?;
     match (config.user_token, config.device_id, config.user_id) {
-        (Some(token), Some(id), Some(user_id)) => Ok(Some((token, id, user_id))),
+        (Some(token), Some(id), user_id) => Ok(Some((token, id, Uuid::from_str(&user_id).unwrap()))),
         _ => Ok(None),
     }
 }

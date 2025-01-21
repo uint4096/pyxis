@@ -1,5 +1,5 @@
 use super::listener::Listener;
-use pyxis_db::entities::snapshots::Snapshots;
+use pyxis_shared::entities::snapshots::Snapshots;
 use rusqlite::{Connection, Error};
 
 pub struct SnapshotsListener {

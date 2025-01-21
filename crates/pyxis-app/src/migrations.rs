@@ -21,7 +21,7 @@ use tracker::TrackerMigration;
 use updates::UpdatesMigration;
 use workspaces::WorkspaceMigration;
 
-use pyxis_db::database::Database;
+use pyxis_shared::database::Database;
 
 pub trait MigrationsTrait: Migrations + ToSql + Debug {}
 

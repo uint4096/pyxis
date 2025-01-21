@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use pyxis_db::{
+use pyxis_shared::{
     database::ConfigDatabase,
     entities::config::{ConfigEntry, Configuration},
 };

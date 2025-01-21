@@ -10,7 +10,7 @@ use std::collections::HashMap;
 use directories::DirectoryListener;
 use files::FilesListener;
 use listener::Listener;
-use pyxis_db::entities::queue::Source;
+use pyxis_shared::entities::queue::Source;
 use rusqlite::{hooks::Action, Connection, Error};
 use snapshots::SnapshotsListener;
 use updates::UpdatesListener;

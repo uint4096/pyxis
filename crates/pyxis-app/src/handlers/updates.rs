@@ -1,4 +1,4 @@
-use pyxis_db::{database::Database, entities::updates::Updates};
+use pyxis_shared::{database::Database, entities::updates::Updates};
 use tauri::State;
 
 #[tauri::command]

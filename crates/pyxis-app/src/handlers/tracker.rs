@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use pyxis_db::{
+use pyxis_shared::{
     database::ConfigDatabase,
     entities::{queue::Source, tracker::Tracker},
 };

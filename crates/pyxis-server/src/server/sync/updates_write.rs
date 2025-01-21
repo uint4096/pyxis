@@ -1,6 +1,6 @@
 use crate::server::router::AWSConnectionState;
 use axum::{extract::State, http::StatusCode, Extension, Json};
-use pyxis_db::payload::UpdateWritePayload;
+use pyxis_shared::payload::UpdateWritePayload;
 use uuid::Uuid;
 
 use crate::database::{

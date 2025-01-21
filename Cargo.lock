@@ -3662,7 +3662,7 @@ dependencies = [
  "dirs",
  "machineid-rs",
  "nanoid",
- "pyxis_db",
+ "pyxis_shared",
  "rusqlite",
  "serde",
  "serde_json",
@@ -3688,7 +3688,7 @@ dependencies = [
  "futures",
  "jsonwebtoken",
  "pwhash",
- "pyxis_db",
+ "pyxis_shared",
  "serde",
  "serde_json",
  "serde_with",
@@ -3702,7 +3702,7 @@ version = "0.1.0"
 dependencies = [
  "aws-config",
  "aws-sdk-dynamodb",
- "pyxis_db",
+ "pyxis_shared",
  "reqwest",
  "rusqlite",
  "serde",
@@ -3712,7 +3712,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pyxis_db"
+name = "pyxis_shared"
 version = "0.1.0"
 dependencies = [
  "aws-config",

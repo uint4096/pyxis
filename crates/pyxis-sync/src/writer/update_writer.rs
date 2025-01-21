@@ -1,4 +1,4 @@
-use pyxis_db::{entities::queue::ListenerQueue, payload::UpdateWritePayload};
+use pyxis_shared::{entities::queue::ListenerQueue, payload::UpdateWritePayload};
 use reqwest::{Client, Error};
 
 use super::sync_writer::SyncWriter;

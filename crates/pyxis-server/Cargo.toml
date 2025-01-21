@@ -17,6 +17,6 @@ axum-macros = "0.4.2"
 aws-sdk-dynamodb = "1.55.0"
 aws-config = { version = "1.1.7", features = ["behavior-version-latest"] }
 dotenv = "0.15.0"
-pyxis_db = { path = "../pyxis_db" }
+pyxis_shared = { path = "../pyxis_shared" }
 serde_json = "1.0.134"
 aws-sdk-sns = "1.55.0"

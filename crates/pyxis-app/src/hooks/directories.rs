@@ -1,4 +1,4 @@
-use pyxis_db::entities::directories::Directory;
+use pyxis_shared::entities::directories::Directory;
 use rusqlite::{Connection, Error};
 use serde_json::json;
 

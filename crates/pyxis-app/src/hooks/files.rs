@@ -1,5 +1,5 @@
 use super::listener::Listener;
-use pyxis_db::entities::files::Files;
+use pyxis_shared::entities::files::Files;
 use rusqlite::{Connection, Error};
 use serde_json::json;
 

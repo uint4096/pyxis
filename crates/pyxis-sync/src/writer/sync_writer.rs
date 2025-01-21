@@ -1,4 +1,4 @@
-use pyxis_db::entities::queue::{ListenerQueue, Source};
+use pyxis_shared::entities::queue::{ListenerQueue, Source};
 use reqwest::{Client, Error};
 use rusqlite::Connection;
 use uuid::Uuid;

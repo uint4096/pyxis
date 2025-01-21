@@ -2,7 +2,7 @@ use std::{collections::HashMap, error::Error, str::FromStr, sync::Arc};
 
 use aws_sdk_dynamodb::{self as DynamoDB, types::AttributeValue};
 use chrono::Utc;
-use pyxis_db::entities::queue::Source;
+use pyxis_shared::entities::queue::Source;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]

@@ -54,6 +54,19 @@ impl ConfigEntry {
         }
     }
 
+    pub fn get_logged_in_user(conn: &Connection) -> Result<Configuration, Error> {
+        let mut stmt = conn.prepare("SELECT config FROM configuration WHERE config IS NOT NULL")?;
+        let config = stmt.query_row([], |row| {
+            let json_str: String = row.get(0)?;
+            let config: Configuration = serde_json::from_str(&json_str)
+                .expect("[Configuration] Failed to cast JSON to struct!");
+
+            Ok(config)
+        });
+
+        config
+    }
+
     pub fn get(conn: &Connection, user_id: String) -> Result<Configuration, Error> {
         let mut stmt = conn.prepare("SELECT config FROM configuration WHERE user_id=?1")?;
         let config = stmt.query_row([&user_id], |row| {

@@ -1,4 +1,4 @@
-use pyxis_db::entities::queue::ListenerQueue;
+use pyxis_shared::entities::queue::ListenerQueue;
 use rusqlite::{Connection, Error};
 
 pub trait Listener {

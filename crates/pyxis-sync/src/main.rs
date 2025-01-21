@@ -1,6 +1,6 @@
 mod writer;
 
-use pyxis_db::database::Database;
+use pyxis_shared::database::Database;
 use rusqlite::Error;
 use sync_worker::sync_worker;
 

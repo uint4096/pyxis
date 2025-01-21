@@ -1,4 +1,4 @@
-use pyxis_db::{
+use pyxis_shared::{
     entities::{
         queue::{ListenerQueue, Source},
         tracker::Tracker,

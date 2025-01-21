@@ -1,7 +1,7 @@
 [workspace]
 
 members = [
-    "crates/pyxis_db",
+    "crates/pyxis_shared",
     "crates/pyxis-app",
     "crates/pyxis-server",
     "crates/pyxis-sync"

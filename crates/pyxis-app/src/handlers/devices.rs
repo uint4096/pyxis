@@ -1,4 +1,4 @@
-use pyxis_db::{database::ConfigDatabase, entities::devices::Device};
+use pyxis_shared::{database::ConfigDatabase, entities::devices::Device};
 use tauri::State;
 
 #[tauri::command]

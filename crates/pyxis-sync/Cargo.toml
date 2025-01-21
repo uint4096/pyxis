@@ -8,7 +8,7 @@ aws-config = "1.5.12"
 aws-sdk-dynamodb = "1.57.0"
 serde = "1.0.217"
 tokio = { version = "1.12", features = ['full'] }
-pyxis_db = { path = "../pyxis_db" }
+pyxis_shared = { path = "../pyxis_shared" }
 rusqlite = { version = "0.32.1", features = ["hooks"] }
 serde_json = "1.0.134"
 reqwest = { version = "0.12.12", features = ["json"] }
