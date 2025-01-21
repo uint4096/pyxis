@@ -5,7 +5,7 @@ mod hooks;
 mod migrations;
 mod sidecar;
 
-use handlers::config::{add_user_data, get_config, remove_user_data};
+use handlers::config::{add_user_data, get_config, remove_user_data, get_logged_in_user};
 use handlers::devices::{add_devices, list_devices};
 use handlers::directories::{create_dir, delete_dir, get_directory_id, list_dirs, update_dir};
 use handlers::files::{create_file, delete_file, get_file_id, list_files, update_file};
@@ -22,31 +22,31 @@ use sidecar::start_sync_worker;
 use tauri::{App, Manager};
 
 fn main() {
-    let mut database = Database::create_connection("pyxis");
+    let mut database = Database::create_connection("pyxis_docs");
 
     /*
      * SQLite locks the database file during inserts and updates. Hence, a different
      * database to handle queue operations
      */
-    let mut config_database = ConfigDatabase(Database::create_connection("pyxis_config"));
+    let mut sync_db = ConfigDatabase(Database::create_connection("pyxis_sync"));
 
     match run_migrations(&mut database) {
         Ok(_) => println!("Migration successful!"),
         Err(e) => eprintln!("Migration failed! Error: {}", e),
     }
 
-    match run_config_migrations(&mut config_database.0) {
+    match run_config_migrations(&mut sync_db.0) {
         Ok(_) => println!("Migration successful (config)!"),
         Err(e) => eprintln!("Migration failed (config)! Error: {}", e),
     }
 
-    database.set_update_hook(content_hook, &config_database);
+    database.set_update_hook(content_hook, &sync_db);
 
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
         .manage(database)
-        .manage(config_database)
+        .manage(sync_db)
         .invoke_handler(tauri::generate_handler![
             create_workspace,
             list_workspaces,
@@ -73,7 +73,8 @@ fn main() {
             get_file_id,
             get_directory_id,
             get_workspace_id,
-            add_record
+            add_record,
+            get_logged_in_user
         ])
         .setup(|app: &mut App| {
             let window = app

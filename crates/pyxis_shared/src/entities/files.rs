@@ -75,7 +75,7 @@ impl Files {
                 d.uid as dir_uid \
                 FROM files f \
                 INNER JOIN workspaces w ON f.workspace_id = w.id \
-                INNER JOIN directories d ON f.dir_id = d.id \
+                LEFT JOIN directories d ON f.dir_id = d.id \
                 WHERE f.id = ?1"
         ))?;
 

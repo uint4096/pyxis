@@ -72,12 +72,10 @@ impl FeaturesRepository {
     }
 
     pub async fn get(&self, user_id: String) -> Result<Option<Feature>, Box<dyn Error>> {
-        let table_name = "updates_sync";
-
         let feature = self
             .client
             .get_item()
-            .table_name(table_name)
+            .table_name(TABLE_NAME)
             .key("user_id", AttributeValue::S(user_id))
             .send()
             .await?;

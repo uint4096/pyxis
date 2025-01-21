@@ -9,7 +9,7 @@ use uuid::Uuid;
 
 #[tauri::command]
 pub fn last_synced_record_id(
-    config_database: State<ConfigDatabase>,
+    sync_db: State<ConfigDatabase>,
     sources: Vec<String>,
     device_id: String,
     user_id: String,
@@ -20,7 +20,7 @@ pub fn last_synced_record_id(
         .collect();
 
     match Tracker::get(
-        &config_database.0.get_connection(),
+        &sync_db.0.get_connection(),
         sources,
         Uuid::from_str(&device_id).unwrap(),
         Uuid::from_str(&user_id).unwrap(),
@@ -35,7 +35,7 @@ pub fn last_synced_record_id(
 
 #[tauri::command]
 pub fn add_record(
-    config_database: State<ConfigDatabase>,
+    sync_db: State<ConfigDatabase>,
     source: String,
     device_id: String,
     record_id: i64,
@@ -50,10 +50,10 @@ pub fn add_record(
         None,
     );
 
-    match record.add(&config_database.0.get_connection()) {
+    match record.add(&sync_db.0.get_connection()) {
         Ok(_) => Some(true),
         Err(e) => {
-            eprintln!("[Tracker] Failed to fetch! {}", e);
+            eprintln!("[Tracker] Failed to add! {}", e);
             Some(false)
         }
     }

@@ -42,12 +42,7 @@ impl Tracker {
         device_id: Uuid,
         user_id: Uuid,
     ) -> Result<Option<i64>, Error> {
-        let query = format!(
-            "SELECT queue_entry_id\
-            FROM tracker\
-            WHERE device_id=?1 AND user_id=?2\
-            ORDER BY record_id DESC LIMIT 1",
-        );
+        let query = "SELECT queue_entry_id FROM tracker WHERE device_id=?1 AND user_id=?2 ORDER BY record_id DESC LIMIT 1";
         let mut stmt = conn.prepare(&query)?;
 
         stmt.query_row((&device_id.to_string(), &user_id.to_string()), |row| {
@@ -67,10 +62,7 @@ impl Tracker {
         let placeholders = placeholders.join(",");
 
         let query = format!(
-            "SELECT id, record_id, device_id, source, user_id, queue_entry_id\
-            FROM tracker\
-            WHERE device_id=?1 AND user_id=?2 AND source in ({})\
-            ORDER BY record_id DESC LIMIT 1",
+            "SELECT id, record_id, device_id, source, user_id, queue_entry_id FROM tracker WHERE device_id=?1 AND user_id=?2 AND source in ({}) ORDER BY record_id DESC LIMIT 1",
             placeholders
         );
         let mut stmt = conn.prepare(&query)?;
@@ -105,7 +97,7 @@ impl Tracker {
     pub fn add(&self, conn: &Connection) -> Result<(), Error> {
         // Unique constraint on (source, device_id). Replaced on conflict
         let insert_sql =
-            "INSERT INTO tracker (source, device_id, record_id, user_id) VALUES (?1, ?2, ?3, ?4)";
+            "INSERT INTO tracker (source, device_id, record_id, user_id, queue_entry_id) VALUES (?1, ?2, ?3, ?4, ?5)";
 
         conn.execute(
             &insert_sql,
@@ -114,6 +106,7 @@ impl Tracker {
                 &self.device_id.to_string(),
                 &self.record_id,
                 &self.user_id.to_string(),
+                &self.queue_entry_id
             ),
         )?;
 

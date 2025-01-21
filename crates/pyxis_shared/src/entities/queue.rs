@@ -92,10 +92,10 @@ impl ListenerQueue {
 
     pub fn dequeue(conn: &Connection, id: i64) -> Result<ListenerQueue, Error> {
         let mut sql = conn.prepare(
-            "SELECT id, status, source, operation, payload, file_uid, snapshot_id\
-            FROM listener_queue\
-            WHERE id>?1\
-            ORDER BY ROWID ASC\
+            "SELECT id, status, source, operation, payload, file_uid, snapshot_id \
+            FROM listener_queue \
+            WHERE id>?1 \
+            ORDER BY ROWID ASC \
             LIMIT 1",
         )?;
 

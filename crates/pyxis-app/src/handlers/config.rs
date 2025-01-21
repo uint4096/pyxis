@@ -12,11 +12,11 @@ pub fn add_user_data(
     user_token: String,
     user_id: String,
     features: Option<HashMap<String, String>>,
-    config_database: State<ConfigDatabase>,
+    sync_db: State<ConfigDatabase>,
 ) -> Option<bool> {
     let content = ConfigEntry::new(Some(user_token), user_id, Some(username), features);
 
-    match content.add(&config_database.0.get_connection()) {
+    match content.add(&sync_db.0.get_connection()) {
         Ok(_) => Some(true),
         Err(e) => {
             eprintln!("[Configuration] Failed to add user data to config! {}", e);
@@ -26,10 +26,10 @@ pub fn add_user_data(
 }
 
 #[tauri::command]
-pub fn remove_user_data(user_id: String, config_database: State<ConfigDatabase>) -> Option<bool> {
+pub fn remove_user_data(user_id: String, sync_db: State<ConfigDatabase>) -> Option<bool> {
     let content = ConfigEntry::new(None, user_id, None, None);
 
-    match content.add(&config_database.0.get_connection()) {
+    match content.add(&sync_db.0.get_connection()) {
         Ok(_) => Some(true),
         Err(e) => {
             eprintln!(
@@ -44,10 +44,23 @@ pub fn remove_user_data(user_id: String, config_database: State<ConfigDatabase>)
 #[tauri::command]
 pub fn get_config(
     user_id: String,
-    config_database: State<ConfigDatabase>,
+    sync_db: State<ConfigDatabase>,
 ) -> Option<Configuration> {
-    match ConfigEntry::get(&config_database.0.get_connection(), user_id) {
+    match ConfigEntry::get(&sync_db.0.get_connection(), user_id) {
         Ok(content) => Some(content),
+        Err(e) => {
+            eprintln!("[Configuration] Failed to fetch! {}", e);
+            None
+        }
+    }
+}
+
+#[tauri::command]
+pub fn get_logged_in_user(
+    sync_db: State<ConfigDatabase>,
+) -> Option<Configuration> {
+    match ConfigEntry::get_logged_in_user(&sync_db.0.get_connection()) {
+        Ok(config) => Some(config),
         Err(e) => {
             eprintln!("[Configuration] Failed to fetch! {}", e);
             None

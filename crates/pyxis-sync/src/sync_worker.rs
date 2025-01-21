@@ -34,7 +34,7 @@ pub async fn sync_worker(conn: &Connection) -> Result<(), Error> {
         {
             Ok(id) => id.or(Some(0)).unwrap(),
             Err(e) => {
-                eprintln!("Failed to get last send queue entry. Error: {}", e);
+                eprintln!("Failed to get last sent queue entry. Error: {}", e);
                 0
             }
         };
@@ -68,7 +68,6 @@ pub async fn sync_worker(conn: &Connection) -> Result<(), Error> {
             }
         };
 
-        println!("Processing result: {:?}", processing_result);
         let post_write_result: Result<(), rusqlite::Error> = match processing_result {
             Ok((record_id, queue_entry_id)) => {
                 if queue_element.source != Source::Update {

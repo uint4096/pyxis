@@ -1,9 +1,10 @@
-use machineid_rs::{Encryption, HWIDComponent, IdBuilder};
 use rusqlite::{Connection, Error};
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
 use std::collections::HashMap;
 use uuid::Uuid;
+
+use crate::utils::get_machine_id::get_machine_id;
 
 #[serde_as]
 #[derive(Serialize, Deserialize, Debug)]
@@ -20,18 +21,6 @@ pub struct ConfigEntry {
     pub id: Option<i64>,
     pub user_id: String,
     pub config: Configuration,
-}
-
-fn get_machine_id() -> Uuid {
-    let key = "machineid_key";
-    let mut builder = IdBuilder::new(Encryption::SHA1);
-    builder
-        .add_component(HWIDComponent::Username)
-        .add_component(HWIDComponent::OSName)
-        .add_component(HWIDComponent::SystemID);
-    let system_id = builder.build(key).expect("Failed to build machine id!");
-
-    Uuid::new_v5(&Uuid::NAMESPACE_DNS, system_id.as_bytes())
 }
 
 impl ConfigEntry {
@@ -96,7 +85,7 @@ impl ConfigEntry {
             "features": features
         });
 
-        let upsert_sql = "INSERT INTO configuration SET user_id=?1, config=?2 ON CONFLICT(user_id) DO UPDATE SET config=?2";
+        let upsert_sql = "INSERT INTO configuration (user_id, config) VALUES (?1, ?2) ON CONFLICT(user_id) DO UPDATE SET config=?2";
 
         conn.execute(&upsert_sql, (&self.user_id, &json_payload.to_string()))?;
 
