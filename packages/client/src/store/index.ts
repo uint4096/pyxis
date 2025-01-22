@@ -5,3 +5,4 @@ export * from "./types";
 export * from "./useConfig";
 export * from "./useDevices";
 export * from "./useTracker";
+export * from "./useOffline";

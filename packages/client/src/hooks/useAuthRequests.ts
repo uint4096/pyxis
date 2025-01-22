@@ -1,8 +1,7 @@
 import { useCallback } from "react";
 import { ConfigResponse } from "../ffi";
-import { useConfig } from "../store";
+import { useConfig, useOffline } from "../store";
 import { ky } from "../utils";
-import { useOffline } from "./useOffline";
 
 type SigninPayload = {
   username: string;

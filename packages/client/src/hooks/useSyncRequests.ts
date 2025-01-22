@@ -1,9 +1,8 @@
 import { useCallback } from "react";
 import { DeviceIds, Sources } from "../ffi";
 import { Document } from "./useSync";
-import { useConfig, useDevices } from "../store";
+import { useConfig, useDevices, useOffline } from "../store";
 import { ky } from "../utils";
-import { useOffline } from "./useOffline";
 
 type Update = {
   pk: string;
