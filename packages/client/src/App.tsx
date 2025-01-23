@@ -26,7 +26,7 @@ function App() {
   const { create: addDevices, list: listDevices } = useDevices();
   const { initDevices } = useSyncRequests();
   const { setStatus, status } = useOffline();
-  const { getFeatures } = useAuthRequests();
+  const { getFeatures, logout } = useAuthRequests();
   const { status: syncStatus } = useSync();
   const { networkCall } = useOffline();
 
@@ -67,6 +67,7 @@ function App() {
         const decodedToken = decodeToken(userDetails.userToken);
         const currentTime = new Date().getTime();
         if (!decodedToken || decodedToken.exp * 1000 < currentTime) {
+          await logout();
           await deleteConfig(userDetails.userId);
           return;
         }
@@ -74,7 +75,7 @@ function App() {
 
       await setConfig(userDetails);
     })();
-  }, [deleteConfig, setConfig]);
+  }, [deleteConfig, logout, setConfig]);
 
   useEffect(() => {
     const { username, userToken, userId, deviceId } = config ?? {};
