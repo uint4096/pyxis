@@ -4,17 +4,22 @@ import { WorkspaceSelection, CreateWorkspace } from "./forms";
 import { useTreeStore, useWorkspace } from "../../store";
 import { Tree } from "../tree";
 import Editor from "../editor/editor";
-import { type FormattedContent, useContentSync } from "../../hooks";
+import { useContentSync } from "../../hooks";
 
 export const Explorer = () => {
   const { workspaces, list, currentWorkspace } = useWorkspace();
-  const { selectedFile, updateSnapshots, insertUpdates } = useTreeStore();
+  const {
+    selectedFile,
+    updateSnapshots,
+    insertUpdates,
+    formattedContent,
+    setFormattedContent,
+  } = useTreeStore();
   const { getFileContent } = useContentSync();
 
   const [showWorkspaceForm, setWorkspaceForm] = useState<boolean>(false);
   const [showWorkspaceSelectionForm, setWorkspaceSelectionForm] =
     useState<boolean>(false);
-  const [formattedContent, setFormattedContent] = useState<FormattedContent>();
 
   const [showEditor, setEditor] = useState<boolean>(false);
 
@@ -39,7 +44,7 @@ export const Explorer = () => {
     }
 
     return () => setFormattedContent(undefined);
-  }, [getFileContent, selectedFile?.uid]);
+  }, [getFileContent, selectedFile?.uid, setFormattedContent]);
 
   useEffect(() => {
     if (!workspaces || !workspaces.length) {

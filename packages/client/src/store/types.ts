@@ -35,9 +35,16 @@ export type FileContent = {
   updates: Array<Uint8Array>;
 };
 
+export type FormattedContent = {
+  fileContent: Uint8Array[];
+  snapshotId: number;
+};
+
 export interface FileState {
   tree: Array<Node>;
   selectedFile: File | undefined;
+  formattedContent: FormattedContent | undefined;
+  setFormattedContent: (content: FormattedContent | undefined) => void;
   selectFile: (file: File | undefined) => void;
   findNode: (uid: string, tree?: Array<Node>) => Node | undefined;
   isDuplicateFile: (path: string, workspaceUid: string) => Promise<boolean>;

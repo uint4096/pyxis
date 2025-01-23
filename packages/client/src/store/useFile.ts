@@ -44,6 +44,7 @@ export const fileSlice: StateCreator<
   tree: [],
 
   selectedFile: undefined,
+  formattedContent: undefined,
   doc: { snapshot: undefined, updates: [] },
 
   isDuplicateFile: async (path, workspaceUid) => {
@@ -51,10 +52,17 @@ export const fileSlice: StateCreator<
     return !!fileId;
   },
 
+  setFormattedContent: (content) => {
+    set({
+      formattedContent: content,
+    });
+  },
+
   selectFile: async (file) => {
     if (!file?.id) {
       set({
         selectedFile: undefined,
+        formattedContent: undefined,
       });
 
       return;

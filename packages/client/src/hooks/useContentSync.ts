@@ -1,16 +1,17 @@
 import { useCallback } from "react";
-import { useConfig, useDevices, useTracker, useTreeStore } from "../store";
+import {
+  FormattedContent,
+  useConfig,
+  useDevices,
+  useTracker,
+  useTreeStore,
+} from "../store";
 import type { Snapshot, Sources, Updates } from "../ffi";
 import { useSyncRequests } from "./useSyncRequests";
 
-export type FormattedContent = {
-  fileContent: Uint8Array[];
-  snapshotId: number;
-};
-
 export const useContentSync = () => {
   const { config } = useConfig();
-  const { deviceIds } = useDevices();
+  const { list: listDevices } = useDevices();
   const { getSyncedRecordId, updateRecord } = useTracker();
   const { getContent } = useTreeStore();
   const { getDocuments: getSnapshots, getUpdates } = useSyncRequests();
@@ -66,6 +67,7 @@ export const useContentSync = () => {
       }
 
       try {
+        const deviceIds = await listDevices();
         const documents = await Promise.all(
           deviceIds
             .filter((id) => id !== config.deviceId)
@@ -152,10 +154,10 @@ export const useContentSync = () => {
     [
       config.deviceId,
       config.userId,
-      deviceIds,
       getContent,
       getDocuments,
       getUpdatesList,
+      listDevices,
       updateRecord,
     ],
   );
