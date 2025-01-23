@@ -1,4 +1,4 @@
-use std::{cmp::min, str::FromStr, thread::sleep, time::Duration};
+use std::{cmp::min, collections::HashMap, str::FromStr, thread::sleep, time::Duration};
 
 use pyxis_shared::entities::{
     config::ConfigEntry,
@@ -21,7 +21,7 @@ pub async fn sync_worker(conn: &Connection) -> Result<(), Error> {
     loop {
         sleep_duration = min(sleep_duration, MAX_SLEEP_DURATION);
 
-        let (user_token, device_id, user_id) = match get_valid_configuration(conn)? {
+        let (user_token, device_id, user_id, features) = match get_valid_configuration(conn)? {
             Some(config) => config,
             None => {
                 eprintln!("Invalid configuration!");
@@ -29,6 +29,24 @@ pub async fn sync_worker(conn: &Connection) -> Result<(), Error> {
                 continue;
             }
         };
+
+        if let Some(features) = features {
+            match features.get("sync") {
+                Some(val) => {
+                    if *val != String::from("enabled") {
+                        handle_backoff(&mut sleep_duration);
+                        continue;
+                    }
+                },
+                None => {
+                    handle_backoff(&mut sleep_duration);
+                    continue;
+                }
+            }
+        } else {
+            handle_backoff(&mut sleep_duration);
+            continue;
+        }
 
         let last_written_id: i64 = match Tracker::get_last_queue_entry_id(conn, device_id, user_id)
         {
@@ -115,11 +133,11 @@ pub async fn sync_worker(conn: &Connection) -> Result<(), Error> {
     }
 }
 
-fn get_valid_configuration(conn: &Connection) -> Result<Option<(String, Uuid, Uuid)>, Error> {
+fn get_valid_configuration(conn: &Connection) -> Result<Option<(String, Uuid, Uuid, Option<HashMap<String, String>>)>, Error> {
     let config = ConfigEntry::get_logged_in_user(conn)?;
-    match (config.user_token, config.device_id, config.user_id) {
-        (Some(token), Some(id), user_id) => {
-            Ok(Some((token, id, Uuid::from_str(&user_id).unwrap())))
+    match (config.user_token, config.device_id, config.user_id, config.features) {
+        (Some(token), Some(id), user_id, features) => {
+            Ok(Some((token, id, Uuid::from_str(&user_id).unwrap(), features )))
         }
         _ => Ok(None),
     }

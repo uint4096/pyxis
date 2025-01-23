@@ -1,14 +1,13 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import {
   DirWithChildren,
-  useConfig,
-  useDevices,
   useTracker,
   useTreeStore,
   useWorkspace,
 } from "../store";
 import {
   deleteWorkspace,
+  DeviceIds,
   type Directory,
   type File,
   type Sources,
@@ -40,10 +39,6 @@ type DocumentHandlers = {
 };
 
 export const useSync = () => {
-  const [status, setStatus] = useState(true);
-
-  const { config } = useConfig();
-  const { deviceIds } = useDevices();
   const { getDocuments: getSyncedDocs } = useSyncRequests();
 
   const {
@@ -196,12 +191,6 @@ export const useSync = () => {
 
   const getDocuments = useCallback(
     async (deviceId: string, userId: string) => {
-      const { userToken } = config ?? {};
-
-      if (!userToken) {
-        return;
-      }
-
       const sources = ["workspaces", "files", "directories"] as Array<Sources>;
 
       const lastSyncedRecordId = await getSyncedRecordId(
@@ -223,20 +212,14 @@ export const useSync = () => {
 
       return response?.documents ?? [];
     },
-    [config, getSyncedDocs, getSyncedRecordId],
+    [getSyncedDocs, getSyncedRecordId],
   );
 
-  useEffect(() => {
-    (async () => {
-      if (!config?.userId || !config?.deviceId) {
-        return;
-      }
-
+  const syncDocuments = useCallback(
+    async (userId: string, deviceIds: DeviceIds) => {
       try {
         const documents = await Promise.all(
-          deviceIds
-            .filter((id) => id !== config.deviceId)
-            .map((device) => getDocuments(device, config.userId!)),
+          deviceIds.map((device) => getDocuments(device, userId!)),
         );
 
         // @todo: handle unsynced documents
@@ -270,22 +253,16 @@ export const useSync = () => {
         await Promise.all(
           Object.entries(documentsRecordIdMap).map(
             ([deviceId, { source, recordId }]) =>
-              updateRecord(deviceId, source, recordId, config.userId!),
+              updateRecord(deviceId, source, recordId, userId!),
           ),
         );
       } catch (e) {
         console.error("[Sync] Failed operation!", e);
-        setStatus(false);
+        throw e;
       }
-    })();
-  }, [
-    config?.deviceId,
-    config?.userId,
-    deviceIds,
-    getDocuments,
-    operationHandlers,
-    updateRecord,
-  ]);
+    },
+    [getDocuments, operationHandlers, updateRecord],
+  );
 
-  return { status };
+  return { syncDocuments };
 };

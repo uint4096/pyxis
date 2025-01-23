@@ -73,14 +73,12 @@ export const createFile = async (
     });
 
     if (!file) {
-      toast("Failed to create file!");
       return;
     }
 
     return file;
   } catch (e) {
     console.error("[File] Create failed!", e);
-    toast("Failed to create file!");
   }
 };
 

@@ -23,12 +23,11 @@ function App() {
     setConfig,
     delete: deleteConfig,
   } = useConfig();
-  const { create: addDevices, list: listDevices } = useDevices();
+  const { create: addDevices } = useDevices();
   const { initDevices } = useSyncRequests();
   const { setStatus, status } = useOffline();
   const { getFeatures, logout } = useAuthRequests();
-  const { status: syncStatus } = useSync();
-  const { networkCall } = useOffline();
+  const { syncDocuments } = useSync();
 
   const decodeToken = (token: string): DecodedToken | null => {
     try {
@@ -78,46 +77,48 @@ function App() {
   }, [deleteConfig, logout, setConfig]);
 
   useEffect(() => {
-    const { username, userToken, userId, deviceId } = config ?? {};
-    if (!userToken || !userId || !username || !deviceId) {
+    if (
+      !config?.userToken ||
+      !config?.userId ||
+      !config?.username ||
+      !config?.deviceId
+    ) {
       return;
     }
 
     (async () => {
-      const { response } = await getFeatures(config.userId!);
+      const [{ response: featuresResponse }, { response: devicesResponse }] =
+        await Promise.all([getFeatures(config.userId!), initDevices()]);
+
       await modifyConfig(
-        username,
-        userId,
-        userToken,
-        deviceId,
-        response?.features?.features,
+        config.username!,
+        config.userId!,
+        config.userToken!,
+        config.deviceId!,
+        featuresResponse?.features?.features,
       );
+
+      const deviceIds = devicesResponse?.devices;
+      await addDevices(devicesResponse?.devices ?? []);
+      const devicesToSync = deviceIds?.filter((id) => id !== config.deviceId);
+      try {
+        await syncDocuments(config.userId!, devicesToSync ?? []);
+      } catch (e) {
+        console.error("Failed to sync. Error: ", e);
+      }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    config?.username,
-    config?.userToken,
-    config?.deviceId,
-    config?.userId,
+    config.username,
+    config.userToken,
+    config.deviceId,
+    config.userId,
     getFeatures,
     modifyConfig,
     status,
+    initDevices,
+    addDevices,
+    syncDocuments,
   ]);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        if (!config?.userToken) {
-          return;
-        }
-
-        const { response } = await initDevices();
-        await addDevices(response?.devices ?? []);
-      } catch (e) {
-        console.error("[Device] Init failed!");
-      }
-    })();
-  }, [addDevices, config?.userToken, initDevices, listDevices, networkCall]);
 
   return (
     <>

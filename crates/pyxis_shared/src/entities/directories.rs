@@ -200,7 +200,7 @@ impl Directory {
     ) -> Result<i64, Error> {
         let mut stmt = conn.prepare(&format!(
             "SELECT \
-                d.id, \
+                d.id \
                 FROM directories d \
                 INNER JOIN workspaces w ON d.workspace_id = w.id \
                 WHERE d.path = ?1 \
