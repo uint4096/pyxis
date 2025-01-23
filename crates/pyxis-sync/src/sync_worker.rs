@@ -80,6 +80,16 @@ pub async fn sync_worker(conn: &Connection) -> Result<(), Error> {
                         queue_element.source.clone(),
                     )
                     .await?
+                } else {
+                    UpdateWriter::post_write(
+                        conn,
+                        record_id,
+                        queue_entry_id,
+                        device_id,
+                        user_id,
+                        queue_element.source.clone(),
+                    )
+                    .await?
                 }
 
                 Ok(())
@@ -108,7 +118,9 @@ pub async fn sync_worker(conn: &Connection) -> Result<(), Error> {
 fn get_valid_configuration(conn: &Connection) -> Result<Option<(String, Uuid, Uuid)>, Error> {
     let config = ConfigEntry::get_logged_in_user(conn)?;
     match (config.user_token, config.device_id, config.user_id) {
-        (Some(token), Some(id), user_id) => Ok(Some((token, id, Uuid::from_str(&user_id).unwrap()))),
+        (Some(token), Some(id), user_id) => {
+            Ok(Some((token, id, Uuid::from_str(&user_id).unwrap())))
+        }
         _ => Ok(None),
     }
 }

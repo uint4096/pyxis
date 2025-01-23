@@ -42,7 +42,7 @@ impl Tracker {
         device_id: Uuid,
         user_id: Uuid,
     ) -> Result<Option<i64>, Error> {
-        let query = "SELECT queue_entry_id FROM tracker WHERE device_id=?1 AND user_id=?2 ORDER BY record_id DESC LIMIT 1";
+        let query = "SELECT queue_entry_id FROM tracker WHERE device_id=?1 AND user_id=?2 ORDER BY queue_entry_id DESC LIMIT 1";
         let mut stmt = conn.prepare(&query)?;
 
         stmt.query_row((&device_id.to_string(), &user_id.to_string()), |row| {
@@ -106,7 +106,7 @@ impl Tracker {
                 &self.device_id.to_string(),
                 &self.record_id,
                 &self.user_id.to_string(),
-                &self.queue_entry_id
+                &self.queue_entry_id,
             ),
         )?;
 
