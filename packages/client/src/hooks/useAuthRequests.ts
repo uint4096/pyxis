@@ -9,6 +9,11 @@ type SigninPayload = {
   device_id?: string;
 };
 
+type FeatureRecord = {
+  user_id?: string;
+  features: Record<string, string> | undefined;
+};
+
 export const useAuthRequests = () => {
   const { networkCall } = useOffline();
   const {
@@ -65,21 +70,20 @@ export const useAuthRequests = () => {
       await networkCall(
         () =>
           ky
-            .get<{ features: Record<string, string> | undefined }>(
-              "/auth/features",
-              {
-                headers: {
-                  authorization: `Bearer ${token}`,
-                },
+            .get<{
+              features: FeatureRecord;
+            }>("/auth/features", {
+              headers: {
+                authorization: `Bearer ${token}`,
               },
-            )
+            })
             .json(),
         {
           onError: async () => ({
-            features: (await getConfig(userId))?.features,
+            features: (await getConfig(userId)) as FeatureRecord,
           }),
           onOffline: async () => ({
-            features: (await getConfig(userId))?.features,
+            features: (await getConfig(userId)) as FeatureRecord,
           }),
         },
       ),

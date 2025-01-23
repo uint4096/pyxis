@@ -6,14 +6,17 @@ import { toast } from "../../../utils";
 import { useConfig } from "../../../store";
 import { UserSquare } from "../../../icons";
 import { useAuthRequests } from "../../../hooks";
+import { Config } from "../../../ffi";
 
-export const UserDetails = ({ onDone }: { onDone: () => void }) => {
-  const {
-    config,
-    delete: removeTokenFromStore,
-    create: modifyConfig,
-  } = useConfig();
+export const UserDetails = ({
+  onDone,
+  config,
+}: {
+  onDone: () => void;
+  config: Config;
+}) => {
   const { logout, requestFeatureAccess } = useAuthRequests();
+  const { delete: removeTokenFromStore, create: modifyConfig } = useConfig();
 
   const signout = useCallback(async () => {
     if (!config?.userToken) {
@@ -50,18 +53,22 @@ export const UserDetails = ({ onDone }: { onDone: () => void }) => {
         : { [key]: "requested" };
 
       try {
-        await requestFeatureAccess(key);
-        await modifyConfig(
-          username!,
-          userId,
-          userToken,
-          deviceId,
-          featuresWithAddition,
-        );
+        const { status } = await requestFeatureAccess(key);
+
+        if (status !== "offline") {
+          await modifyConfig(
+            username!,
+            userId,
+            userToken,
+            deviceId,
+            featuresWithAddition,
+          );
+        }
+
         onDone();
       } catch (e) {
-        console.error("[Auth] Logout failed!");
-        toast("Sign out failed!");
+        console.error("[Auth] Subscription request failed!");
+        toast("Subscription request failed!");
       }
     },
     [config, requestFeatureAccess, modifyConfig, onDone],
@@ -75,9 +82,17 @@ export const UserDetails = ({ onDone }: { onDone: () => void }) => {
         <br />
         <SyncFeatureWrapper>
           <FeatureName>Sync</FeatureName>
-          <AccessRequestButton onClick={() => requestFeature("sync")}>
-            Request Access
-          </AccessRequestButton>
+          {!config.features?.["sync"] && (
+            <AccessRequestButton onClick={() => requestFeature("sync")}>
+              Request Access
+            </AccessRequestButton>
+          )}
+          {config.features?.["sync"] === "enabled" && (
+            <FeatureName>Enabled</FeatureName>
+          )}
+          {config.features?.["sync"] === "requested" && (
+            <FeatureName>Requested</FeatureName>
+          )}
         </SyncFeatureWrapper>
       </UserContainer>
       <LogoutButton onClick={signout}>Sign out</LogoutButton>

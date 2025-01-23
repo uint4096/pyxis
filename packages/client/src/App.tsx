@@ -7,17 +7,37 @@ import { ConfigurationTray } from "./pages/configuration";
 import { useEffect } from "react";
 import { useConfig, useDevices, useOffline } from "./store";
 import { useAuthRequests, useSync, useSyncRequests } from "./hooks";
-import { getLoggedInUser } from "./ffi";
+import { ConfigResponse, getLoggedInUser } from "./ffi";
 import { ky } from "./utils";
+import { jwtDecode } from "jwt-decode";
+
+type DecodedToken = {
+  user: Pick<ConfigResponse, "user_id" | "username">;
+  exp: number;
+};
 
 function App() {
-  const { create: modifyConfig, config } = useConfig();
+  const {
+    create: modifyConfig,
+    config,
+    setConfig,
+    delete: deleteConfig,
+  } = useConfig();
   const { create: addDevices, list: listDevices } = useDevices();
   const { initDevices } = useSyncRequests();
-  const { setStatus } = useOffline();
+  const { setStatus, status } = useOffline();
   const { getFeatures } = useAuthRequests();
   const { status: syncStatus } = useSync();
   const { networkCall } = useOffline();
+
+  const decodeToken = (token: string): DecodedToken | null => {
+    try {
+      return jwtDecode(token);
+    } catch (e) {
+      console.error("[Auth] Error while decoding token!", e);
+      return null;
+    }
+  };
 
   useEffect(() => {
     const ping = async () => {
@@ -36,6 +56,27 @@ function App() {
   }, [setStatus]);
 
   useEffect(() => {
+    (async () => {
+      const userDetails = await getLoggedInUser();
+      if (!userDetails?.userId) {
+        //@todo: open signup/in modal
+        return;
+      }
+
+      if (userDetails.userToken) {
+        const decodedToken = decodeToken(userDetails.userToken);
+        const currentTime = new Date().getTime();
+        if (!decodedToken || decodedToken.exp * 1000 < currentTime) {
+          await deleteConfig(userDetails.userId);
+          return;
+        }
+      }
+
+      await setConfig(userDetails);
+    })();
+  }, [deleteConfig, setConfig]);
+
+  useEffect(() => {
     const { username, userToken, userId, deviceId } = config ?? {};
     if (!userToken || !userId || !username || !deviceId) {
       return;
@@ -48,10 +89,19 @@ function App() {
         userId,
         userToken,
         deviceId,
-        response?.features,
+        response?.features?.features,
       );
     })();
-  }, [config, getFeatures, modifyConfig]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    config?.username,
+    config?.userToken,
+    config?.deviceId,
+    config?.userId,
+    getFeatures,
+    modifyConfig,
+    status,
+  ]);
 
   useEffect(() => {
     (async () => {

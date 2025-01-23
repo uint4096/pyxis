@@ -14,7 +14,7 @@ export const Account = () => {
         <AccountForm onDone={() => setDialog(false)} />
       )}
       {showDialog && config.username && (
-        <UserDetails onDone={() => setDialog(false)} />
+        <UserDetails onDone={() => setDialog(false)} config={config} />
       )}
       <Option icon={<UserSquare />} onClick={() => setDialog(true)} />
     </>

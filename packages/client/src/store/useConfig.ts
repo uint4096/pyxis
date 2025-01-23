@@ -3,9 +3,8 @@ import {
   removeUserData,
   getConfig,
   type Config,
-  ConfigResponse,
+  getLoggedInUser,
 } from "../ffi";
-import { jwtDecode } from "jwt-decode";
 import { create } from "zustand";
 
 interface ConfigState {
@@ -19,60 +18,44 @@ interface ConfigState {
   ) => Promise<void>;
   get: (userId: string) => Promise<Config | undefined>;
   delete: (userId: string) => Promise<void>;
-  setConfig: (userId: string) => Promise<void>;
+  setConfig: (config: Config) => Promise<void>;
+  getLoggedInUser: () => Promise<Config | undefined>;
 }
-
-type DecodedToken = {
-  user: Pick<ConfigResponse, "user_id" | "username">;
-  exp: number;
-};
-
-const decodeToken = (token: string): DecodedToken | null => {
-  try {
-    return jwtDecode(token);
-  } catch (e) {
-    console.error("[Auth] Error while decoding token!", e);
-    return null;
-  }
-};
 
 export const useConfig = create<ConfigState>((set, get) => ({
   config: {},
 
   create: async (username, userId, token, deviceId, features) => {
-    await addUserData({
+    const config = {
       username,
       userId: userId,
       userToken: token,
       deviceId,
       features,
-    });
-    get().setConfig(userId);
+    };
+
+    await addUserData(config);
+    get().setConfig(config);
   },
 
   delete: async (userId: string) => {
     await removeUserData(userId);
-    get().setConfig(userId);
+
+    const config = { userId };
+    get().setConfig(config);
   },
 
   get: async (userId: string) => {
     return await getConfig(userId);
   },
 
-  setConfig: async (userId: string) => {
-    const config = await getConfig(userId);
+  getLoggedInUser: async () => {
+    return await getLoggedInUser();
+  },
 
+  setConfig: async (config: Config) => {
     if (!config) {
       return;
-    }
-
-    if (config.userToken) {
-      const decodedToken = decodeToken(config.userToken);
-      const currentTime = new Date().getTime();
-      if (!decodedToken || decodedToken.exp * 1000 < currentTime) {
-        await get().delete(userId);
-        return;
-      }
     }
 
     set({

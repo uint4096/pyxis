@@ -5,6 +5,7 @@ export type ConfigResponse = {
   user_id?: string;
   username?: string;
   user_token?: string;
+  features?: Record<string, string>;
 };
 
 export type Config = {
@@ -24,6 +25,7 @@ type Args = {
   add_user_data: Config;
   remove_user_data: { userId: string };
   get_config: { userId: string };
+  get_logged_in_user: never;
 };
 
 export const addUserData = async (payload: Config) => {
@@ -58,7 +60,7 @@ export const getConfig = async (
   userId: string,
 ): Promise<Config | undefined> => {
   try {
-    const { user_id, user_token, username, device_id } = await invoke<
+    const { user_id, user_token, username, device_id, features } = await invoke<
       Args,
       ConfigResponse
     >()("get_config", { userId });
@@ -66,6 +68,31 @@ export const getConfig = async (
     if (!device_id) {
       throw new Error("Empty response");
     }
+
+    return {
+      userId: user_id,
+      username,
+      deviceId: device_id,
+      userToken: user_token,
+      features: features,
+    };
+  } catch (e) {
+    console.error("[Configuration] Failed to get config!", e);
+  }
+};
+
+export const getLoggedInUser = async (): Promise<Config | undefined> => {
+  try {
+    const response = await invoke<Args, ConfigResponse>()(
+      "get_logged_in_user",
+      {} as never,
+    );
+
+    if (!response) {
+      return;
+    }
+
+    const { device_id, user_id, user_token, username } = response;
 
     return {
       userId: user_id,
