@@ -29,7 +29,14 @@ pub async fn sign_in(
     let user_repository = UserRepository::new(connections.dynamo.connection.clone());
     let token_repository = TokenRepository::new(connections.dynamo.connection.clone());
 
-    let user = match user_repository.verify(username, password, device_id.or(Some(get_machine_id().to_string())).unwrap()).await {
+    let user = match user_repository
+        .verify(
+            username,
+            password,
+            device_id.or(Some(get_machine_id().to_string())).unwrap(),
+        )
+        .await
+    {
         Ok(user) => user,
         Err(e) => {
             println!("Error while verifying password: {}", e);

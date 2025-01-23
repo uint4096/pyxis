@@ -65,6 +65,7 @@ pub async fn modify_subscription(
     let create_response = features_repostiory.upsert(&feature).await;
 
     if let Ok(_) = create_response {
+
         if payload.value == String::from("requested") {
             match client
                 .publish()
@@ -77,13 +78,18 @@ pub async fn modify_subscription(
                 .await
             {
                 Ok(_) => {
+                    println!("Published message");
                     return Ok(StatusCode::CREATED);
                 }
                 Err(e) => {
-                    eprintln!("[Features] Failed to send SNS notification! Error: {}", e);
+                    eprintln!("[Features] Failed to send SNS notification! Error: {:?}", e);
                     return Err(StatusCode::INTERNAL_SERVER_ERROR);
                 }
             };
+        }
+    } else {
+        if let Err(e) = create_response {
+            eprintln!("Error while creating subscription. {}", e);
         }
     }
 

@@ -42,10 +42,7 @@ pub fn remove_user_data(user_id: String, sync_db: State<ConfigDatabase>) -> Opti
 }
 
 #[tauri::command]
-pub fn get_config(
-    user_id: String,
-    sync_db: State<ConfigDatabase>,
-) -> Option<Configuration> {
+pub fn get_config(user_id: String, sync_db: State<ConfigDatabase>) -> Option<Configuration> {
     match ConfigEntry::get(&sync_db.0.get_connection(), user_id) {
         Ok(content) => Some(content),
         Err(e) => {
@@ -56,9 +53,7 @@ pub fn get_config(
 }
 
 #[tauri::command]
-pub fn get_logged_in_user(
-    sync_db: State<ConfigDatabase>,
-) -> Option<Configuration> {
+pub fn get_logged_in_user(sync_db: State<ConfigDatabase>) -> Option<Configuration> {
     match ConfigEntry::get_logged_in_user(&sync_db.0.get_connection()) {
         Ok(config) => Some(config),
         Err(e) => {

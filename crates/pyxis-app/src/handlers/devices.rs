@@ -2,10 +2,7 @@ use pyxis_shared::{database::ConfigDatabase, entities::devices::Device};
 use tauri::State;
 
 #[tauri::command]
-pub fn add_devices(
-    device_ids: Vec<String>,
-    sync_db: State<ConfigDatabase>,
-) -> Option<bool> {
+pub fn add_devices(device_ids: Vec<String>, sync_db: State<ConfigDatabase>) -> Option<bool> {
     let devices = Device::new(None, device_ids);
 
     match devices.add(&sync_db.0.get_connection()) {

@@ -58,12 +58,10 @@ impl FeaturesRepository {
         self.client
             .update_item()
             .table_name(TABLE_NAME)
-            .condition_expression("#user_id = :user_id")
-            .update_expression("SET #features = :feature")
-            .expression_attribute_names("#user_id", "user_id")
+            .key("user_id", user_id_av.clone())
+            .update_expression("SET #features = :features")
             .expression_attribute_names("#features", "features")
-            .expression_attribute_values("#:user_id", user_id_av)
-            .expression_attribute_values("#:features", features_av)
+            .expression_attribute_values(":features", features_av)
             .send()
             .await
             .map_err(|err| Box::new(err) as Box<dyn std::error::Error + Send + Sync>)?;
