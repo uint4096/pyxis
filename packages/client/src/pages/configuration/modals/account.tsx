@@ -28,11 +28,11 @@ export const AccountForm = ({ onDone }: { onDone: () => void }) => {
         toast(
           "You seem to be offline. Registration or login requires network connection!",
         );
+      } else {
+        const { user_id, device_id, user_token: token } = response ?? {};
+        await create(username, user_id!, token!, device_id!);
+        onDone();
       }
-
-      const { user_id, device_id, user_token: token } = response ?? {};
-      await create(username, user_id!, token!, device_id!);
-      onDone();
     } catch (e) {
       if (e instanceof HTTPError && /Username taken/g.test(e.message)) {
         toast(e.message);
