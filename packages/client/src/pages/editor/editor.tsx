@@ -23,9 +23,10 @@ import {
   insertTextAtPosition,
   textLength,
 } from "../../utils";
-import { type FormattedContent, useDebounce } from "../../hooks";
+import { useDebounce } from "../../hooks";
 import { LoroDoc, LoroList, LoroText, VersionVector } from "loro-crdt";
 import fastDiff from "fast-diff";
+import { FormattedContent } from "../../store";
 
 type EditorText = {
   text: string | undefined;

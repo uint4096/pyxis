@@ -4,12 +4,13 @@ import "./App.css";
 import { ToastContainer } from "react-toastify";
 import { Explorer } from "./pages/explorer";
 import { ConfigurationTray } from "./pages/configuration";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useConfig, useDevices, useOffline } from "./store";
 import { useAuthRequests, useSync, useSyncRequests } from "./hooks";
 import { ConfigResponse, getLoggedInUser } from "./ffi";
 import { ky } from "./utils";
 import { jwtDecode } from "jwt-decode";
+import { AccountForm } from "./pages/configuration/modals";
 
 type DecodedToken = {
   user: Pick<ConfigResponse, "user_id" | "username">;
@@ -28,6 +29,8 @@ function App() {
   const { setStatus, status } = useOffline();
   const { getFeatures, logout } = useAuthRequests();
   const { syncDocuments } = useSync();
+
+  const [showAccountsForm, setAccountsForm] = useState(false);
 
   const decodeToken = (token: string): DecodedToken | null => {
     try {
@@ -57,19 +60,18 @@ function App() {
   useEffect(() => {
     (async () => {
       const userDetails = await getLoggedInUser();
-      if (!userDetails?.userId) {
-        //@todo: open signup/in modal
+      if (!userDetails?.userToken) {
+        setAccountsForm(true);
         return;
       }
 
-      if (userDetails.userToken) {
-        const decodedToken = decodeToken(userDetails.userToken);
-        const currentTime = new Date().getTime();
-        if (!decodedToken || decodedToken.exp * 1000 < currentTime) {
-          await logout();
-          await deleteConfig(userDetails.userId);
-          return;
-        }
+      setAccountsForm(false);
+      const decodedToken = decodeToken(userDetails.userToken);
+      const currentTime = new Date().getTime();
+      if (!decodedToken || decodedToken.exp * 1000 < currentTime) {
+        await logout();
+        await deleteConfig(userDetails.userId!);
+        return;
       }
 
       await setConfig(userDetails);
@@ -122,8 +124,11 @@ function App() {
 
   return (
     <>
-      <ConfigurationTray />
+      {config.userToken && <ConfigurationTray />}
       {config.userToken && <Explorer />}
+      {showAccountsForm && (
+        <AccountForm onDone={() => setAccountsForm(false)} />
+      )}
       <ToastContainer
         position={"bottom-right"}
         autoClose={3000}
