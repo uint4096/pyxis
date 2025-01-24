@@ -80,9 +80,10 @@ export const deleteWorkspace = async (uid: string) => {
       }))
     ) {
       toast("Failed to delete workspace!");
+      return false;
     }
 
-    return;
+    return true;
   } catch (e) {
     console.error("[Workspace] Failed to delete!", e);
     toast("Failed to delete workspace!");

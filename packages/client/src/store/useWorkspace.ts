@@ -51,11 +51,14 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
   },
 
   delete: async (uid) => {
-    await deleteWorkspace(uid);
+    const success = await deleteWorkspace(uid);
 
-    set({
-      workspaces: get().workspaces.filter((w) => w.uid !== uid),
-    });
+    if (success) {
+      set({
+        workspaces: get().workspaces.filter((w) => w.uid !== uid),
+        ...(get().currentWorkspace.uid === uid && { currentWorkspace: {} }),
+      });
+    }
   },
 
   list: async () => {

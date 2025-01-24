@@ -4,17 +4,23 @@ import { Modal } from "../../../components";
 import { FormWrapper } from "./common";
 import { Workspace } from "../../../ffi";
 import { useWorkspace } from "../../../store";
+import { noop } from "../../../utils";
+import { Trash } from "../../../icons";
 
 type WorkspaceListProps = {
   workspaces: Array<Partial<Workspace>>;
   setVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  allowClosing?: boolean;
+  onCreate?: () => void;
 };
 
 export const WorkspaceSelection = ({
   workspaces,
   setVisibility,
+  allowClosing,
+  onCreate,
 }: WorkspaceListProps) => {
-  const { updateSelection } = useWorkspace();
+  const { updateSelection, delete: deleteWorkspace } = useWorkspace();
 
   const selectWorkspace = useCallback(
     async (workspace: Workspace) => {
@@ -25,19 +31,28 @@ export const WorkspaceSelection = ({
     [setVisibility, updateSelection],
   );
 
-  const label = (
-    <WorkspaceSelectionMessage>Select a workspace</WorkspaceSelectionMessage>
+  const header = (
+    <Header>
+      <WorkspaceSelectionMessage>Select a workspace</WorkspaceSelectionMessage>
+      {onCreate && (
+        <AddWorkspaceButton onClick={onCreate}>+</AddWorkspaceButton>
+      )}
+    </Header>
   );
 
   const list = (
     <WorkspaceList>
       {workspaces.map((workspace) => {
         return (
-          <WorkspaceListElement
-            onClick={() => selectWorkspace(workspace as Workspace)}
-            key={workspace.id}
-          >
-            {workspace.name}
+          <WorkspaceListElement key={workspace.id}>
+            <WorkspaceName
+              onClick={() => selectWorkspace(workspace as Workspace)}
+            >
+              {workspace.name}
+            </WorkspaceName>
+            <div onClick={() => deleteWorkspace(workspace.uid!)}>
+              <Trash width={22} height={22} stroke="#C6011F" />
+            </div>
           </WorkspaceListElement>
         );
       })}
@@ -46,16 +61,36 @@ export const WorkspaceSelection = ({
 
   return (
     <FormWrapper>
-      <Modal header={label} body={list} size="medium" />
+      <Modal
+        header={header}
+        body={list}
+        size="medium"
+        onClose={allowClosing ? () => setVisibility(false) : noop}
+      />
     </FormWrapper>
   );
 };
+
+const WorkspaceName = styled.span`
+  flex-grow: 1;
+`;
 
 const WorkspaceSelectionMessage = styled.div`
   text-align: left;
   font-size: 1.5em;
   font-weight: 600;
   padding-left: 0.5vw;
+`;
+
+const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+  width: 80%;
+`;
+
+const AddWorkspaceButton = styled.button`
+  font-size: 1em;
+  padding: 0.5em 1em;
 `;
 
 const WorkspaceList = styled.div`
@@ -74,4 +109,6 @@ const WorkspaceListElement = styled.div`
   cursor: pointer;
   text-align: left;
   border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
 `;

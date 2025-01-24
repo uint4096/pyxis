@@ -118,7 +118,7 @@ impl Workspace {
     }
 
     pub fn delete(uid: String, conn: &Connection) -> Result<(), Error> {
-        let sql = "DELETE FROM workspaces WHERE uid = (?id)";
+        let sql = "DELETE FROM workspaces WHERE uid = ?1";
         conn.execute(sql, (uid,))?;
 
         Ok(())

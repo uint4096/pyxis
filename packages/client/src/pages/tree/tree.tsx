@@ -10,10 +10,10 @@ export const Tree = () => {
   const [overflowPopup, setOverflowPopup] = useState<string | undefined>();
 
   useEffect(() => {
-    if (!tree.length && currentWorkspace?.uid) {
-      createTree(currentWorkspace.uid);
+    if (currentWorkspace?.uid) {
+      (async () => await createTree(currentWorkspace.uid!))();
     }
-  }, [createTree, currentWorkspace.uid, tree.length]);
+  }, [createTree, currentWorkspace.uid]);
 
   const keyListener = useCallback(
     (e: KeyboardEvent) => {
