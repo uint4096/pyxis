@@ -30,6 +30,7 @@ export type DirContainerProps = {
   setOverflowPopup: React.Dispatch<React.SetStateAction<string | undefined>>;
   setNewDocument: React.Dispatch<React.SetStateAction<Document | undefined>>;
   overflowPopup: string | undefined;
+  isWorkspace: boolean;
 };
 
 export const DirContainer = ({
@@ -39,6 +40,7 @@ export const DirContainer = ({
   overflowPopup,
   setOverflowPopup,
   setNewDocument,
+  isWorkspace,
 }: DirContainerProps) => {
   const optionsRef = useRef<HTMLDivElement>(null);
 
@@ -56,33 +58,40 @@ export const DirContainer = ({
       id: "new_directory",
       name: "New Directory",
     },
-    {
-      handler: async () => {},
-      id: "rename",
-      name: "Rename",
-    },
-    {
-      handler: useCallback(async () => {
-        if (
-          selectedFile?.path &&
-          isFileInDir(selectedFile.uid, dir as DirWithChildren)
-        ) {
-          selectFile(undefined);
-        }
-
-        await deleteDir(dir as DirWithChildren);
-      }, [
-        deleteDir,
-        dir,
-        isFileInDir,
-        selectFile,
-        selectedFile?.path,
-        selectedFile?.uid,
-      ]),
-      id: "delete",
-      name: "Delete",
-    },
   ];
+
+  if (!isWorkspace) {
+    dirMenuOptions.push(
+      ...[
+        {
+          handler: async () => {},
+          id: "rename",
+          name: "Rename",
+        },
+        {
+          handler: useCallback(async () => {
+            if (
+              selectedFile?.path &&
+              isFileInDir(selectedFile.uid, dir as DirWithChildren)
+            ) {
+              selectFile(undefined);
+            }
+
+            await deleteDir(dir as DirWithChildren);
+          }, [
+            deleteDir,
+            dir,
+            isFileInDir,
+            selectFile,
+            selectedFile?.path,
+            selectedFile?.uid,
+          ]),
+          id: "delete",
+          name: "Delete",
+        },
+      ],
+    );
+  }
 
   return (
     <>

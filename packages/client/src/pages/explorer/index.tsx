@@ -53,7 +53,7 @@ export const Explorer = () => {
       setWorkspaceForm(false);
     }
 
-    if (!currentWorkspace) {
+    if (workspaces?.length && !currentWorkspace.uid) {
       setWorkspaceSelectionForm(true);
     } else {
       setWorkspaceSelectionForm(false);
@@ -64,7 +64,7 @@ export const Explorer = () => {
   return (
     <>
       <ExplorerWrapper>
-        {currentWorkspace && <Tree />}
+        {currentWorkspace?.uid && <Tree />}
 
         {showEditor && selectedFile?.id && formattedContent && (
           <Editor
@@ -77,7 +77,7 @@ export const Explorer = () => {
         )}
 
         {/* Modals and Forms */}
-        {showWorkspaceForm && !currentWorkspace && (
+        {showWorkspaceForm && !currentWorkspace?.uid && (
           <CreateWorkspace setVisibility={setWorkspaceForm} />
         )}
         {showWorkspaceSelectionForm && workspaces.length > 0 && (

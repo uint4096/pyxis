@@ -42,6 +42,7 @@ export const Tree = () => {
           workspaceUid={currentWorkspace.uid}
           overflowPopup={overflowPopup}
           setOverflowPopup={setOverflowPopup}
+          isWorkspace={true}
         />
       )}
     </EntitiesWrapper>

@@ -1,5 +1,5 @@
 import { styled } from "@linaria/react";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { Modal } from "../../../components";
 import { FormWrapper } from "./common";
 import { Workspace } from "../../../ffi";
@@ -30,6 +30,12 @@ export const WorkspaceSelection = ({
     },
     [setVisibility, updateSelection],
   );
+
+  useEffect(() => {
+    if (!workspaces.length) {
+      setVisibility(false);
+    }
+  }, [setVisibility, workspaces.length]);
 
   const header = (
     <Header>

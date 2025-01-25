@@ -11,6 +11,7 @@ type EntityProps = {
   workspaceUid: string;
   overflowPopup: string | undefined;
   setOverflowPopup: React.Dispatch<React.SetStateAction<string | undefined>>;
+  isWorkspace: boolean;
 };
 
 export const Entities = ({
@@ -18,6 +19,7 @@ export const Entities = ({
   workspaceUid,
   overflowPopup,
   setOverflowPopup,
+  isWorkspace,
 }: EntityProps) => {
   const [collapased, setCollapsed] = useState(false);
   const [newDocument, setNewDocument] = useState<Document>();
@@ -83,6 +85,7 @@ export const Entities = ({
             overflowPopup={overflowPopup}
             setOverflowPopup={setOverflowPopup}
             setNewDocument={setNewDocument}
+            isWorkspace={isWorkspace}
           />
 
           {!collapased && (
@@ -102,6 +105,7 @@ export const Entities = ({
                   key={dir.id}
                   overflowPopup={overflowPopup}
                   setOverflowPopup={setOverflowPopup}
+                  isWorkspace={false}
                 />
               ))}
             </EntityContainer>
