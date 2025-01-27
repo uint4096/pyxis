@@ -65,7 +65,6 @@ pub async fn modify_subscription(
     let create_response = features_repostiory.upsert(&feature).await;
 
     if let Ok(_) = create_response {
-
         if payload.value == String::from("requested") {
             match client
                 .publish()

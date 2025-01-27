@@ -1,3 +1,5 @@
+use std::env;
+
 use pyxis_shared::{
     entities::{
         queue::{ListenerQueue, Source},
@@ -31,8 +33,10 @@ impl SyncWriter for UpdateWriter {
                 .expect("No snapshot id associated with the update"),
         };
 
+        let base_url = env::var("APP_BASE_URL").unwrap();
+
         client
-            .post("http://localhost:8080/sync/update/write")
+            .post(format!("{}/sync/update/write", base_url))
             .json(&update_payload)
             .header("authorization", format!("Bearer {}", &token))
             .send()

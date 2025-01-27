@@ -1,10 +1,8 @@
-use std::{collections::HashMap, error::Error, sync::Arc};
+use std::{collections::HashMap, env, error::Error, sync::Arc};
 
 use aws_sdk_dynamodb::{self as DynamoDB, types::AttributeValue};
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
-
-static TABLE_NAME: &str = "updates_sync";
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Update {
@@ -44,6 +42,10 @@ impl UpdateRepository {
         Self { client }
     }
 
+    fn get_table_name() -> String {
+        env::var("UPDATES_SYNC_TABLE").unwrap()
+    }
+
     pub async fn create(&self, document: Update) -> Result<(), Box<dyn Error>> {
         let timestamp = Utc::now().timestamp();
         let Update { pk, sk, payload } = document;
@@ -55,7 +57,7 @@ impl UpdateRepository {
 
         self.client
             .put_item()
-            .table_name(TABLE_NAME)
+            .table_name(UpdateRepository::get_table_name())
             .item("pk", pk_av)
             .item("sk", sk_av)
             .item("payload", payload_av)
@@ -73,12 +75,10 @@ impl UpdateRepository {
         file_uid: String,
         snapshot_id: i64,
     ) -> Result<Vec<Update>, Box<dyn Error>> {
-        let table_name = "updates_sync";
-
         let records_iter = self
             .client
             .query()
-            .table_name(table_name)
+            .table_name(UpdateRepository::get_table_name())
             .key_condition_expression("#pk = :pk AND begins_with(#sk, :file_snapshot)")
             .expression_attribute_names("#sk", "sk")
             .expression_attribute_names("#pk", "pk")

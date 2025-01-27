@@ -1,4 +1,4 @@
-use std::{collections::HashMap, error::Error, str::FromStr, sync::Arc};
+use std::{collections::HashMap, env, error::Error, str::FromStr, sync::Arc};
 
 use aws_sdk_dynamodb::{self as DynamoDB, types::AttributeValue};
 use chrono::Utc;
@@ -59,6 +59,14 @@ impl DocumentRepository {
         Self { client }
     }
 
+    fn get_documents_table_name() -> String {
+        env::var("DOCUMENTS_SYNC_TABLE").unwrap()
+    }
+
+    fn get_snapshots_table_name() -> String {
+        env::var("SNAPSHOTS_SYNC_TABLE").unwrap()
+    }
+
     pub async fn create(&self, document: Document) -> Result<i64, Box<dyn Error>> {
         let timestamp = Utc::now().timestamp();
         let Document {
@@ -78,9 +86,9 @@ impl DocumentRepository {
         let source_av = AttributeValue::S(source.to_string());
 
         let table_name = if Source::from_str(&source).unwrap() == Source::Snapshot {
-            "snapshots_sync"
+            DocumentRepository::get_snapshots_table_name()
         } else {
-            "documents_sync"
+            DocumentRepository::get_documents_table_name()
         };
 
         let query = self

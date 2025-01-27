@@ -3702,6 +3702,7 @@ version = "0.1.0"
 dependencies = [
  "aws-config",
  "aws-sdk-dynamodb",
+ "dotenv",
  "pyxis_shared",
  "reqwest",
  "rusqlite",

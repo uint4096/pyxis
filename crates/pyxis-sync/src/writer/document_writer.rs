@@ -1,3 +1,5 @@
+use std::env;
+
 use pyxis_shared::{
     entities::{
         queue::{ListenerQueue, Source},
@@ -61,9 +63,10 @@ impl<'a> SyncWriter for DocumentWriter<'a> {
             file_uid: queue_element.file_uid.clone(),
         };
 
-        //@todo use env vars
+        let base_url = env::var("APP_BASE_URL").unwrap();
+
         client
-            .post("http://localhost:8080/sync/document/write")
+            .post(format!("{}/sync/document/write", base_url))
             .json(&update_payload)
             .header("authorization", format!("Bearer {}", &token))
             .send()

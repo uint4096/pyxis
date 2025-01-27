@@ -37,7 +37,7 @@ pub async fn sync_worker(conn: &Connection) -> Result<(), Error> {
                         handle_backoff(&mut sleep_duration);
                         continue;
                     }
-                },
+                }
                 None => {
                     handle_backoff(&mut sleep_duration);
                     continue;
@@ -133,12 +133,22 @@ pub async fn sync_worker(conn: &Connection) -> Result<(), Error> {
     }
 }
 
-fn get_valid_configuration(conn: &Connection) -> Result<Option<(String, Uuid, Uuid, Option<HashMap<String, String>>)>, Error> {
+fn get_valid_configuration(
+    conn: &Connection,
+) -> Result<Option<(String, Uuid, Uuid, Option<HashMap<String, String>>)>, Error> {
     let config = ConfigEntry::get_logged_in_user(conn)?;
-    match (config.user_token, config.device_id, config.user_id, config.features) {
-        (Some(token), Some(id), user_id, features) => {
-            Ok(Some((token, id, Uuid::from_str(&user_id).unwrap(), features )))
-        }
+    match (
+        config.user_token,
+        config.device_id,
+        config.user_id,
+        config.features,
+    ) {
+        (Some(token), Some(id), user_id, features) => Ok(Some((
+            token,
+            id,
+            Uuid::from_str(&user_id).unwrap(),
+            features,
+        ))),
         _ => Ok(None),
     }
 }
