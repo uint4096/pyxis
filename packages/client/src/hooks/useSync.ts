@@ -35,7 +35,9 @@ type DocumentSource<T extends DocumentSources> = T extends "files"
       : never;
 
 type DocumentHandlers = {
-  [K in DocumentSources]: (document: DocumentSource<K>) => Promise<void>;
+  [K in DocumentSources]: (
+    document: DocumentSource<K>,
+  ) => Promise<void | boolean>;
 };
 
 export const useSync = () => {
@@ -167,7 +169,9 @@ export const useSync = () => {
   );
 
   const operationHandlers: {
-    [key in Document["operation"]]: (document: Document) => Promise<void>;
+    [key in Document["operation"]]: (
+      document: Document,
+    ) => Promise<void | boolean>;
   } = useMemo(
     () => ({
       insert: async (document) => {

@@ -45,8 +45,6 @@ export const createWorkspace = async (
       return;
     }
 
-    toast("Workspace created!");
-
     return workspace;
   } catch (e) {
     console.error("[Workspace] Create failed!", e);
