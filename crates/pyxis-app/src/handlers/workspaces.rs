@@ -9,9 +9,10 @@ pub fn create_workspace(
     created_at: Option<String>,
     updated_at: Option<String>,
     uid: Option<String>,
+    synced: Option<bool>,
     database: State<Database>,
 ) -> Option<Workspace> {
-    let workspace = Workspace::new(name, selected, None, created_at, updated_at, uid);
+    let workspace = Workspace::new(name, selected, None, created_at, updated_at, uid, synced);
 
     match workspace.create(&database.get_connection()) {
         Ok(_) => Some(workspace),
@@ -50,6 +51,7 @@ pub fn update_workspace(
     name: String,
     selected: bool,
     database: State<Database>,
+    synced: Option<bool>
 ) -> Option<Workspace> {
     let conn = &database.get_connection();
     let workspace = match Workspace::list(conn) {
@@ -64,6 +66,7 @@ pub fn update_workspace(
         workspace.name = name;
         workspace.selected = selected;
         workspace.updated_at = Utc::now().to_rfc3339();
+        workspace.synced = synced;
 
         match workspace.update(conn) {
             Ok(_) => {

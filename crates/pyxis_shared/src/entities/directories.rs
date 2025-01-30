@@ -12,6 +12,7 @@ pub struct Directory {
     pub updated_at: String,
     pub path: String,
     pub parent_uid: Option<String>,
+    pub synced: Option<bool>
 }
 
 impl Directory {
@@ -24,6 +25,7 @@ impl Directory {
         created_at: Option<String>,
         updated_at: Option<String>,
         uid: Option<String>,
+        synced: Option<bool>
     ) -> Self {
         let current_time = Utc::now().to_rfc3339();
 
@@ -36,6 +38,7 @@ impl Directory {
             parent_uid,
             created_at: created_at.or(Some(String::from(&current_time))).unwrap(),
             updated_at: updated_at.or(Some(String::from(&current_time))).unwrap(),
+            synced
         }
     }
 
@@ -49,7 +52,8 @@ impl Directory {
                 d.path, \
                 d.parent_uid, \
                 d.created_at, \
-                d.updated_at \
+                d.updated_at, \
+                d.synced \
                 FROM directories d \
                 INNER JOIN workspaces w ON d.workspace_id = w.id \
                 WHERE d.id = ?1",
@@ -65,6 +69,7 @@ impl Directory {
                 parent_uid: row.get(5)?,
                 created_at: row.get(6)?,
                 updated_at: row.get(7)?,
+                synced: row.get(8)?
             })
         })
     }
@@ -77,8 +82,8 @@ impl Directory {
             })?
         };
 
-        let sql = "INSERT INTO directories (name, uid, workspace_id, path, parent_uid, created_at, updated_at) \
-                         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)";
+        let sql = "INSERT INTO directories (name, uid, workspace_id, path, parent_uid, created_at, updated_at, synced) \
+                         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)";
 
         conn.execute(
             sql,
@@ -90,6 +95,7 @@ impl Directory {
                 &self.parent_uid,
                 &self.created_at,
                 &self.updated_at,
+                &self.synced
             ),
         )?;
 
@@ -111,7 +117,8 @@ impl Directory {
                     d.path, \
                     d.parent_uid, \
                     d.created_at, \
-                    d.updated_at \
+                    d.updated_at, \
+                    d.synced \
                     FROM directories d \
                     INNER JOIN workspaces w ON d.workspace_id = w.id \
                     WHERE w.uid = ?1 \
@@ -126,7 +133,8 @@ impl Directory {
                     d.path, \
                     d.parent_uid, \
                     d.created_at, \
-                    d.updated_at \
+                    d.updated_at, \
+                    d.synced \
                     FROM directories d \
                     INNER JOIN workspaces w ON d.workspace_id = w.id \
                     WHERE w.uid = ?1 \
@@ -144,6 +152,7 @@ impl Directory {
                 parent_uid: row.get(5)?,
                 created_at: row.get(6)?,
                 updated_at: row.get(7)?,
+                synced: row.get(8)?,
             })
         };
 
@@ -168,8 +177,8 @@ impl Directory {
             })?;
 
         let sql =
-            "UPDATE directories SET name=(?1), workspace_id=(?2), path=(?3), parent_uid=(?4), updated_at = (?5) \
-             WHERE uid = (?6)";
+            "UPDATE directories SET name=(?1), workspace_id=(?2), path=(?3), parent_uid=(?4), updated_at = (?5) synced=(?6) \
+             WHERE uid = (?7)";
 
         conn.execute(
             sql,
@@ -179,6 +188,7 @@ impl Directory {
                 &self.path,
                 &self.parent_uid,
                 &self.updated_at,
+                &self.synced,
                 &self.uid,
             ),
         )?;

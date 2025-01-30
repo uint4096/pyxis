@@ -16,6 +16,7 @@ export const dirSlice: StateCreator<
     uid,
     createdAt,
     updatedAt,
+    synced,
   ) => {
     const dirs = await createDir(
       name,
@@ -25,6 +26,7 @@ export const dirSlice: StateCreator<
       uid,
       createdAt,
       updatedAt,
+      synced,
     );
     if (!dirs) {
       return;
@@ -62,13 +64,13 @@ export const dirSlice: StateCreator<
     await get().createTree(directory.workspace_uid);
   },
 
-  updateDir: async (directory: DirWithChildren) => {
+  updateDir: async (directory: DirWithChildren, synced) => {
     if (!directory.id) {
       return;
     }
 
     const { uid, name, workspace_uid, path, parent_uid } = directory;
-    await updateDir(uid, name, workspace_uid, path, parent_uid);
+    await updateDir(uid, name, workspace_uid, path, parent_uid, synced);
 
     await get().createTree(directory.workspace_uid);
   },

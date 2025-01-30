@@ -14,7 +14,12 @@ impl Listener for WorkspacesListener {
         config_connection: &Connection,
         row_id: i64,
     ) -> Result<(), Error> {
-        let payload = serde_json::to_string(&Workspace::get(connection, row_id)?)
+        let workspace = &Workspace::get(connection, row_id)?;
+        if !workspace.synced.is_none() {
+            return Ok(());
+        }
+
+        let payload = serde_json::to_string(workspace)
             .expect("[Workspaces Listener] Failed to serialize to json!");
 
         self.insert_into_queue(config_connection, payload, "insert", &self.name, None, None)
@@ -26,7 +31,12 @@ impl Listener for WorkspacesListener {
         config_connection: &Connection,
         row_id: i64,
     ) -> Result<(), Error> {
-        let payload = serde_json::to_string(&Workspace::get(connection, row_id)?)
+        let workspace = &Workspace::get(connection, row_id)?;
+        if !workspace.synced.is_none() {
+            return Ok(());
+        }
+
+        let payload = serde_json::to_string(workspace)
             .expect("[Workspaces Listener] Failed to serialize to json!");
 
         self.insert_into_queue(config_connection, payload, "update", &self.name, None, None)

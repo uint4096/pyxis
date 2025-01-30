@@ -39,6 +39,7 @@ impl Migrations for DirectoriesMigration {
             path TEXT NOT NULL UNIQUE,
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL,
+            synced INTEGER DEFAULT 0,
 
             FOREIGN KEY (workspace_id) REFERENCES workspaces(id)
             ON DELETE CASCADE

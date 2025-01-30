@@ -17,13 +17,14 @@ export interface DirectoryState {
     uid?: string,
     createdAt?: string,
     updatedAt?: string,
+    synced?: boolean,
   ) => Promise<Directory | undefined>;
   buildDir: (
     workspaceUid: string,
     parentUid?: string,
   ) => Promise<Array<DirWithChildren>>;
   deleteDir: (directory: DirWithChildren) => Promise<void>;
-  updateDir: (directory: DirWithChildren) => Promise<void>;
+  updateDir: (directory: DirWithChildren, synced?: boolean) => Promise<void>;
 }
 
 export type Node = File | (Directory & { children: Array<Node> });
@@ -58,11 +59,12 @@ export interface FileState {
     uid?: string,
     createdAt?: string,
     updatedAt?: string,
+    synced?: boolean,
   ) => Promise<File | undefined>;
 
   deleteFile: (file: File) => Promise<void>;
 
-  updateFile: (file: File) => Promise<void>;
+  updateFile: (file: File, synced?: boolean) => Promise<void>;
 
   buildTree: (workspaceId: string) => Promise<Array<Node>>;
   createTree: (workspaceId: string) => Promise<Array<Node>>;

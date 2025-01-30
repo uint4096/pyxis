@@ -83,6 +83,7 @@ export const fileSlice: StateCreator<
     uid?: string,
     createdAt?: string,
     updatedAt?: string,
+    synced?: boolean,
   ) => {
     const file = await createFile(
       title,
@@ -94,6 +95,7 @@ export const fileSlice: StateCreator<
       uid,
       createdAt,
       updatedAt,
+      synced,
     );
     if (!file) {
       return;
@@ -127,13 +129,22 @@ export const fileSlice: StateCreator<
     await get().createTree(file.workspace_uid);
   },
 
-  updateFile: async (file: File) => {
+  updateFile: async (file: File, synced) => {
     if (!file.id) {
       return;
     }
 
     const { uid, title, workspace_uid, path, dir_uid, tags, links } = file;
-    await updateFile(uid, title, workspace_uid, path, links, tags, dir_uid);
+    await updateFile(
+      uid,
+      title,
+      workspace_uid,
+      path,
+      links,
+      tags,
+      dir_uid,
+      synced,
+    );
 
     await get().createTree(workspace_uid);
   },

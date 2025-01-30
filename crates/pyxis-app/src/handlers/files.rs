@@ -16,6 +16,7 @@ pub fn create_file(
     created_at: Option<String>,
     updated_at: Option<String>,
     uid: Option<String>,
+    synced: Option<bool>,
     database: State<Database>,
 ) -> Option<Files> {
     let file = Files::new(
@@ -29,6 +30,7 @@ pub fn create_file(
         created_at,
         updated_at,
         uid,
+        synced
     );
 
     match file.create(&database.get_connection()) {
@@ -75,6 +77,7 @@ pub fn update_file(
     path: String,
     links: Vec<Link>,
     tags: Vec<String>,
+    synced: Option<bool>,
     database: State<Database>,
 ) -> Option<Files> {
     let conn = &database.get_connection();
@@ -93,6 +96,7 @@ pub fn update_file(
         file.links = links;
         file.tags = tags;
         file.updated_at = Utc::now().to_rfc3339();
+        file.synced = synced;
 
         match file.update(conn) {
             Ok(_) => {

@@ -17,12 +17,17 @@ interface WorkspaceState {
     uid?: string,
     createdAt?: string,
     updatedAt?: string,
+    synced?: boolean,
   ) => Promise<Workspace | undefined>;
   delete: (uid: string) => Promise<void>;
   list: () => Promise<Array<Workspace>>;
   updateSelection: (workspace: Workspace) => Promise<void>;
   isDuplicate: (name: string) => Promise<boolean>;
-  updateWorkspace: (uid: string, name: string) => Promise<void>;
+  updateWorkspace: (
+    uid: string,
+    name: string,
+    synced?: boolean,
+  ) => Promise<void>;
 }
 
 export const useWorkspace = create<WorkspaceState>((set, get) => ({
@@ -36,13 +41,14 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
       currentWorkspace: workspaces.find((w) => w.selected),
     }),
 
-  create: async (name, uid, createdAt, updatedAt) => {
+  create: async (name, uid, createdAt, updatedAt, synced) => {
     const workspace = await createWorkspace(
       name,
       true,
       uid,
       createdAt,
       updatedAt,
+      synced,
     );
     const { list } = get();
     await list();
@@ -81,7 +87,7 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
       return;
     }
 
-    await updateWorkspace(workspace.uid, workspace.name, true);
+    await updateWorkspace(workspace.uid, workspace.name, true, false);
     const { list } = get();
     await list();
   },
@@ -91,8 +97,8 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
     return !!workspaceId;
   },
 
-  updateWorkspace: async (uid, name) => {
+  updateWorkspace: async (uid, name, synced) => {
     const currentWorkspace = get().workspaces?.find((w) => w.uid === uid);
-    await updateWorkspace(uid, name, !!currentWorkspace?.selected);
+    await updateWorkspace(uid, name, !!currentWorkspace?.selected, synced);
   },
 }));

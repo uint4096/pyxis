@@ -8,6 +8,7 @@ export type Workspace = {
   selected: boolean;
   created_at: string;
   updated_at: string;
+  synced?: boolean;
 };
 
 type Args = {
@@ -18,9 +19,15 @@ type Args = {
     uid?: string;
     created_at?: string;
     updated_at?: string;
+    synced?: boolean;
   };
   delete_workspace: { uid: string };
-  update_workspace: { uid: string; name: string; selected: boolean };
+  update_workspace: {
+    uid: string;
+    name: string;
+    selected: boolean;
+    synced?: boolean;
+  };
   get_workspace_id: { name: string };
 };
 
@@ -30,6 +37,7 @@ export const createWorkspace = async (
   uid?: string,
   createdAt?: string,
   updatedAt?: string,
+  synced?: boolean,
 ) => {
   try {
     const workspace = await invoke<Args, Workspace>()("create_workspace", {
@@ -38,6 +46,7 @@ export const createWorkspace = async (
       uid,
       created_at: createdAt,
       updated_at: updatedAt,
+      synced,
     });
 
     if (!workspace) {
@@ -92,12 +101,14 @@ export const updateWorkspace = async (
   uid: string,
   name: string,
   selected: boolean,
+  synced?: boolean,
 ) => {
   try {
     return await invoke<Args, void>()("update_workspace", {
       uid,
       name,
       selected,
+      synced,
     });
   } catch (e) {
     console.error("[Workspace] Failed to update!", e);

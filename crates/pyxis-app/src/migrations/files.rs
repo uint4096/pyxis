@@ -41,6 +41,7 @@ impl Migrations for FilesMigration {
             workspace_id INTEGER NOT NULL,
             tags TEXT,
             links TEXT,
+            synced INTEGER DEFAULT 0,
 
             FOREIGN KEY (dir_id) REFERENCES directories(id)
             ON DELETE CASCADE

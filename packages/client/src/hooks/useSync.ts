@@ -81,6 +81,7 @@ export const useSync = () => {
             uid,
             created_at,
             updated_at,
+            true,
           );
         }
       },
@@ -107,13 +108,14 @@ export const useSync = () => {
             uid,
             created_at,
             updated_at,
+            true,
           );
         }
       },
       workspaces: async (workspace) => {
         const { name, uid, created_at, updated_at } = workspace;
         if (!(await isDuplicateWorkspace(name))) {
-          await createWorkspace(name, uid, created_at, updated_at);
+          await createWorkspace(name, uid, created_at, updated_at, true);
         }
       },
     }),
@@ -136,11 +138,11 @@ export const useSync = () => {
   const updateHandlers: DocumentHandlers = useMemo(
     () => ({
       directories: async (directory) =>
-        await updateDir(directory as DirWithChildren),
-      files: async (file) => await updateFile(file),
+        await updateDir(directory as DirWithChildren, true),
+      files: async (file) => await updateFile(file, true),
       workspaces: async (workspace) => {
         const { name, uid } = workspace;
-        await updateWorkspace(name, uid);
+        await updateWorkspace(name, uid, true);
       },
     }),
     [updateDir, updateFile, updateWorkspace],

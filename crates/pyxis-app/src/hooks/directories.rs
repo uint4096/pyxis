@@ -15,7 +15,12 @@ impl Listener for DirectoryListener {
         config_connection: &Connection,
         row_id: i64,
     ) -> Result<(), Error> {
-        let payload = serde_json::to_string(&Directory::get(connection, row_id)?)
+        let dir = &Directory::get(connection, row_id)?;
+        if !dir.synced.is_none() {
+            return Ok(());
+        }
+
+        let payload = serde_json::to_string(dir)
             .expect("[Files Listener] Failed to serialize to json!");
 
         self.insert_into_queue(config_connection, payload, "insert", &self.name, None, None)
@@ -27,7 +32,12 @@ impl Listener for DirectoryListener {
         config_connection: &Connection,
         row_id: i64,
     ) -> Result<(), Error> {
-        let payload = serde_json::to_string(&Directory::get(connection, row_id)?)
+        let dir = &Directory::get(connection, row_id)?;
+        if !dir.synced.is_none() {
+            return Ok(());
+        }
+
+        let payload = serde_json::to_string(dir)
             .expect("[Files Listener] Failed to serialize to json!");
 
         self.insert_into_queue(config_connection, payload, "update", &self.name, None, None)

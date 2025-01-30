@@ -11,6 +11,7 @@ pub fn create_dir(
     created_at: Option<String>,
     updated_at: Option<String>,
     uid: Option<String>,
+    synced: Option<bool>,
     database: State<Database>,
 ) -> Option<Directory> {
     let directory = Directory::new(
@@ -22,6 +23,7 @@ pub fn create_dir(
         created_at,
         updated_at,
         uid,
+        synced
     );
 
     match directory.create(&database.get_connection()) {
@@ -67,6 +69,7 @@ pub fn update_dir(
     path: String,
     parent_uid: Option<String>,
     database: State<Database>,
+    synced: Option<bool>
 ) -> Option<Directory> {
     let conn = &database.get_connection();
     let directory = match Directory::list(conn, workspace_uid.clone(), parent_uid.clone()) {
@@ -83,6 +86,7 @@ pub fn update_dir(
         dir.path = path;
         dir.parent_uid = parent_uid;
         dir.updated_at = Utc::now().to_rfc3339();
+        dir.synced = synced;
 
         match dir.update(conn) {
             Ok(_) => {

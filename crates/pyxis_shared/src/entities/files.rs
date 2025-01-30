@@ -21,6 +21,7 @@ pub struct Files {
     pub tags: Vec<String>,
     pub workspace_uid: String,
     pub links: Vec<Link>,
+    pub synced: Option<bool>
 }
 
 pub fn val_or_else<'a, T>(val: &'a Option<T>, value: &'a str, else_value: &'a str) -> &'a str {
@@ -43,6 +44,7 @@ impl Files {
         created_at: Option<String>,
         updated_at: Option<String>,
         uid: Option<String>,
+        synced: Option<bool>
     ) -> Self {
         let current_time = Utc::now().to_rfc3339();
 
@@ -57,6 +59,8 @@ impl Files {
             updated_at: updated_at.or(Some(String::from(&current_time))).unwrap(),
             links,
             tags,
+            synced
+
         }
     }
 
@@ -72,7 +76,8 @@ impl Files {
                 f.updated_at, \
                 f.links, \
                 f.tags, \
-                d.uid as dir_uid \
+                d.uid as dir_uid, \
+                f.synced \
                 FROM files f \
                 INNER JOIN workspaces w ON f.workspace_id = w.id \
                 LEFT JOIN directories d ON f.dir_id = d.id \
@@ -97,6 +102,7 @@ impl Files {
                 dir_uid: row.get(9)?,
                 links,
                 tags,
+                synced: row.get(10)?
             })
         })
     }
@@ -116,7 +122,7 @@ impl Files {
             })?
         };
 
-        let sql = "INSERT INTO files (uid, dir_id, workspace_id, path, title, created_at, updated_at, links, tags) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)";
+        let sql = "INSERT INTO files (uid, dir_id, workspace_id, path, title, created_at, updated_at, links, tags, synced) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)";
 
         conn.execute(
             sql,
@@ -130,6 +136,7 @@ impl Files {
                 &self.updated_at,
                 &to_string(&self.tags).expect("[Files] Unable to convert tags to JSON"),
                 &to_string(&self.links).expect("[Files] Unable to convert links to JSON"),
+                &self.synced
             ),
         )?;
 
@@ -151,7 +158,8 @@ impl Files {
                 f.created_at, \
                 f.updated_at, \
                 f.links, \
-                f.tags \
+                f.tags, \
+                f.synced \
                 {} \
                 FROM files f \
                 INNER JOIN workspaces w ON f.workspace_id = w.id \
@@ -181,10 +189,11 @@ impl Files {
                 links,
                 tags,
                 dir_uid: if let Some(_) = &dir_uid {
-                    Some(row.get(9)?)
+                    Some(row.get(10)?)
                 } else {
                     None
                 },
+                synced: row.get(9)?
             })
         };
 
@@ -210,7 +219,7 @@ impl Files {
         };
 
         let sql =
-            "UPDATE files SET dir_id=(?1), title=(?2), path=(?3), links=(?4), tags=(?5), updated_at=(?6) WHERE uid = (?7)";
+            "UPDATE files SET dir_id=(?1), title=(?2), path=(?3), links=(?4), tags=(?5), updated_at=(?6), synced=(?7) WHERE uid = (?8)";
 
         conn.execute(
             sql,
@@ -221,6 +230,8 @@ impl Files {
                 &to_string(&self.links).expect("[Files] Unable to serialize links"),
                 &to_string(&self.tags).expect("[Files] Unable to serialize tags"),
                 &self.updated_at,
+                &self.synced,
+                &self.uid
             ),
         )?;
 

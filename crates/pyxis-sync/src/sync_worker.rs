@@ -136,21 +136,29 @@ pub async fn sync_worker(conn: &Connection) -> Result<(), Error> {
 fn get_valid_configuration(
     conn: &Connection,
 ) -> Result<Option<(String, Uuid, Uuid, Option<HashMap<String, String>>)>, Error> {
-    let config = ConfigEntry::get_logged_in_user(conn)?;
-    match (
-        config.user_token,
-        config.device_id,
-        config.user_id,
-        config.features,
-    ) {
-        (Some(token), Some(id), user_id, features) => Ok(Some((
-            token,
-            id,
-            Uuid::from_str(&user_id).unwrap(),
-            features,
-        ))),
-        _ => Ok(None),
+    match ConfigEntry::get_logged_in_user(conn) {
+        Ok(config) => {
+            match (
+                config.user_token,
+                config.device_id,
+                config.user_id,
+                config.features,
+            ) {
+                (Some(token), Some(id), user_id, features) => Ok(Some((
+                    token,
+                    id,
+                    Uuid::from_str(&user_id).unwrap(),
+                    features,
+                ))),
+                _ => Ok(None),
+            }
+        },
+        Err(e) => {
+            eprintln!("[Worker] Failed to get config! Error: {}", e);
+            Ok(None)
+        }
     }
+   
 }
 
 fn handle_backoff(sleep_duration: &mut u64) {

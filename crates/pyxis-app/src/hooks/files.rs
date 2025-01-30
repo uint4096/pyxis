@@ -14,7 +14,12 @@ impl Listener for FilesListener {
         config_connection: &Connection,
         row_id: i64,
     ) -> Result<(), Error> {
-        let payload = serde_json::to_string(&Files::get(connection, row_id)?)
+        let file = &Files::get(connection, row_id)?;
+        if !file.synced.is_none() {
+            return Ok(());
+        }
+
+        let payload = serde_json::to_string(file)
             .expect("[Files Listener] Failed to serialize to json!");
 
         self.insert_into_queue(config_connection, payload, "insert", &self.name, None, None)
@@ -26,7 +31,12 @@ impl Listener for FilesListener {
         config_connection: &Connection,
         row_id: i64,
     ) -> Result<(), Error> {
-        let payload = serde_json::to_string(&Files::get(connection, row_id)?)
+        let file = &Files::get(connection, row_id)?;
+        if !file.synced.is_none() {
+            return Ok(());
+        }
+
+        let payload = serde_json::to_string(file)
             .expect("[Files Listener] Failed to serialize to json!");
 
         self.insert_into_queue(config_connection, payload, "update", &self.name, None, None)

@@ -10,6 +10,7 @@ pub struct Workspace {
     pub selected: bool,
     pub created_at: String,
     pub updated_at: String,
+    pub synced: Option<bool>
 }
 
 impl Workspace {
@@ -20,6 +21,7 @@ impl Workspace {
         created_at: Option<String>,
         updated_at: Option<String>,
         uid: Option<String>,
+        synced: Option<bool>
     ) -> Self {
         let current_time = Utc::now().to_rfc3339();
 
@@ -30,12 +32,13 @@ impl Workspace {
             name,
             created_at: created_at.or(Some(String::from(&current_time))).unwrap(),
             updated_at: updated_at.or(Some(String::from(&current_time))).unwrap(),
+            synced
         }
     }
 
     pub fn get(connection: &Connection, id: i64) -> Result<Workspace, Error> {
         let mut sql = connection.prepare(
-            "SELECT id, uid, name, selected, created_at, updated_at from workspaces WHERE id=?1",
+            "SELECT id, uid, name, selected, created_at, updated_at, synced from workspaces WHERE id=?1",
         )?;
 
         sql.query_row(&[&id], |row| -> Result<Workspace, Error> {
@@ -46,6 +49,7 @@ impl Workspace {
                 selected: row.get(3)?,
                 created_at: row.get(4)?,
                 updated_at: row.get(5)?,
+                synced: row.get(6)?
             })
         })
     }
@@ -56,7 +60,7 @@ impl Workspace {
             conn.execute(&update_sql, ())?;
         }
 
-        let sql = "INSERT INTO workspaces (name, uid, selected, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5)";
+        let sql = "INSERT INTO workspaces (name, uid, selected, created_at, updated_at, synced) VALUES (?1, ?2, ?3, ?4, ?5, ?6)";
 
         conn.execute(
             sql,
@@ -66,6 +70,7 @@ impl Workspace {
                 &(self.selected as i32),
                 &self.created_at,
                 &self.updated_at,
+                &self.synced
             ),
         )?;
 
@@ -74,7 +79,7 @@ impl Workspace {
 
     pub fn list(conn: &Connection) -> Result<Vec<Self>, Error> {
         let mut stmt =
-            conn.prepare("SELECT id, uid, name, selected, created_at, updated_at from workspaces")?;
+            conn.prepare("SELECT id, uid, name, selected, created_at, updated_at, synced from workspaces")?;
         let workspace_iter = stmt.query_map([], |row| {
             let selected: i32 = row.get(3)?;
 
@@ -85,6 +90,7 @@ impl Workspace {
                 selected: selected != 0,
                 created_at: row.get(4)?,
                 updated_at: row.get(5)?,
+                synced: row.get(6)?,
             })
         })?;
 
@@ -102,7 +108,7 @@ impl Workspace {
         }
 
         let sql =
-            "UPDATE workspaces SET name = (?1), selected = (?2), updated_at = (?3) WHERE uid = (?4)";
+            "UPDATE workspaces SET name = (?1), selected = (?2), updated_at = (?3), synced = (?4) WHERE uid = (?5)";
 
         conn.execute(
             sql,
@@ -110,6 +116,7 @@ impl Workspace {
                 &self.name,
                 &(self.selected as i32),
                 &self.updated_at,
+                &self.synced,
                 &self.uid,
             ),
         )?;
@@ -127,7 +134,7 @@ impl Workspace {
     pub fn get_by_name(conn: &Connection, name: String) -> Result<i64, Error> {
         let mut stmt = conn.prepare(&format!(
             "SELECT \
-                id, \
+                id \
                 FROM workspaces \
                 WHERE w.name = ?1"
         ))?;

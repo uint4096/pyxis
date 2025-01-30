@@ -36,7 +36,8 @@ impl Migrations for WorkspaceMigration {
             name TEXT NOT NULL,
             selected INTEGER NOT NULL,
             created_at TEXT NOT NULL,
-            updated_at TEXT NOT NULL
+            updated_at TEXT NOT NULL,
+            synced INTEGER DEFAULT 0
         )";
 
         transaction.execute(sql, ())

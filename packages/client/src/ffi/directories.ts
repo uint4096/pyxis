@@ -10,6 +10,7 @@ export type Directory = {
   parent_uid?: string;
   created_at: string;
   updated_at: string;
+  synced?: boolean;
 };
 
 type Args = {
@@ -23,6 +24,7 @@ type Args = {
     uid?: string;
     created_at?: string;
     updated_at?: string;
+    synced?: boolean;
   };
   delete_dir: { uid: string };
   update_dir: {
@@ -31,6 +33,7 @@ type Args = {
     workspaceUid: string;
     path: string;
     parentUid?: string;
+    synced?: boolean;
   };
 };
 
@@ -42,6 +45,7 @@ export const createDir = async (
   uid?: string,
   createdAt?: string,
   updatedAt?: string,
+  synced?: boolean,
 ) => {
   try {
     const directory = await invoke<Args, Directory | null>()("create_dir", {
@@ -52,6 +56,7 @@ export const createDir = async (
       uid,
       created_at: createdAt,
       updated_at: updatedAt,
+      synced,
     });
 
     if (!directory) {
@@ -117,6 +122,7 @@ export const updateDir = async (
   workspaceUid: string,
   path: string,
   parentUid?: string,
+  synced?: boolean,
 ) => {
   try {
     const directory = await invoke<Args, Directory | null>()("update_dir", {
@@ -125,6 +131,7 @@ export const updateDir = async (
       workspaceUid,
       path,
       parentUid,
+      synced,
     });
 
     if (!directory) {

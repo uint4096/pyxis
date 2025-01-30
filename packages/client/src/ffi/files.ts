@@ -17,6 +17,7 @@ export type File = {
   updated_at: string;
   tags: Array<string>;
   links: Array<Link>;
+  synced?: boolean;
 };
 
 type Args = {
@@ -31,6 +32,7 @@ type Args = {
     uid?: string;
     created_at?: string;
     updated_at?: string;
+    synced?: boolean;
   };
   get_file_id: {
     path: string;
@@ -45,6 +47,7 @@ type Args = {
     path: string;
     links: Array<Link>;
     tags: Array<string>;
+    synced?: boolean;
   };
 };
 
@@ -58,6 +61,7 @@ export const createFile = async (
   uid?: string,
   createdAt?: string,
   updatedAt?: string,
+  synced?: boolean,
 ) => {
   try {
     const file = await invoke<Args, File | null>()("create_file", {
@@ -70,6 +74,7 @@ export const createFile = async (
       uid,
       created_at: createdAt,
       updated_at: updatedAt,
+      synced,
     });
 
     if (!file) {
@@ -136,6 +141,7 @@ export const updateFile = async (
   links: Array<Link>,
   tags: Array<string>,
   dirUid?: string,
+  synced?: boolean,
 ) => {
   try {
     const file = await invoke<Args, File | null>()("update_file", {
@@ -146,6 +152,7 @@ export const updateFile = async (
       dirUid,
       tags,
       links,
+      synced,
     });
 
     if (!file) {
