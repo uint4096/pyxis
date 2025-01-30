@@ -152,13 +152,12 @@ fn get_valid_configuration(
                 ))),
                 _ => Ok(None),
             }
-        },
+        }
         Err(e) => {
             eprintln!("[Worker] Failed to get config! Error: {}", e);
             Ok(None)
         }
     }
-   
 }
 
 fn handle_backoff(sleep_duration: &mut u64) {

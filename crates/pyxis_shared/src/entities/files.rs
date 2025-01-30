@@ -21,7 +21,7 @@ pub struct Files {
     pub tags: Vec<String>,
     pub workspace_uid: String,
     pub links: Vec<Link>,
-    pub synced: Option<bool>
+    pub synced: Option<bool>,
 }
 
 pub fn val_or_else<'a, T>(val: &'a Option<T>, value: &'a str, else_value: &'a str) -> &'a str {
@@ -44,7 +44,7 @@ impl Files {
         created_at: Option<String>,
         updated_at: Option<String>,
         uid: Option<String>,
-        synced: Option<bool>
+        synced: Option<bool>,
     ) -> Self {
         let current_time = Utc::now().to_rfc3339();
 
@@ -59,8 +59,7 @@ impl Files {
             updated_at: updated_at.or(Some(String::from(&current_time))).unwrap(),
             links,
             tags,
-            synced
-
+            synced,
         }
     }
 
@@ -102,7 +101,7 @@ impl Files {
                 dir_uid: row.get(9)?,
                 links,
                 tags,
-                synced: row.get(10)?
+                synced: row.get(10)?,
             })
         })
     }
@@ -136,7 +135,7 @@ impl Files {
                 &self.updated_at,
                 &to_string(&self.tags).expect("[Files] Unable to convert tags to JSON"),
                 &to_string(&self.links).expect("[Files] Unable to convert links to JSON"),
-                &self.synced
+                &self.synced,
             ),
         )?;
 
@@ -193,7 +192,7 @@ impl Files {
                 } else {
                     None
                 },
-                synced: row.get(9)?
+                synced: row.get(9)?,
             })
         };
 
@@ -231,7 +230,7 @@ impl Files {
                 &to_string(&self.tags).expect("[Files] Unable to serialize tags"),
                 &self.updated_at,
                 &self.synced,
-                &self.uid
+                &self.uid,
             ),
         )?;
 

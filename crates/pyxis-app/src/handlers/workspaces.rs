@@ -51,7 +51,7 @@ pub fn update_workspace(
     name: String,
     selected: bool,
     database: State<Database>,
-    synced: Option<bool>
+    synced: Option<bool>,
 ) -> Option<Workspace> {
     let conn = &database.get_connection();
     let workspace = match Workspace::list(conn) {

@@ -12,7 +12,7 @@ pub struct Directory {
     pub updated_at: String,
     pub path: String,
     pub parent_uid: Option<String>,
-    pub synced: Option<bool>
+    pub synced: Option<bool>,
 }
 
 impl Directory {
@@ -25,7 +25,7 @@ impl Directory {
         created_at: Option<String>,
         updated_at: Option<String>,
         uid: Option<String>,
-        synced: Option<bool>
+        synced: Option<bool>,
     ) -> Self {
         let current_time = Utc::now().to_rfc3339();
 
@@ -38,7 +38,7 @@ impl Directory {
             parent_uid,
             created_at: created_at.or(Some(String::from(&current_time))).unwrap(),
             updated_at: updated_at.or(Some(String::from(&current_time))).unwrap(),
-            synced
+            synced,
         }
     }
 
@@ -69,7 +69,7 @@ impl Directory {
                 parent_uid: row.get(5)?,
                 created_at: row.get(6)?,
                 updated_at: row.get(7)?,
-                synced: row.get(8)?
+                synced: row.get(8)?,
             })
         })
     }
@@ -95,7 +95,7 @@ impl Directory {
                 &self.parent_uid,
                 &self.created_at,
                 &self.updated_at,
-                &self.synced
+                &self.synced,
             ),
         )?;
 

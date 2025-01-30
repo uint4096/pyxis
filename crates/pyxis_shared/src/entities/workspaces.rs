@@ -10,7 +10,7 @@ pub struct Workspace {
     pub selected: bool,
     pub created_at: String,
     pub updated_at: String,
-    pub synced: Option<bool>
+    pub synced: Option<bool>,
 }
 
 impl Workspace {
@@ -21,7 +21,7 @@ impl Workspace {
         created_at: Option<String>,
         updated_at: Option<String>,
         uid: Option<String>,
-        synced: Option<bool>
+        synced: Option<bool>,
     ) -> Self {
         let current_time = Utc::now().to_rfc3339();
 
@@ -32,7 +32,7 @@ impl Workspace {
             name,
             created_at: created_at.or(Some(String::from(&current_time))).unwrap(),
             updated_at: updated_at.or(Some(String::from(&current_time))).unwrap(),
-            synced
+            synced,
         }
     }
 
@@ -49,7 +49,7 @@ impl Workspace {
                 selected: row.get(3)?,
                 created_at: row.get(4)?,
                 updated_at: row.get(5)?,
-                synced: row.get(6)?
+                synced: row.get(6)?,
             })
         })
     }
@@ -70,7 +70,7 @@ impl Workspace {
                 &(self.selected as i32),
                 &self.created_at,
                 &self.updated_at,
-                &self.synced
+                &self.synced,
             ),
         )?;
 
@@ -78,8 +78,9 @@ impl Workspace {
     }
 
     pub fn list(conn: &Connection) -> Result<Vec<Self>, Error> {
-        let mut stmt =
-            conn.prepare("SELECT id, uid, name, selected, created_at, updated_at, synced from workspaces")?;
+        let mut stmt = conn.prepare(
+            "SELECT id, uid, name, selected, created_at, updated_at, synced from workspaces",
+        )?;
         let workspace_iter = stmt.query_map([], |row| {
             let selected: i32 = row.get(3)?;
 

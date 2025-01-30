@@ -30,7 +30,7 @@ pub fn create_file(
         created_at,
         updated_at,
         uid,
-        synced
+        synced,
     );
 
     match file.create(&database.get_connection()) {

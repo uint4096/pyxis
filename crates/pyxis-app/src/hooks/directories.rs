@@ -20,8 +20,8 @@ impl Listener for DirectoryListener {
             return Ok(());
         }
 
-        let payload = serde_json::to_string(dir)
-            .expect("[Files Listener] Failed to serialize to json!");
+        let payload =
+            serde_json::to_string(dir).expect("[Files Listener] Failed to serialize to json!");
 
         self.insert_into_queue(config_connection, payload, "insert", &self.name, None, None)
     }
@@ -37,8 +37,8 @@ impl Listener for DirectoryListener {
             return Ok(());
         }
 
-        let payload = serde_json::to_string(dir)
-            .expect("[Files Listener] Failed to serialize to json!");
+        let payload =
+            serde_json::to_string(dir).expect("[Files Listener] Failed to serialize to json!");
 
         self.insert_into_queue(config_connection, payload, "update", &self.name, None, None)
     }
