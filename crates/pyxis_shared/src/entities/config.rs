@@ -44,7 +44,7 @@ impl ConfigEntry {
     }
 
     pub fn get_logged_in_user(conn: &Connection) -> Result<Configuration, Error> {
-        let mut stmt = conn.prepare("SELECT config FROM configuration WHERE config IS NOT NULL")?;
+        let mut stmt = conn.prepare("SELECT config FROM configuration WHERE json_extract(config, '$.user_token') IS NOT NULL")?;
         let config = stmt.query_row([], |row| {
             let json_str: String = row.get(0)?;
             let config: Configuration = serde_json::from_str(&json_str)

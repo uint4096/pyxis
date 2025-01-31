@@ -8,7 +8,7 @@ use uuid::Uuid;
 static TABLE_NAME: &str = "users";
 
 #[serde_as]
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub struct UserWithPassword {
     pub user_id: String,
     pub username: String,
@@ -17,7 +17,7 @@ pub struct UserWithPassword {
 }
 
 #[serde_as]
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct UserWithoutPassword {
     pub user_id: Uuid,
     pub username: String,
@@ -94,8 +94,10 @@ impl UserRepository {
         &self,
         user_id: String,
         device_ids: Vec<String>,
+        username: String,
     ) -> Result<(), Box<dyn Error>> {
         let user_id_av = AttributeValue::S(user_id.to_string());
+        let username_av = AttributeValue::S(username.to_string());
         let device_id_av = AttributeValue::L(
             device_ids
                 .into_iter()
@@ -106,12 +108,11 @@ impl UserRepository {
         self.client
             .update_item()
             .table_name(TABLE_NAME)
-            .condition_expression("#user_id = :user_id")
+            .key("user_id", user_id_av.clone())
+            .key("username", username_av)
             .update_expression("SET #device_ids = :device_ids")
             .expression_attribute_names("#device_ids", "device_ids")
-            .expression_attribute_names("#user_id", "user_id")
             .expression_attribute_values(":device_ids", device_id_av)
-            .expression_attribute_values(":user_id", user_id_av)
             .send()
             .await?;
 
@@ -204,7 +205,7 @@ impl UserRepository {
             };
 
             if is_new_device {
-                self.update_devices(user_id.clone(), device_ids.clone())
+                self.update_devices(user_id.clone(), device_ids.clone(), username.clone())
                     .await?;
             }
 

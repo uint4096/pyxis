@@ -39,7 +39,7 @@ pub async fn sign_in(
     {
         Ok(user) => user,
         Err(e) => {
-            println!("Error while verifying password: {}", e);
+            println!("Error while verifying password: {:?}", e);
             return Err(StatusCode::INTERNAL_SERVER_ERROR);
         }
     };
