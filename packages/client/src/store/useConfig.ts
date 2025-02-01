@@ -4,6 +4,7 @@ import {
   getConfig,
   type Config,
   getLoggedInUser,
+  getDeviceId,
 } from "../ffi";
 import { create } from "zustand";
 
@@ -20,6 +21,7 @@ interface ConfigState {
   delete: (userId: string) => Promise<void>;
   setConfig: (config: Config) => Promise<void>;
   getLoggedInUser: () => Promise<Config | undefined>;
+  getDeviceId: () => Promise<string>;
 }
 
 export const useConfig = create<ConfigState>((set, get) => ({
@@ -62,4 +64,6 @@ export const useConfig = create<ConfigState>((set, get) => ({
       config,
     });
   },
+
+  getDeviceId: async () => getDeviceId(),
 }));

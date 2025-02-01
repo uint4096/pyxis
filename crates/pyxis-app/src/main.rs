@@ -5,7 +5,7 @@ mod hooks;
 mod migrations;
 mod sidecar;
 
-use handlers::config::{add_user_data, get_config, get_logged_in_user, remove_user_data};
+use handlers::config::{add_user_data, get_config, get_logged_in_user, remove_user_data, get_device_id};
 use handlers::devices::{add_devices, list_devices};
 use handlers::directories::{create_dir, delete_dir, get_directory_id, list_dirs, update_dir};
 use handlers::files::{create_file, delete_file, get_file_id, list_files, update_file};
@@ -74,7 +74,8 @@ fn main() {
             get_directory_id,
             get_workspace_id,
             add_record,
-            get_logged_in_user
+            get_logged_in_user,
+            get_device_id
         ])
         .setup(|app: &mut App| {
             let window = app

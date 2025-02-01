@@ -26,6 +26,7 @@ type Args = {
   remove_user_data: { userId: string };
   get_config: { userId: string };
   get_logged_in_user: never;
+  get_device_id: never;
 };
 
 export const addUserData = async (payload: Config) => {
@@ -102,5 +103,20 @@ export const getLoggedInUser = async (): Promise<Config | undefined> => {
     };
   } catch (e) {
     console.error("[Configuration] Failed to get config!", e);
+  }
+};
+
+export const getDeviceId = async () => {
+  try {
+    const response = await invoke<Args, string>()("get_device_id", {} as never);
+
+    if (!response) {
+      throw new Error("Failed to get device id!");
+    }
+
+    return response;
+  } catch (e) {
+    console.error("Failed to get device id. Error: ", e);
+    throw new Error("Failed to get device id!");
   }
 };

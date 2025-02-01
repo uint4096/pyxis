@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use pyxis_shared::{
     database::ConfigDatabase,
-    entities::config::{ConfigEntry, Configuration},
+    entities::config::{ConfigEntry, Configuration}, utils::get_machine_id,
 };
 use tauri::State;
 
@@ -61,4 +61,9 @@ pub fn get_logged_in_user(sync_db: State<ConfigDatabase>) -> Option<Configuratio
             None
         }
     }
+}
+
+#[tauri::command]
+pub fn get_device_id() -> String {
+    get_machine_id::get_machine_id().to_string()
 }

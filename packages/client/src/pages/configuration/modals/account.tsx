@@ -11,7 +11,7 @@ export const AccountForm = ({ onDone }: { onDone: () => void }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const { create, config } = useConfig();
+  const { create, getDeviceId } = useConfig();
   const { registerOrLogin } = useAuthRequests();
 
   const [type, setType] = useState<"signin" | "signup">("signin");
@@ -21,7 +21,7 @@ export const AccountForm = ({ onDone }: { onDone: () => void }) => {
       const { response, status } = await registerOrLogin(type, {
         username,
         password,
-        device_id: config.deviceId,
+        device_id: await getDeviceId(),
       });
 
       if (status === "offline") {
@@ -42,15 +42,7 @@ export const AccountForm = ({ onDone }: { onDone: () => void }) => {
       const message = type === "signin" ? "Signin failed!" : "Signup failed!";
       toast(message);
     }
-  }, [
-    registerOrLogin,
-    type,
-    username,
-    password,
-    config.deviceId,
-    create,
-    onDone,
-  ]);
+  }, [registerOrLogin, type, username, password, getDeviceId, create, onDone]);
 
   const body = (
     <FormWrapper>

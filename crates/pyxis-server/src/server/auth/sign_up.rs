@@ -5,7 +5,6 @@ use axum::{
     response::{IntoResponse, Response},
     Json,
 };
-use pyxis_shared::utils::get_machine_id::get_machine_id;
 use serde::Deserialize;
 use uuid::Uuid;
 
@@ -16,7 +15,7 @@ use crate::database::{
 
 #[derive(Deserialize)]
 pub struct SignUpPayload {
-    device_id: Option<Uuid>,
+    device_id: Uuid,
     password: String,
     username: String,
 }
@@ -57,7 +56,7 @@ pub async fn sign_up(
     let user = match user_repository
         .create(
             UserWithoutPassword {
-                device_id: device_id.or(Some(get_machine_id())).unwrap(),
+                device_id,
                 username,
                 user_id,
             },

@@ -1,6 +1,5 @@
 use crate::server::router::AWSConnectionState;
 use axum::{extract::State, http::StatusCode, Json};
-use pyxis_shared::utils::get_machine_id::get_machine_id;
 use serde::Deserialize;
 
 use crate::database::{
@@ -12,7 +11,7 @@ use crate::database::{
 pub struct SignInPayload {
     password: String,
     username: String,
-    device_id: Option<String>,
+    device_id: String,
 }
 
 #[axum_macros::debug_handler]
@@ -33,7 +32,7 @@ pub async fn sign_in(
         .verify(
             username,
             password,
-            device_id.or(Some(get_machine_id().to_string())).unwrap(),
+            device_id,
         )
         .await
     {
