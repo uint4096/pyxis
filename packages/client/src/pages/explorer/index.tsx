@@ -66,9 +66,9 @@ export const Explorer = () => {
       <ExplorerWrapper>
         {currentWorkspace?.uid && <Tree />}
 
-        {showEditor && selectedFile?.id && formattedContent && (
+        {showEditor && selectedFile?.uid && formattedContent && (
           <Editor
-            key={selectedFile.id}
+            key={selectedFile.uid}
             fileUid={selectedFile.uid}
             content={formattedContent}
             updatesWriter={insertUpdates}

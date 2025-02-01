@@ -59,7 +59,7 @@ export const fileSlice: StateCreator<
   },
 
   selectFile: async (file) => {
-    if (!file?.id) {
+    if (!file?.uid) {
       set({
         selectedFile: undefined,
         formattedContent: undefined,

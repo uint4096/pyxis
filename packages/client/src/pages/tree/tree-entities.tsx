@@ -36,6 +36,7 @@ export const Entities = ({
     createFile,
     updateDir,
     updateFile,
+    selectFile,
     selectedFile,
   } = useTreeStore();
 
@@ -58,7 +59,7 @@ export const Entities = ({
       const entityPath = `${parent?.path ?? ""}/${documentName}`;
 
       if (newDocument === "file") {
-        await createFile(
+        const file = await createFile(
           documentName,
           workspaceUid,
           entityPath,
@@ -66,6 +67,8 @@ export const Entities = ({
           [],
           parent?.uid,
         );
+
+        selectFile(file);
       } else {
         await createDir(documentName, workspaceUid, entityPath, parent?.uid);
       }
@@ -73,7 +76,15 @@ export const Entities = ({
       setDocumentName("");
       setNewDocument(undefined);
     },
-    [findNode, documentName, newDocument, createFile, workspaceUid, createDir],
+    [
+      findNode,
+      documentName,
+      newDocument,
+      createFile,
+      workspaceUid,
+      selectFile,
+      createDir,
+    ],
   );
 
   const renameKeydown = useCallback(
