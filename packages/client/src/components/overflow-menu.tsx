@@ -12,7 +12,7 @@ import { noop } from "../utils";
 export type MenuOption = {
   id: string;
   name: string;
-  handler: () => Promise<void>;
+  handler: () => void | Promise<void>;
 };
 
 export type MenuProps = {

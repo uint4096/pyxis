@@ -177,7 +177,7 @@ impl Directory {
             })?;
 
         let sql =
-            "UPDATE directories SET name=(?1), workspace_id=(?2), path=(?3), parent_uid=(?4), updated_at = (?5) synced=(?6) \
+            "UPDATE directories SET name=(?1), workspace_id=(?2), path=(?3), parent_uid=(?4), updated_at=(?5), synced=(?6) \
              WHERE uid = (?7)";
 
         conn.execute(

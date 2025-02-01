@@ -31,6 +31,7 @@ export type DirContainerProps = {
   setNewDocument: React.Dispatch<React.SetStateAction<Document | undefined>>;
   overflowPopup: string | undefined;
   isWorkspace: boolean;
+  initDocRename: (type: Document, uid: string, name: string) => void;
 };
 
 export const DirContainer = ({
@@ -41,6 +42,7 @@ export const DirContainer = ({
   setOverflowPopup,
   setNewDocument,
   isWorkspace,
+  initDocRename,
 }: DirContainerProps) => {
   const optionsRef = useRef<HTMLDivElement>(null);
 
@@ -64,7 +66,7 @@ export const DirContainer = ({
     dirMenuOptions.push(
       ...[
         {
-          handler: async () => {},
+          handler: () => initDocRename("dir", dir.uid, dir.name),
           id: "rename",
           name: "Rename",
         },

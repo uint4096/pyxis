@@ -63,7 +63,7 @@ pub fn delete_dir(uid: String, database: State<Database>) -> bool {
 
 #[tauri::command]
 pub fn update_dir(
-    id: i32,
+    uid: String,
     name: String,
     workspace_uid: String,
     path: String,
@@ -73,7 +73,7 @@ pub fn update_dir(
 ) -> Option<Directory> {
     let conn = &database.get_connection();
     let directory = match Directory::list(conn, workspace_uid.clone(), parent_uid.clone()) {
-        Ok(w) => w.into_iter().find(|w| w.id == Some(id)),
+        Ok(dir) => dir.into_iter().find(|d| d.uid == uid),
         Err(e) => {
             eprintln!("[Directories] Failed to get for update! {}", e);
             None

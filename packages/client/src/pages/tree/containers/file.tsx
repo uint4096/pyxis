@@ -13,17 +13,20 @@ import {
   noDisplay,
   OptionsContainer,
 } from "./styles";
+import type { Document } from "../../../types";
 
 type FileContainerProps = {
   file: Partial<File>;
   setOverflowPopup: React.Dispatch<React.SetStateAction<string | undefined>>;
   overflowPopup: string | undefined;
+  initDocRename: (type: Document, uid: string, name: string) => void;
 };
 
 export const FileContainer = ({
   file,
   setOverflowPopup,
   overflowPopup,
+  initDocRename,
 }: FileContainerProps) => {
   const { currentWorkspace } = useWorkspace();
   const { selectedFile, deleteFile, selectFile } = useTreeStore();
@@ -41,7 +44,7 @@ export const FileContainer = ({
 
   const fileMenuOptions: Array<MenuOption> = [
     {
-      handler: async () => {},
+      handler: () => initDocRename("file", file?.uid ?? "", file?.title ?? ""),
       id: "rename",
       name: "Rename",
     },

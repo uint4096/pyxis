@@ -4,7 +4,8 @@ import type { Document } from "../../types";
 import { InputInPlace } from "../../components";
 import { FileContainer } from "./containers/file";
 import { DirContainer, TreeDirectory } from "./containers/dir";
-import { isFile, Node, useTreeStore } from "../../store";
+import { DirWithChildren, isFile, Node, useTreeStore } from "../../store";
+import { File } from "../../ffi";
 
 type EntityProps = {
   node: TreeDirectory | Node;
@@ -23,11 +24,22 @@ export const Entities = ({
 }: EntityProps) => {
   const [collapased, setCollapsed] = useState(false);
   const [newDocument, setNewDocument] = useState<Document>();
+  const [renameDocument, setRenameDocument] = useState<{
+    type: Document;
+    uid: string;
+  }>();
   const [documentName, setDocumentName] = useState("");
 
-  const { findNode, createDir, createFile, selectedFile } = useTreeStore();
+  const {
+    findNode,
+    createDir,
+    createFile,
+    updateDir,
+    updateFile,
+    selectedFile,
+  } = useTreeStore();
 
-  const inputKeydown = useCallback(
+  const createKeydown = useCallback(
     async (
       e: React.KeyboardEvent<HTMLInputElement>,
       parentUid: string | undefined,
@@ -64,29 +76,92 @@ export const Entities = ({
     [findNode, documentName, newDocument, createFile, workspaceUid, createDir],
   );
 
+  const renameKeydown = useCallback(
+    async (e: React.KeyboardEvent<HTMLInputElement>, uid: string) => {
+      if (e.key === "Escape") {
+        setDocumentName("");
+        setRenameDocument(undefined);
+        return;
+      }
+
+      if (e.key !== "Enter") {
+        return;
+      }
+
+      const node = uid ? findNode(uid) : undefined;
+      if (!node) {
+        setDocumentName("");
+        setRenameDocument(undefined);
+        return;
+      }
+
+      if (renameDocument?.type === "file") {
+        await updateFile({ ...(node as File), title: documentName });
+      } else {
+        await updateDir({ ...(node as DirWithChildren), name: documentName });
+      }
+
+      setDocumentName("");
+      setRenameDocument(undefined);
+    },
+    [documentName, findNode, renameDocument?.type, updateDir, updateFile],
+  );
+
+  const initDocRename = useCallback(
+    (type: Document, uid: string, name: string) => {
+      setRenameDocument({ type, uid });
+      setDocumentName(name);
+    },
+    [],
+  );
+
   useEffect(() => {
     setOverflowPopup("");
-  }, [newDocument, selectedFile, setOverflowPopup]);
+  }, [newDocument, selectedFile, renameDocument, setOverflowPopup]);
 
   return (
     <DirTreeWrapper>
-      {isFile(node) ? (
+      {isFile(node) && node.uid === renameDocument?.uid && (
+        <InputInPlace
+          size="small"
+          value={documentName}
+          onKeyDown={(e) => renameKeydown(e, node.uid)}
+          onChange={setDocumentName}
+        />
+      )}
+
+      {isFile(node) && node.uid !== renameDocument?.uid && (
         <FileContainer
           file={node}
           overflowPopup={overflowPopup}
           setOverflowPopup={setOverflowPopup}
+          initDocRename={initDocRename}
         />
-      ) : (
+      )}
+
+      {!isFile(node) && (
         <>
-          <DirContainer
-            collapsed={collapased}
-            setCollapsed={setCollapsed}
-            dir={node}
-            overflowPopup={overflowPopup}
-            setOverflowPopup={setOverflowPopup}
-            setNewDocument={setNewDocument}
-            isWorkspace={isWorkspace}
-          />
+          {node.uid === renameDocument?.uid && (
+            <InputInPlace
+              size="small"
+              value={documentName}
+              onKeyDown={(e) => renameKeydown(e, node.uid)}
+              onChange={setDocumentName}
+            />
+          )}
+
+          {node.uid !== renameDocument?.uid && (
+            <DirContainer
+              collapsed={collapased}
+              setCollapsed={setCollapsed}
+              dir={node}
+              overflowPopup={overflowPopup}
+              setOverflowPopup={setOverflowPopup}
+              setNewDocument={setNewDocument}
+              isWorkspace={isWorkspace}
+              initDocRename={initDocRename}
+            />
+          )}
 
           {!collapased && (
             <EntityContainer>
@@ -94,10 +169,11 @@ export const Entities = ({
                 <InputInPlace
                   size="small"
                   value={documentName}
-                  onKeyDown={(e) => inputKeydown(e, node.uid)}
+                  onKeyDown={(e) => createKeydown(e, node.uid)}
                   onChange={setDocumentName}
                 />
               )}
+
               {(node.children ?? []).map((dir) => (
                 <Entities
                   node={dir}
