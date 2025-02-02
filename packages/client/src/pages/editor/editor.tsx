@@ -17,6 +17,9 @@ import {
   type Caret,
   ctrlSelectionKeys,
   ctrlSkipKeys,
+  skipKeys,
+  skipKeysOnSelection,
+  stopPropagationKeys,
 } from "./keys";
 import {
   ZERO_WIDTH_SPACE_UNICODE,
@@ -267,6 +270,18 @@ const Editor = ({
         return;
       } else if (event.ctrlKey && ctrlSkipKeys.includes(key)) {
         return;
+      }
+
+      if (
+        (!rawText.caret.collapsed && skipKeysOnSelection.includes(key)) ||
+        skipKeys.includes(key)
+      ) {
+        return;
+      }
+
+      if (stopPropagationKeys.includes(key)) {
+        event.stopPropagation();
+        event.preventDefault();
       }
 
       if (!loroText || !loroCaret) {

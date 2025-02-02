@@ -47,3 +47,8 @@ export const selectionKeys: Array<string> = [
 
 export const ctrlSelectionKeys: Array<string> = [Keys.a, Keys.c];
 export const ctrlSkipKeys: Array<string> = [Keys.v];
+
+export const skipKeys: Array<string> = [Keys.ALT, Keys.CAPSLOCK];
+export const skipKeysOnSelection: Array<string> = [Keys.SHIFT];
+
+export const stopPropagationKeys: Array<string> = [Keys.TAB];

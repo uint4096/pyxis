@@ -5,11 +5,13 @@ export const getKeyContent = (key: string) => {
     case Keys.ENTER: {
       return "\n";
     }
+    case Keys.TAB: {
+      return "    ";
+    }
     case Keys.CONTROL:
     case Keys.SHIFT:
     case Keys.ALT:
     case Keys.CAPSLOCK:
-    case Keys.TAB:
     case Keys.ESCAPE:
     case Keys.SUPER:
     case Keys.F1:
