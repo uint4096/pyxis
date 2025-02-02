@@ -35,14 +35,21 @@ impl SyncWriter for UpdateWriter {
 
         let base_url = env::var("APP_BASE_URL").unwrap();
 
-        client
+        let response = client
             .post(format!("{}/sync/update/write", base_url))
             .json(&update_payload)
             .header("authorization", format!("Bearer {}", &token))
             .send()
             .await?;
 
-        Ok((0, queue_element.id.unwrap()))
+        match response.error_for_status() {
+            Ok(_) => {
+                return Ok((0, queue_element.id.unwrap()));
+            }
+            Err(e) => {
+                return Err(e);
+            }
+        }
     }
 
     async fn post_write(

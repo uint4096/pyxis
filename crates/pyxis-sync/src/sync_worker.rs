@@ -21,7 +21,7 @@ pub async fn sync_worker(conn: &Connection) -> Result<(), Error> {
     loop {
         sleep_duration = min(sleep_duration, MAX_SLEEP_DURATION);
 
-        let (user_token, device_id, user_id, features) = match get_valid_configuration(conn)? {
+        let (user_token, device_id, user_id, _features) = match get_valid_configuration(conn)? {
             Some(config) => config,
             None => {
                 eprintln!("Invalid configuration!");
@@ -29,24 +29,6 @@ pub async fn sync_worker(conn: &Connection) -> Result<(), Error> {
                 continue;
             }
         };
-
-        if let Some(features) = features {
-            match features.get("sync") {
-                Some(val) => {
-                    if *val != String::from("enabled") {
-                        handle_backoff(&mut sleep_duration);
-                        continue;
-                    }
-                }
-                None => {
-                    handle_backoff(&mut sleep_duration);
-                    continue;
-                }
-            }
-        } else {
-            handle_backoff(&mut sleep_duration);
-            continue;
-        }
 
         let last_written_id: i64 = match Tracker::get_last_queue_entry_id(conn, device_id, user_id)
         {

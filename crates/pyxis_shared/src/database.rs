@@ -38,6 +38,12 @@ impl Database {
                 conn.execute("PRAGMA foreign_keys=ON;", [])
                     .unwrap_or_default();
 
+                conn.execute("PRAGMA busy_timeout=5000;", [])
+                    .unwrap_or_default();
+
+                conn.execute("PRAGMA synchronous=NORMAL;", [])
+                    .unwrap_or_default();
+
                 Database {
                     conn: Arc::new(Mutex::new(conn)),
                 }

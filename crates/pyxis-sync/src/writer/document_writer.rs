@@ -65,14 +65,21 @@ impl<'a> SyncWriter for DocumentWriter<'a> {
 
         let base_url = env::var("APP_BASE_URL").unwrap();
 
-        client
+        let response = client
             .post(format!("{}/sync/document/write", base_url))
             .json(&update_payload)
             .header("authorization", format!("Bearer {}", &token))
             .send()
             .await?;
 
-        Ok((last_record.record_id + 1, queue_element.id.unwrap()))
+        match response.error_for_status() {
+            Ok(_) => {
+                return Ok((last_record.record_id + 1, queue_element.id.unwrap()));
+            }
+            Err(e) => {
+                return Err(e);
+            }
+        }
     }
 
     async fn post_write(
