@@ -11,7 +11,7 @@ use serde_with::{chrono::TimeDelta, serde_as, DurationSeconds};
 
 static TABLE_NAME: &str = "tokens";
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Claims {
     pub user: UserWithoutPassword,
     pub exp: usize,

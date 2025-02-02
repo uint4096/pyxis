@@ -9,7 +9,7 @@ use crate::database::token_repository::Claims;
 
 #[derive(Serialize)]
 pub struct FeaturesResponse {
-    features: Option<Feature>,
+    pub features: Option<Feature>,
 }
 
 #[axum_macros::debug_handler]

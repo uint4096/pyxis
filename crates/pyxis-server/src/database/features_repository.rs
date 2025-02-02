@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 static TABLE_NAME: &str = "user_features";
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Feature {
     pub user_id: String,
     pub features: HashMap<String, String>,
@@ -69,7 +69,10 @@ impl FeaturesRepository {
         Ok(())
     }
 
-    pub async fn get(&self, user_id: String) -> Result<Option<Feature>, Box<dyn Error>> {
+    pub async fn get(
+        &self,
+        user_id: String,
+    ) -> Result<Option<Feature>, Box<dyn std::error::Error + Send + Sync>> {
         let feature = self
             .client
             .get_item()

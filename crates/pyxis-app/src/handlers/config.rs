@@ -2,7 +2,8 @@ use std::collections::HashMap;
 
 use pyxis_shared::{
     database::ConfigDatabase,
-    entities::config::{ConfigEntry, Configuration}, utils::get_machine_id,
+    entities::config::{ConfigEntry, Configuration},
+    utils::get_machine_id,
 };
 use tauri::State;
 
