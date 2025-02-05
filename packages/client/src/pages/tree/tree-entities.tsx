@@ -68,6 +68,7 @@ export const Entities = ({
           parent?.uid,
         );
 
+        selectFile(undefined);
         selectFile(file);
       } else {
         await createDir(documentName, workspaceUid, entityPath, parent?.uid);

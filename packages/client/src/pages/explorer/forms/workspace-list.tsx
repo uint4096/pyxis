@@ -3,7 +3,7 @@ import { useCallback, useEffect } from "react";
 import { Modal } from "../../../components";
 import { FormWrapper } from "./common";
 import { Workspace } from "../../../ffi";
-import { useWorkspace } from "../../../store";
+import { useTreeStore, useWorkspace } from "../../../store";
 import { noop } from "../../../utils";
 import { Trash } from "../../../icons";
 
@@ -21,6 +21,7 @@ export const WorkspaceSelection = ({
   onCreate,
 }: WorkspaceListProps) => {
   const { updateSelection, delete: deleteWorkspace } = useWorkspace();
+  const { selectedFile, selectFile } = useTreeStore();
 
   const selectWorkspace = useCallback(
     async (workspace: Workspace) => {
@@ -46,6 +47,17 @@ export const WorkspaceSelection = ({
     </Header>
   );
 
+  const workspaceDelete = useCallback(
+    (workspaceUid: string) => {
+      if (workspaceUid === selectedFile?.workspace_uid) {
+        selectFile(undefined);
+      }
+
+      return deleteWorkspace(workspaceUid);
+    },
+    [deleteWorkspace, selectFile, selectedFile?.workspace_uid],
+  );
+
   const list = (
     <WorkspaceList>
       {workspaces.map((workspace) => {
@@ -56,7 +68,7 @@ export const WorkspaceSelection = ({
             >
               {workspace.name}
             </WorkspaceName>
-            <div onClick={() => deleteWorkspace(workspace.uid!)}>
+            <div onClick={() => workspaceDelete(workspace.uid!)}>
               <Trash width={22} height={22} stroke="#C6011F" />
             </div>
           </WorkspaceListElement>
