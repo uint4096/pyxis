@@ -1,10 +1,11 @@
 import { styled } from "@linaria/react";
 import { useEffect, useState } from "react";
 import { WorkspaceSelection, CreateWorkspace } from "./forms";
-import { useTreeStore, useWorkspace } from "../../store";
+import { useConfig, useTreeStore, useWorkspace } from "../../store";
 import { Tree } from "../tree";
 import Editor from "../editor/editor";
 import { useContentSync } from "../../hooks";
+import { ConfigurationTray } from "../configuration";
 
 export const Explorer = () => {
   const { workspaces, list, currentWorkspace } = useWorkspace();
@@ -16,8 +17,10 @@ export const Explorer = () => {
     setFormattedContent,
   } = useTreeStore();
   const { getFileContent } = useContentSync();
+  const { config } = useConfig();
 
   const [showWorkspaceForm, setWorkspaceForm] = useState<boolean>(false);
+  const [explorerVisibility, setExplorerVisibility] = useState<boolean>(true);
   const [showWorkspaceSelectionForm, setWorkspaceSelectionForm] =
     useState<boolean>(false);
 
@@ -64,7 +67,18 @@ export const Explorer = () => {
   return (
     <>
       <ExplorerWrapper>
-        {currentWorkspace?.uid && <Tree />}
+        {config.userToken && (
+          <ConfigurationTray
+            explorerVisibility={explorerVisibility}
+            setExplorerVisibility={setExplorerVisibility}
+          />
+        )}
+        {currentWorkspace?.uid && (
+          <Tree
+            explorerVisibility={explorerVisibility}
+            setExplorerVisibility={setExplorerVisibility}
+          />
+        )}
 
         {showEditor && selectedFile?.uid && formattedContent && (
           <Editor
@@ -93,10 +107,7 @@ export const Explorer = () => {
 
 const ExplorerWrapper = styled.div`
   display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
-  padding: 1vh 5vw;
   height: 100%;
-  flex-grow: 1;
-  gap: 5vw;
+  font-family: "Poppins";
+  width: 100%;
 `;
