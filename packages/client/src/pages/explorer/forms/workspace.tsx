@@ -1,7 +1,6 @@
 import { styled } from "@linaria/react";
 import { useState } from "react";
 
-import { FormWrapper } from "./common";
 import { CreateWorkspaceForm } from "./create-workspace";
 
 type WorkspaceSelectionProps = {
@@ -14,12 +13,10 @@ export const CreateWorkspace = ({ setVisibility }: WorkspaceSelectionProps) => {
   return (
     <>
       {!showForm && (
-        <FormWrapper>
-          <MessageWrapper>
-            <WorkspaceMessage>You have no workspaces!</WorkspaceMessage>
-            <button onClick={() => setForm(true)}>Create a Workspace</button>
-          </MessageWrapper>
-        </FormWrapper>
+        <MessageWrapper>
+          <WorkspaceMessage>You have no workspaces!</WorkspaceMessage>
+          <button onClick={() => setForm(true)}>Create a Workspace</button>
+        </MessageWrapper>
       )}
       {showForm && <CreateWorkspaceForm onDone={() => setVisibility(false)} />}
     </>
@@ -32,6 +29,7 @@ const MessageWrapper = styled.div`
   align-items: center;
   justify-content: center;
   gap: 1vh;
+  flex-grow: 1;
 `;
 
 const WorkspaceMessage = styled.span`

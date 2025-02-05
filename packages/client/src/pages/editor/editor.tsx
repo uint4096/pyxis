@@ -30,6 +30,7 @@ import { useDebounce } from "../../hooks";
 import { LoroDoc, LoroList, LoroText, VersionVector } from "loro-crdt";
 import fastDiff from "fast-diff";
 import { FormattedContent } from "../../store";
+import { styled } from "@linaria/react";
 
 type EditorText = {
   text: string | undefined;
@@ -389,7 +390,7 @@ const Editor = ({
   return (
     <>
       {rawText.text != null && (
-        <div
+        <TextEditor
           id={"editor"}
           contentEditable
           dangerouslySetInnerHTML={{
@@ -403,5 +404,12 @@ const Editor = ({
     </>
   );
 };
+
+const TextEditor = styled.div`
+  flex-grow: 1;
+  padding: 1vh 2vw;
+  margin: 4vh 5vw;
+  border-radius: 1%;
+`;
 
 export default Editor;

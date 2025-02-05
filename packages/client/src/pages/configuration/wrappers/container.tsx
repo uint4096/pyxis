@@ -10,10 +10,13 @@ export const Options = ({ children }: OptionsProps) => {
 };
 
 const OptionsWrapper = styled.div`
-  width: 90%;
-  margin: auto;
+  height: 100%;
   display: flex;
-  justify-content: flex-start;
+  background-color: #1a1a1a;
+  flex-direction: column;
+  justify-content: flex-end;
   gap: 2em;
-  padding: 1em 0 0.5em 0;
+  border-right: 1px solid gray;
+  padding: 2vh 0.5vw;
+  color: #e8e8e8;
 `;

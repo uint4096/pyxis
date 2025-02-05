@@ -3,7 +3,6 @@ import "./App.css";
 
 import { ToastContainer } from "react-toastify";
 import { Explorer } from "./pages/explorer";
-import { ConfigurationTray } from "./pages/configuration";
 import { useEffect, useState } from "react";
 import { useConfig, useDevices, useOffline } from "./store";
 import { useAuthRequests, useSync, useSyncRequests } from "./hooks";
@@ -11,6 +10,7 @@ import { ConfigResponse, getLoggedInUser } from "./ffi";
 import { ky } from "./utils";
 import { jwtDecode } from "jwt-decode";
 import { AccountForm } from "./pages/configuration/modals";
+import { styled } from "@linaria/react";
 
 type DecodedToken = {
   user: Pick<ConfigResponse, "user_id" | "username">;
@@ -124,11 +124,12 @@ function App() {
 
   return (
     <>
-      {config.userToken && <ConfigurationTray />}
-      {config.userToken && <Explorer />}
-      {showAccountsForm && (
-        <AccountForm onDone={() => setAccountsForm(false)} />
-      )}
+      <AppWrapper>
+        {config.userToken && <Explorer />}
+        {showAccountsForm && (
+          <AccountForm onDone={() => setAccountsForm(false)} />
+        )}
+      </AppWrapper>
       <ToastContainer
         position={"bottom-right"}
         autoClose={3000}
@@ -138,5 +139,12 @@ function App() {
     </>
   );
 }
+
+const AppWrapper = styled.div`
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+`;
 
 export default App;

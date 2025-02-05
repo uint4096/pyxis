@@ -50,7 +50,8 @@
         "resizable": true,
         "title": "Pyxis",
         "width": 800,
-        "theme": "Dark"
+        "theme": "Dark",
+        "backgroundColor": "#1a1a1a"
       }
     ],
     "security": {

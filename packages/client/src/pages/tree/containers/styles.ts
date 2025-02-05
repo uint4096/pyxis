@@ -10,7 +10,7 @@ export const flexDisplay = css`
 `;
 
 export const backgroundHover = css`
-  background-color: #080808;
+  background-color: #262626;
 `;
 
 export const OptionsContainer = styled.div`
@@ -28,7 +28,7 @@ export const NameContainer = styled.div`
   border-radius: 5px;
 
   &:hover {
-    background-color: #080808;
+    background-color: #262626;
   }
 
   &:hover ${OptionsContainer} {

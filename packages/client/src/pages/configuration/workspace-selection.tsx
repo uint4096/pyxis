@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { Option } from "./wrappers";
 import { useWorkspace } from "../../store";
 import { CreateWorkspaceForm, WorkspaceSelection } from "../explorer/forms";
-import { WorkspacePerson } from "../../icons";
+import { FaFolderTree } from "react-icons/fa6";
 
 export const Workspaces = () => {
   const [showSelectDialog, setSelectDialog] = useState(false);
@@ -34,7 +34,7 @@ export const Workspaces = () => {
         />
       )}
       <Option
-        icon={<WorkspacePerson width={26} height={26} />}
+        icon={<FaFolderTree size={18} />}
         onClick={() => setSelectDialog(true)}
       />
     </>

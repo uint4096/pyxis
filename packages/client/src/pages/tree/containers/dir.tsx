@@ -142,6 +142,8 @@ const verticallyMiddle = css`
 
 const Name = styled.span`
   flex-grow: 1;
+  color: #e8e8e8;
+  opacity: 0.7;
 `;
 
 const Collapsable = styled.div`

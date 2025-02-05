@@ -1,12 +1,10 @@
 #editor {
   width: 40vw;
   height: 100%;
-  padding: 2vh 2vw;
-  flex-grow: 1;
-  background-color: #080808;
   font-size: 1em;
   text-align: left;
   white-space: pre-wrap;
+  font-family: "Lato";
 }
 
 #editor:focus {

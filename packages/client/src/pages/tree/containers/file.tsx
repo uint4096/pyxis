@@ -67,7 +67,11 @@ export const FileContainer = ({
         selectFile(undefined);
         selectFile(file as File);
       }}
-      className={overflowPopup === file.uid ? backgroundHover : ""}
+      className={
+        overflowPopup === file.uid || selectedFile?.uid === file.uid
+          ? backgroundHover
+          : ""
+      }
     >
       <FileName>{file.title}</FileName>
       <OptionsContainer
@@ -90,8 +94,5 @@ export const FileContainer = ({
 const FileName = styled.div`
   padding: 0.2vh 0vw;
   margin-left: 1vw;
-  opacity: 0.5;
-  &:hover {
-    background-color: #080808;
-  }
+  color: #e8e8e8;
 `;
