@@ -1,4 +1,3 @@
-import "./editor.css";
 import {
   useState,
   useRef,
@@ -63,6 +62,12 @@ const Editor = ({
 
   const [snapshotId, setSnapshotId] = useState<number>(content.snapshotId ?? 0);
   const [version, setVersion] = useState<VersionVector>();
+
+  const getEditor = (): HTMLElement | null => {
+    const editor = document.getElementById("editor");
+
+    return editor;
+  };
 
   const formatCaret = useCallback((loroList: LoroList, caret: Caret) => {
     loroList.insert(0, caret.start);
@@ -137,12 +142,6 @@ const Editor = ({
   }>();
 
   const [lastKey, setLastKey] = useState({ key: "", ctrl: false });
-
-  const getEditor = (): Node | null => {
-    const editor = document.getElementById("editor");
-
-    return editor;
-  };
 
   const applyTextEvents = useCallback(
     (loroText: LoroText, currentText: string, updatedText: string) => {
@@ -399,7 +398,7 @@ const Editor = ({
           onSelect={onSelection}
           onKeyDown={onKeyDown}
           onPaste={onPaste}
-        />
+        ></TextEditor>
       )}
     </>
   );
@@ -407,9 +406,60 @@ const Editor = ({
 
 const TextEditor = styled.div`
   flex-grow: 1;
-  padding: 1vh 2vw;
-  margin: 4vh 5vw;
-  border-radius: 1%;
+  padding: 4vh 20vw;
+  white-space: pre-wrap;
+  font-family: "Lato";
+  text-align: left;
+  font-size: 1.2em;
+  overflow: auto;
+  width: 80vw;
+
+  &:focus {
+    outline: none;
+  }
+
+  &:after {
+    content: "";
+    height: 40vh;
+    display: inline-block;
+  }
+
+  & code {
+    color: #ea928a;
+    background-color: #a1a19f3d;
+    padding: 0 5px;
+    border-radius: 3px;
+  }
+
+  & h1 {
+    font-size: 1em;
+    line-height: 1.1;
+  }
+
+  & h2 {
+    font-size: 2.7em;
+    line-height: 0.9;
+  }
+
+  & h3 {
+    font-size: 2em;
+    line-height: 0.7;
+  }
+
+  & h4 {
+    font-size: 1.8em;
+    line-height: 0.5;
+  }
+
+  & h5 {
+    font-size: 1.4em;
+    line-height: 0.3;
+  }
+
+  & h6 {
+    font-size: 1.2em;
+    line-height: 0.1;
+  }
 `;
 
 export default Editor;

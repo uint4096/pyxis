@@ -92,7 +92,6 @@ export const FileContainer = ({
 };
 
 const FileName = styled.div`
-  padding: 0.2vh 0vw;
-  margin-left: 1vw;
+  padding: 0.2vh 0.3vw;
   color: #e8e8e8;
 `;
