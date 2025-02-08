@@ -229,7 +229,7 @@ export const useSync = () => {
         );
 
         // @todo: handle unsynced documents
-        const responses = await Promise.allSettled(
+        await Promise.allSettled(
           (documents || [])
             .flat()
             .filter(Boolean)

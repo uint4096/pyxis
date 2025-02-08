@@ -107,10 +107,10 @@ const InputWrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: 2em;
-  margin-top: 0;
-  margin-bottom: auto;
-  align-items: flex-start;
+  align-items: center;
   position: relative;
+  width: 100%;
+  font-size: 1.1rem;
 `;
 
 const InputMessage = styled.span`
@@ -124,6 +124,8 @@ const Input = styled.input<{
   border: 1px solid grey;
   background-color: inherit;
   border-radius: 10px;
+  font-size: inherit;
+  padding: 0 0.5vw;
 
   &:focus {
     outline: none;
@@ -132,7 +134,7 @@ const Input = styled.input<{
 
   &::placeholder {
     font-style: italic;
-    font-size: 0.9rem;
+    font-size: 1rem;
   }
 
   width: ${(props) =>

@@ -63,19 +63,24 @@ const verticallyMiddle = css`
 
 const Menu = styled.div`
   position: absolute;
-  padding: 0.5vh 0.5vw;
+  padding: 0.5vh 0vw;
   background-color: #111;
   opacity: 1;
   display: flex;
   flex-direction: column;
   gap: 0.2vh;
   border-radius: 5px;
+  border: 1px solid #27272a;
 `;
 
 const Option = styled.div`
-  padding: 0.5vh 1vw;
+  padding: 0.3vh 1.5vw 0.3vh 0.5vw;
+  font-size: 0.9em;
+  display: flex;
+  opacity: 0.9;
+  justify-content: flex-start;
   &:hover {
-    background-color: #000;
-    opacity: 0.8;
+    background-color: #27272a;
+    opacity: 0.7;
   }
 `;

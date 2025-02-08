@@ -111,4 +111,5 @@ const ExplorerWrapper = styled.div`
   font-family: "Poppins";
   width: 100%;
   overflow: hidden;
+  font-size: 0.9em;
 `;

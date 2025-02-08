@@ -1,82 +1,55 @@
 import { styled } from "@linaria/react";
+import ReactModal from "react-modal";
+import { IoCloseSharp } from "react-icons/io5";
 
-export type ModalSize = "small" | "medium" | "large";
 export type ModalProps = {
-  header?: JSX.Element;
-  body: JSX.Element;
-  footer?: JSX.Element;
-  size?: ModalSize;
+  children: React.ReactNode;
   onClose?: () => void;
+  easyClose: boolean;
 };
 
-//@todo: supposed to accept children instead of having so many different elements
+export const Modal = ({ children, onClose, easyClose }: ModalProps) => {
+  const customStyles = {
+    content: {
+      top: "50%",
+      left: "50%",
+      right: "auto",
+      bottom: "auto",
+      marginRight: "-50%",
+      transform: "translate(-50%, -50%)",
+      backgroundColor: "#1a1a1a",
+    },
+    overlay: {
+      backgroundColor: "transparent",
+    },
+  };
 
-export const Modal = ({ body, footer, header, size, onClose }: ModalProps) => {
   return (
-    <>
-      <ModalOverlay />
-      <ModalContainer size={size ?? "medium"}>
-        {
-          <ModalHeader>
-            {header ?? <></>}
-            {onClose && (
-              <ModalCloseButton>
-                <button onClick={onClose}>x</button>
-              </ModalCloseButton>
-            )}
-          </ModalHeader>
-        }
-        <ModalBody>{body}</ModalBody>
-        {footer && <div>{footer}</div>}
-      </ModalContainer>
-    </>
+    <ReactModal
+      onRequestClose={onClose}
+      isOpen
+      shouldCloseOnEsc={easyClose}
+      shouldCloseOnOverlayClick={easyClose}
+      style={customStyles}
+    >
+      {easyClose && (
+        <CloseButton onClick={onClose}>
+          <IoCloseSharp size={24} id={"icon"} />
+        </CloseButton>
+      )}
+      {children}
+    </ReactModal>
   );
 };
 
-const ModalOverlay = styled.div`
+const CloseButton = styled.span`
   position: absolute;
   top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.4);
-  z-index: 999;
-`;
+  right: 0;
+  padding: 1vh 0.5vw;
+  cursor: pointer;
 
-const ModalContainer = styled.div<{ size: ModalSize }>`
-  display: flex;
-  flex-direction: column;
-  border-radius: 5px;
-  border: 1px solid grey;
-  box-shadow: 5px 5px 5px black;
-  justify-content: flex-end;
-  position: absolute;
-  top: 35%;
-  left: 35%;
-  gap: 1em;
-  background-color: rgb(17, 19, 25);
-  z-index: 1000;
-  padding: 0.5vh 0.5vw 2vh 0.5vw;
-  width: ${(props) =>
-    ({ small: "20vw", medium: "30vw", large: "40vw" })[props.size]};
-`;
-
-const ModalHeader = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  margin-bottom: auto;
-  margin-top: 0;
-`;
-
-const ModalBody = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  flex-grow: 1;
-`;
-
-const ModalCloseButton = styled.div`
-  margin-left: auto;
-  margin-right: 0;
+  &:hover #icon {
+    color: #c6011f;
+  }
 `;

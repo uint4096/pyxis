@@ -1,7 +1,7 @@
 import { styled } from "@linaria/react";
 import { useCallback, useState } from "react";
 
-import { Modal, TextInput } from "../../../components";
+import { TextInput, Modal } from "../../../components";
 import { toast } from "../../../utils";
 import { useConfig } from "../../../store";
 import { HTTPError } from "ky";
@@ -26,7 +26,7 @@ export const AccountForm = ({ onDone }: { onDone: () => void }) => {
 
       if (status === "offline") {
         toast(
-          "You seem to be offline. Registration or login requires network connection!",
+          "We can't reach our servers. Registration or login requires network connection!",
         );
       } else {
         const { user_id, device_id, user_token: token } = response ?? {};
@@ -44,45 +44,44 @@ export const AccountForm = ({ onDone }: { onDone: () => void }) => {
     }
   }, [registerOrLogin, type, username, password, getDeviceId, create, onDone]);
 
-  const body = (
-    <FormWrapper>
-      <FormContainer>
-        <InputWrapper>
-          <TextInput
-            value={username}
-            placeholder="Username"
-            size="medium"
-            onChange={setUsername}
-          />
-          <TextInput
-            value={password}
-            placeholder="Password"
-            size="medium"
-            onChange={setPassword}
-            type="password"
-          />
-        </InputWrapper>
-      </FormContainer>
-      <LoginButton onClick={action}>
-        {type === "signin" ? "Sign In" : "Sign Up"}
-      </LoginButton>
-      <span>
-        or{" "}
-        <SwitchTypeSpan
-          onClick={() =>
-            setType((type) => (type === "signin" ? "signup" : "signin"))
-          }
-        >
-          {type === "signin" ? "sign up" : "sign in"}{" "}
-        </SwitchTypeSpan>
-        instead
-      </span>
-    </FormWrapper>
-  );
-
   return (
     <>
-      <Modal body={body} size="medium" onClose={onDone} />
+      <Modal onClose={onDone} easyClose={false}>
+        <FormWrapper>
+          <FormContainer>
+            <TextInput
+              value={username}
+              placeholder="Username"
+              size="medium"
+              onChange={setUsername}
+            />
+            <TextInput
+              value={password}
+              placeholder="Password"
+              size="medium"
+              onChange={setPassword}
+              type="password"
+            />
+          </FormContainer>
+          <LoginButton onClick={action}>
+            {type === "signin" ? "Sign In" : "Sign Up"}
+          </LoginButton>
+          <>
+            <Rule />
+            <span>
+              or{" "}
+              <SwitchTypeSpan
+                onClick={() =>
+                  setType((type) => (type === "signin" ? "signup" : "signin"))
+                }
+              >
+                {type === "signin" ? "sign up" : "sign in"}{" "}
+              </SwitchTypeSpan>
+              instead
+            </span>
+          </>
+        </FormWrapper>
+      </Modal>
     </>
   );
 };
@@ -90,15 +89,14 @@ export const AccountForm = ({ onDone }: { onDone: () => void }) => {
 const FormContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.5em;
-  width: 100%;
+  gap: 1em;
   justify-content: center;
+  align-items: center;
+  width: 100%;
 `;
 
-const InputWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1em;
+const Rule = styled.hr`
+  width: 60%;
 `;
 
 const SwitchTypeSpan = styled.span`
@@ -107,15 +105,16 @@ const SwitchTypeSpan = styled.span`
 `;
 
 const FormWrapper = styled.div`
+  width: 25vw;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
   gap: 2em;
+  padding: 2vh 0;
 `;
 
 const LoginButton = styled.button`
   background-color: #96a4e5;
   width: 80%;
-  align-self: flex-start;
 `;
