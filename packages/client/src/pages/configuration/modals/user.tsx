@@ -1,12 +1,14 @@
+import "react-toggle/style.css";
 import { styled } from "@linaria/react";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 import { Modal } from "../../../components";
 import { toast } from "../../../utils";
 import { useConfig } from "../../../store";
 import { UserSquare } from "../../../icons";
 import { useAuthRequests } from "../../../hooks";
-import { Config } from "../../../ffi";
+import { Config, Features } from "../../../ffi";
+import Toggle from "react-toggle";
 
 export const UserDetails = ({
   onDone,
@@ -17,6 +19,7 @@ export const UserDetails = ({
 }) => {
   const { logout, requestFeatureAccess } = useAuthRequests();
   const { delete: removeTokenFromStore, create: modifyConfig } = useConfig();
+  const [syncStatus, setSyncStatus] = useState(config.features?.["sync"]?.[0]);
 
   const signout = useCallback(async () => {
     if (!config?.userToken) {
@@ -48,9 +51,9 @@ export const UserDetails = ({
       }
 
       const { deviceId, userId, userToken, username, features } = config;
-      const featuresWithAddition = features
-        ? { ...features, [key]: "requested" }
-        : { [key]: "requested" };
+      const featuresWithAddition: Features = features
+        ? { ...features, [key]: [false, "requested"] }
+        : { [key]: [false, "requested"] };
 
       try {
         const { status } = await requestFeatureAccess(key);
@@ -74,34 +77,67 @@ export const UserDetails = ({
     [config, requestFeatureAccess, modifyConfig, onDone],
   );
 
-  const body = (
-    <Wrapper>
-      <UserContainer>
-        <UserSquare width={36} height={36} stroke="#808080" />
-        <Username>{config.username}</Username>
-        <br />
-        <SyncFeatureWrapper>
-          <FeatureName>Sync</FeatureName>
-          {!config.features?.["sync"] && (
-            <AccessRequestButton onClick={() => requestFeature("sync")}>
-              Request Access
-            </AccessRequestButton>
-          )}
-          {config.features?.["sync"] === "enabled" && (
-            <FeatureName>Enabled</FeatureName>
-          )}
-          {config.features?.["sync"] === "requested" && (
-            <FeatureName>Requested</FeatureName>
-          )}
-        </SyncFeatureWrapper>
-      </UserContainer>
-      <LogoutButton onClick={signout}>Sign out</LogoutButton>
-    </Wrapper>
+  const handleSyncToggle = useCallback(
+    async (status: boolean) => {
+      await modifyConfig(
+        config.username!,
+        config.userId!,
+        config.userToken!,
+        config.deviceId!,
+        {
+          ...config.features,
+          sync: [
+            status,
+            config.features?.["sync"]?.[1] as Features[keyof Features][1],
+          ],
+        },
+      );
+
+      setSyncStatus(status);
+    },
+    [
+      config.deviceId,
+      config.features,
+      config.userId,
+      config.userToken,
+      config.username,
+      modifyConfig,
+    ],
   );
 
   return (
     <>
-      <Modal body={body} size="medium" onClose={onDone} />
+      <Modal onClose={onDone} easyClose>
+        <Wrapper>
+          <UserContainer>
+            <UserSquare width={36} height={36} stroke="#808080" />
+            <Username>{config.username}</Username>
+            <br />
+            <SyncFeatureWrapper>
+              <FeatureName>Sync</FeatureName>
+              {config.features?.["sync"]?.[1] !== "enabled" &&
+                config.features?.["sync"]?.[1] !== "requested" && (
+                  <AccessRequestButton onClick={() => requestFeature("sync")}>
+                    Request Access
+                  </AccessRequestButton>
+                )}
+              {config.features?.["sync"]?.[1] !== "enabled" &&
+                config.features?.["sync"]?.[1] === "requested" && (
+                  <FeatureName>Requested</FeatureName>
+                )}
+              {config.features?.["sync"]?.[1] === "enabled" && (
+                <Toggle
+                  checked={syncStatus}
+                  onChange={(e) => handleSyncToggle(e.target.checked)}
+                  defaultChecked={false}
+                  icons={false}
+                />
+              )}
+            </SyncFeatureWrapper>
+          </UserContainer>
+          <LogoutButton onClick={signout}>Sign out</LogoutButton>
+        </Wrapper>
+      </Modal>
     </>
   );
 };
@@ -117,6 +153,7 @@ const Wrapper = styled.div`
   padding: 0.5em 1em;
   gap: 2em;
   align-items: center;
+  width: 20vw;
 `;
 
 const SyncFeatureWrapper = styled.div`

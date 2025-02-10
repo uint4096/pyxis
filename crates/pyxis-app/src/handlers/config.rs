@@ -1,8 +1,6 @@
-use std::collections::HashMap;
-
 use pyxis_shared::{
     database::ConfigDatabase,
-    entities::config::{ConfigEntry, Configuration},
+    entities::config::{ConfigEntry, Configuration, Features},
     utils::get_machine_id,
 };
 use tauri::State;
@@ -12,7 +10,7 @@ pub fn add_user_data(
     username: String,
     user_token: String,
     user_id: String,
-    features: Option<HashMap<String, String>>,
+    features: Option<Features>,
     sync_db: State<ConfigDatabase>,
 ) -> Option<bool> {
     let content = ConfigEntry::new(Some(user_token), user_id, Some(username), features);

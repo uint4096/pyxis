@@ -1,11 +1,16 @@
 import { invoke } from "./invoke";
 
+export type Features = Record<
+  string,
+  [localState: boolean, remoteState: "requested" | "enabled"]
+>;
+
 export type ConfigResponse = {
   device_id?: string;
   user_id?: string;
   username?: string;
   user_token?: string;
-  features?: Record<string, string>;
+  features?: Features;
 };
 
 export type Config = {
@@ -13,7 +18,7 @@ export type Config = {
   userId?: string;
   username?: string;
   userToken?: string;
-  features?: Record<string, string>;
+  features?: Features;
 };
 
 export type ConfigRecord = {

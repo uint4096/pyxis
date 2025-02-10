@@ -6,6 +6,8 @@ use uuid::Uuid;
 
 use crate::utils::get_machine_id::get_machine_id;
 
+pub type Features = HashMap<String, (bool, String)>;
+
 #[serde_as]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Configuration {
@@ -13,7 +15,7 @@ pub struct Configuration {
     pub user_token: Option<String>,
     pub user_id: String,
     pub username: Option<String>,
-    pub features: Option<HashMap<String, String>>,
+    pub features: Option<Features>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -28,7 +30,7 @@ impl ConfigEntry {
         user_token: Option<String>,
         user_id: String,
         username: Option<String>,
-        features: Option<HashMap<String, String>>,
+        features: Option<Features>,
     ) -> Self {
         Self {
             id: None,

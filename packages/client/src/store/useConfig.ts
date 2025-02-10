@@ -5,6 +5,7 @@ import {
   type Config,
   getLoggedInUser,
   getDeviceId,
+  Features,
 } from "../ffi";
 import { create } from "zustand";
 
@@ -15,17 +16,27 @@ interface ConfigState {
     userId: string,
     token: string,
     deviceId: string,
-    features?: Record<string, string>,
+    features?: Features,
   ) => Promise<void>;
   get: (userId: string) => Promise<Config | undefined>;
   delete: (userId: string) => Promise<void>;
   setConfig: (config: Config) => Promise<void>;
   getLoggedInUser: () => Promise<Config | undefined>;
   getDeviceId: () => Promise<string>;
+  createLocalFeatureSet: (remoteSet: Record<string, string>) => Features;
 }
 
 export const useConfig = create<ConfigState>((set, get) => ({
   config: {},
+
+  createLocalFeatureSet: (featureSet: Record<string, string>) =>
+    Object.keys(featureSet ?? {}).reduce<Features>((acc, f) => {
+      acc[f] = [
+        !!get().config?.features?.[f]?.[0],
+        featureSet[f] as Features[keyof Features][1],
+      ];
+      return acc;
+    }, {}),
 
   create: async (username, userId, token, deviceId, features) => {
     const config = {

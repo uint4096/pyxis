@@ -23,6 +23,7 @@ function App() {
     config,
     setConfig,
     delete: deleteConfig,
+    createLocalFeatureSet,
   } = useConfig();
   const { create: addDevices } = useDevices();
   const { initDevices } = useSyncRequests();
@@ -92,12 +93,15 @@ function App() {
       const [{ response: featuresResponse }, { response: devicesResponse }] =
         await Promise.all([getFeatures(config.userId!), initDevices()]);
 
+      const featureSet = featuresResponse?.features?.features ?? {};
+      const localFeatures = createLocalFeatureSet(featureSet);
+
       await modifyConfig(
         config.username!,
         config.userId!,
         config.userToken!,
         config.deviceId!,
-        featuresResponse?.features?.features,
+        localFeatures,
       );
 
       const deviceIds = devicesResponse?.devices;
@@ -120,6 +124,7 @@ function App() {
     initDevices,
     addDevices,
     syncDocuments,
+    createLocalFeatureSet,
   ]);
 
   return (
