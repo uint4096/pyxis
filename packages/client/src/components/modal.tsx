@@ -16,6 +16,7 @@ export const Modal = ({ children, onClose, easyClose }: ModalProps) => {
       border: "1px solid #8f94f3",
       maxWidth: "fit-content",
       maxHeight: "fit-content",
+      borderRadius: "5px",
     },
     overlay: {
       backgroundColor: "rgba(32, 32, 32, 0.4)",

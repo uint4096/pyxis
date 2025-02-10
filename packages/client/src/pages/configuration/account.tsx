@@ -1,22 +1,225 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { FaUser } from "react-icons/fa";
 import { Option } from "./wrappers";
-import { AccountForm, UserDetails } from "./modals";
 import { useConfig } from "../../store";
+import { Features } from "../../ffi";
+import { toast } from "react-toastify";
+import { useAuthRequests } from "../../hooks";
+import { styled } from "@linaria/react";
+import { BiSolidUser } from "react-icons/bi";
+import Switch from "react-switch";
 
 export const Account = () => {
-  const [showDialog, setDialog] = useState(false);
+  const [showOverflow, setOverflow] = useState(false);
   const { config } = useConfig();
 
+  const { logout, requestFeatureAccess } = useAuthRequests();
+  const { delete: removeTokenFromStore, create: modifyConfig } = useConfig();
+  const [syncStatus, setSyncStatus] = useState(config.features?.["sync"]?.[0]);
+
+  const signout = useCallback(async () => {
+    if (!config?.userToken) {
+      throw new Error("No token!");
+    }
+
+    try {
+      const { status } = await logout();
+
+      if (status === "offline") {
+        toast(
+          "You seem to be offline. Signing out requires network connection!",
+        );
+        return;
+      }
+
+      await removeTokenFromStore(config.userId!);
+      setOverflow(false);
+    } catch (e) {
+      console.error("[Auth] Logout failed!");
+      toast("Sign out failed!");
+    }
+  }, [config?.userToken, config.userId, logout, removeTokenFromStore]);
+
+  const requestFeature = useCallback(
+    async (key: string) => {
+      if (!config?.userToken || !config?.userId || !config?.deviceId) {
+        throw new Error("No token!");
+      }
+
+      const { deviceId, userId, userToken, username, features } = config;
+      const featuresWithAddition: Features = features
+        ? { ...features, [key]: [false, "requested"] }
+        : { [key]: [false, "requested"] };
+
+      try {
+        const { status } = await requestFeatureAccess(key);
+
+        if (status !== "offline") {
+          await modifyConfig(
+            username!,
+            userId,
+            userToken,
+            deviceId,
+            featuresWithAddition,
+          );
+        }
+      } catch (e) {
+        console.error("[Auth] Subscription request failed!");
+        toast("Subscription request failed!");
+      }
+    },
+    [config, requestFeatureAccess, modifyConfig],
+  );
+
+  const handleSyncToggle = useCallback(
+    async (status: boolean) => {
+      await modifyConfig(
+        config.username!,
+        config.userId!,
+        config.userToken!,
+        config.deviceId!,
+        {
+          ...config.features,
+          sync: [
+            status,
+            config.features?.["sync"]?.[1] as Features[keyof Features][1],
+          ],
+        },
+      );
+
+      setSyncStatus(status);
+    },
+    [
+      config.deviceId,
+      config.features,
+      config.userId,
+      config.userToken,
+      config.username,
+      modifyConfig,
+    ],
+  );
+
   return (
-    <>
-      {showDialog && !config.username && (
-        <AccountForm onDone={() => setDialog(false)} />
+    <Wrapper>
+      <Option
+        icon={<FaUser size={18} />}
+        onClick={() => setOverflow((overflow) => !overflow)}
+      />
+      {showOverflow && (
+        <Menu>
+          <UserContainer>
+            <BiSolidUser color="#9a9999" />
+            <Username>{config.username}</Username>
+          </UserContainer>
+          <Rule />
+          <SyncFeatureWrapper>
+            <FeatureName>Sync</FeatureName>
+            {config.features?.["sync"]?.[1] !== "enabled" &&
+              config.features?.["sync"]?.[1] !== "requested" && (
+                <AccessRequestButton onClick={() => requestFeature("sync")}>
+                  Request Access
+                </AccessRequestButton>
+              )}
+            {config.features?.["sync"]?.[1] !== "enabled" &&
+              config.features?.["sync"]?.[1] === "requested" && (
+                <AccessRequestButton
+                  onClick={() => requestFeature("sync")}
+                  disabled
+                >
+                  Requested
+                </AccessRequestButton>
+              )}
+            {config.features?.["sync"]?.[1] === "enabled" && (
+              <Switch
+                onColor="#646cff"
+                checkedIcon={false}
+                uncheckedIcon={false}
+                checked={!!syncStatus}
+                onChange={(status) => handleSyncToggle(status)}
+                defaultChecked={false}
+              />
+            )}
+          </SyncFeatureWrapper>
+          <LogoutButton onClick={signout}>Sign out</LogoutButton>
+        </Menu>
       )}
-      {showDialog && config.username && (
-        <UserDetails onDone={() => setDialog(false)} config={config} />
-      )}
-      <Option icon={<FaUser size={18} />} onClick={() => setDialog(true)} />
-    </>
+    </Wrapper>
   );
 };
+
+const FeatureName = styled.span`
+  font-weight: 600;
+  color: #c2c2c2;
+`;
+
+const SyncFeatureWrapper = styled.div`
+  display: flex;
+  justify-content: space-around;
+  padding: 4vh 0;
+  gap: 1.5em;
+  align-items: center;
+`;
+
+const Wrapper = styled.div`
+  position: relative;
+`;
+
+const UserContainer = styled.div`
+  display: flex;
+  padding: 0 1vw;
+  gap: 1em;
+  width: 100%;
+  justify-content: center;
+
+  & * {
+    align-self: center;
+  }
+`;
+
+const Rule = styled.hr`
+  width: 100%;
+  opacity: 0.5;
+  margin-top: 1vh;
+`;
+
+const Username = styled.span`
+  font-weight: 600;
+  align-self: flex-start;
+`;
+
+const LogoutButton = styled.button`
+  background-color: #cf142b;
+  font-size: 0.8em;
+  width: 80%;
+
+  &:hover {
+    border-color: none;
+  }
+`;
+
+const AccessRequestButton = styled.button`
+  font-size: 0.8em;
+  border-color: #646cff;
+
+  &:disabled {
+    background-color: #6a6a6a;
+    cursor: not-allowed;
+  }
+`;
+
+const Menu = styled.div`
+  position: absolute;
+  padding: 1vh 1vw;
+  background-color: #000;
+  opacity: 1;
+  display: flex;
+  flex-direction: column;
+  border-radius: 5px;
+  border: 1px solid #6a6a6a;
+  bottom: 100%;
+  margin-bottom: 2px;
+  margin-left: 20px;
+  font-size: 1em;
+  width: 10vw;
+  align-items: center;
+`;
