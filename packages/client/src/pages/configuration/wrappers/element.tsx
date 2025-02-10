@@ -17,6 +17,6 @@ const OptionElement = styled.span`
   color: #fff000;
 
   &:hover {
-    filter: drop-shadow(0 0 3px #ff7f50);
+    color: #c8a6ff;
   }
 `;

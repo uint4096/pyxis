@@ -126,10 +126,10 @@ const Input = styled.input<{
   border-radius: 10px;
   font-size: inherit;
   padding: 0 0.5vw;
+  outline: none;
 
   &:focus {
-    outline: none;
-    border: 1px solid rgb(169, 137, 229);
+    border: 1px solid #8f94f3;
   }
 
   &::placeholder {
@@ -140,7 +140,7 @@ const Input = styled.input<{
   width: ${(props) =>
     ({ small: "60%", medium: "80%", large: "90%" })[props.variation]};
   height: ${(props) =>
-    ({ small: "2.4vh", medium: "2.7vh", large: "2.9vh" })[props.variation]};
+    ({ small: "2.7vh", medium: "2.9vh", large: "3.2vh" })[props.variation]};
   type: ${(props) => props.type ?? "text"};
 `;
 

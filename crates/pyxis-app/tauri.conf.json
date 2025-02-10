@@ -3,7 +3,7 @@
   "build": {
     "beforeBuildCommand": "pnpm --filter client build",
     "beforeDevCommand": "pnpm --filter client dev",
-    "frontendDist": "../../client/dist",
+    "frontendDist": "../../packages/client/dist",
     "devUrl": "http://localhost:5173"
   },
   "bundle": {

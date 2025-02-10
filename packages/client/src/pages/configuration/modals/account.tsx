@@ -101,7 +101,9 @@ const Rule = styled.hr`
 
 const SwitchTypeSpan = styled.span`
   cursor: pointer;
-  color: #96a4e5;
+  color: #95b0ff;
+  font-weight: 500;
+  font-size: 1.1em;
 `;
 
 const FormWrapper = styled.div`
@@ -115,6 +117,6 @@ const FormWrapper = styled.div`
 `;
 
 const LoginButton = styled.button`
-  background-color: #96a4e5;
   width: 80%;
+  background-color: #646cff;
 `;

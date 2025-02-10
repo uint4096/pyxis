@@ -11,16 +11,14 @@ export type ModalProps = {
 export const Modal = ({ children, onClose, easyClose }: ModalProps) => {
   const customStyles = {
     content: {
-      top: "50%",
-      left: "50%",
-      right: "auto",
-      bottom: "auto",
-      marginRight: "-50%",
-      transform: "translate(-50%, -50%)",
-      backgroundColor: "#1a1a1a",
+      margin: "auto",
+      backgroundColor: "#000",
+      border: "1px solid #8f94f3",
+      maxWidth: "fit-content",
+      maxHeight: "fit-content",
     },
     overlay: {
-      backgroundColor: "transparent",
+      backgroundColor: "rgba(32, 32, 32, 0.4)",
     },
   };
 

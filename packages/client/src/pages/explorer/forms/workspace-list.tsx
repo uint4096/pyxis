@@ -38,15 +38,6 @@ export const WorkspaceSelection = ({
     }
   }, [setVisibility, workspaces.length]);
 
-  const header = (
-    <Header>
-      <WorkspaceSelectionMessage>Select a workspace</WorkspaceSelectionMessage>
-      {onCreate && (
-        <AddWorkspaceButton onClick={onCreate}>+</AddWorkspaceButton>
-      )}
-    </Header>
-  );
-
   const workspaceDelete = useCallback(
     (workspaceUid: string) => {
       if (workspaceUid === selectedFile?.workspace_uid) {
@@ -58,33 +49,37 @@ export const WorkspaceSelection = ({
     [deleteWorkspace, selectFile, selectedFile?.workspace_uid],
   );
 
-  const list = (
-    <WorkspaceList>
-      {workspaces.map((workspace) => {
-        return (
-          <WorkspaceListElement key={workspace.id}>
-            <WorkspaceName
-              onClick={() => selectWorkspace(workspace as Workspace)}
-            >
-              {workspace.name}
-            </WorkspaceName>
-            <div onClick={() => workspaceDelete(workspace.uid!)}>
-              <Trash width={22} height={22} stroke="#C6011F" />
-            </div>
-          </WorkspaceListElement>
-        );
-      })}
-    </WorkspaceList>
-  );
-
   return (
     <FormWrapper>
       <Modal
-        header={header}
-        body={list}
-        size="medium"
         onClose={allowClosing ? () => setVisibility(false) : noop}
-      />
+        easyClose={!!allowClosing}
+      >
+        <Header>
+          <WorkspaceSelectionMessage>
+            Select a workspace
+          </WorkspaceSelectionMessage>
+          {onCreate && (
+            <AddWorkspaceButton onClick={onCreate}>+</AddWorkspaceButton>
+          )}
+        </Header>
+        <WorkspaceList>
+          {workspaces.map((workspace) => {
+            return (
+              <WorkspaceListElement key={workspace.id}>
+                <WorkspaceName
+                  onClick={() => selectWorkspace(workspace as Workspace)}
+                >
+                  {workspace.name}
+                </WorkspaceName>
+                <div onClick={() => workspaceDelete(workspace.uid!)}>
+                  <Trash width={22} height={22} stroke="#C6011F" />
+                </div>
+              </WorkspaceListElement>
+            );
+          })}
+        </WorkspaceList>
+      </Modal>
     </FormWrapper>
   );
 };

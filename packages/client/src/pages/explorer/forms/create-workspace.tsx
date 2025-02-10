@@ -25,28 +25,23 @@ export const CreateWorkspaceForm = ({ onDone }: CreateWorkspaceProps) => {
     [create, onDone],
   );
 
-  const body = (
-    <div>
-      <TextInput
-        value={name}
-        placeholder="Workspace Name"
-        size="medium"
-        onChange={setName}
-        message="Select a name for your workspace"
-      />
-    </div>
-  );
-
-  const footer = (
-    <FormFooter>
-      <button onClick={() => onWorkspaceCreation(name)}>Create</button>
-    </FormFooter>
-  );
-
   return (
     <FormWrapper>
       <FormContainer>
-        <Modal body={body} size="small" footer={footer} />
+        <Modal onClose={onDone} easyClose={false}>
+          <div>
+            <TextInput
+              value={name}
+              placeholder="Workspace Name"
+              size="medium"
+              onChange={setName}
+              message="Select a name for your workspace"
+            />
+          </div>
+          <FormFooter>
+            <button onClick={() => onWorkspaceCreation(name)}>Create</button>
+          </FormFooter>
+        </Modal>
       </FormContainer>
     </FormWrapper>
   );

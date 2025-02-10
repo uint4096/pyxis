@@ -398,7 +398,7 @@ const Editor = ({
           onSelect={onSelection}
           onKeyDown={onKeyDown}
           onPaste={onPaste}
-        ></TextEditor>
+        />
       )}
     </>
   );
