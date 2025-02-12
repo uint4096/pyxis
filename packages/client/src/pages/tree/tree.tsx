@@ -92,4 +92,7 @@ const TreeContainer = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  z-index: 999;
+  border-right: 1px solid gray;
+  position: relative;
 `;

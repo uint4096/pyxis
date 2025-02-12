@@ -8,6 +8,8 @@ export type ModalProps = {
   easyClose: boolean;
 };
 
+ReactModal.setAppElement("#root");
+
 export const Modal = ({ children, onClose, easyClose }: ModalProps) => {
   const customStyles = {
     content: {

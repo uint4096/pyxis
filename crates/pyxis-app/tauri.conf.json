@@ -48,10 +48,11 @@
         "fullscreen": false,
         "height": 600,
         "resizable": true,
-        "title": "Pyxis",
+        "title": "",
         "width": 800,
         "theme": "Dark",
-        "backgroundColor": "#1a1a1a"
+        "transparent": true,
+        "decorations": false
       }
     ],
     "security": {

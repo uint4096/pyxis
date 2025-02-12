@@ -1,5 +1,6 @@
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 
 import { ToastContainer } from "react-toastify";
 import { Explorer } from "./pages/explorer";
@@ -41,6 +42,20 @@ function App() {
       return null;
     }
   };
+
+  useEffect(() => {
+    const appWindow = getCurrentWindow();
+
+    document
+      .getElementById("titlebar-minimize")
+      ?.addEventListener("click", () => appWindow.minimize());
+    document
+      .getElementById("titlebar-maximize")
+      ?.addEventListener("click", () => appWindow.toggleMaximize());
+    document
+      .getElementById("titlebar-close")
+      ?.addEventListener("click", () => appWindow.close());
+  }, []);
 
   useEffect(() => {
     const ping = async () => {

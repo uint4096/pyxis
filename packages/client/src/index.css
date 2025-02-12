@@ -70,3 +70,76 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+.titlebar {
+  height: 40px;
+  background: transparent;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  gap: 2em;
+  left: 0;
+  right: 0;
+  border: 0.1px solid gray;
+  padding: 0 10px;
+}
+
+.titlebar-button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  -webkit-user-select: none;
+  color: #fffdfd;
+  cursor: pointer;
+}
+
+#titlebar-close button {
+  border-radius: 50%;
+  padding: 0.5em;
+  width: 18px;
+  height: 18px;
+  border: 1px solid #deddda;
+  color: #deddda;
+  position: relative;
+}
+
+#titlebar-close button:hover {
+  border: 1px solid rgb(26, 26, 26);
+  background-color: rgb(228, 118, 118);
+  color: #141414;
+}
+
+#titlebar-close button::before {
+  content: "";
+  position: absolute;
+  display: block;
+  background-color: #deddda;
+  width: 1px;
+  left: 8px;
+  top: 3px;
+  bottom: 2px;
+  transform: rotate(45deg);
+}
+
+#titlebar-close button::after {
+  content: "";
+  position: absolute;
+  display: block;
+  background-color: #deddda;
+  height: 1px;
+  top: 8px;
+  left: 3px;
+  right: 2px;
+  transform: rotate(45deg);
+}
+
+#titlebar-close button:hover::after {
+  background-color: #000;
+}
+
+#titlebar-close button:hover::before {
+  background-color: #000;
+}

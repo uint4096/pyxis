@@ -5,6 +5,7 @@ import { Workspace } from "../../../ffi";
 import { useTreeStore, useWorkspace } from "../../../store";
 import { noop } from "../../../utils";
 import { Trash } from "../../../icons";
+import { BiPlus } from "react-icons/bi";
 
 type WorkspaceListProps = {
   workspaces: Array<Partial<Workspace>>;
@@ -59,7 +60,9 @@ export const WorkspaceSelection = ({
             Select a workspace
           </WorkspaceSelectionMessage>
           {onCreate && (
-            <AddWorkspaceButton onClick={onCreate}>+</AddWorkspaceButton>
+            <AddWorkspaceButton onClick={onCreate}>
+              <BiPlus style={{ verticalAlign: "middle" }} />
+            </AddWorkspaceButton>
           )}
         </Header>
         <WorkspaceList>

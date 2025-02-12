@@ -235,4 +235,5 @@ const Menu = styled.div`
   font-size: 1em;
   width: 10vw;
   align-items: center;
+  z-index: 9999;
 `;
