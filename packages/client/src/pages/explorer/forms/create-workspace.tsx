@@ -1,14 +1,17 @@
 import { styled } from "@linaria/react";
-import { FormWrapper } from "./common";
 import { Modal, TextInput } from "../../../components";
 import { useCallback, useState } from "react";
 import { useWorkspace } from "../../../store";
 
 type CreateWorkspaceProps = {
   onDone: () => void;
+  onClose?: () => void;
 };
 
-export const CreateWorkspaceForm = ({ onDone }: CreateWorkspaceProps) => {
+export const CreateWorkspaceForm = ({
+  onDone,
+  onClose,
+}: CreateWorkspaceProps) => {
   const [name, setName] = useState("");
   const { create } = useWorkspace();
 
@@ -26,34 +29,46 @@ export const CreateWorkspaceForm = ({ onDone }: CreateWorkspaceProps) => {
   );
 
   return (
-    <FormWrapper>
-      <FormContainer>
-        <Modal onClose={onDone} easyClose={false}>
-          <div>
-            <TextInput
-              value={name}
-              placeholder="Workspace Name"
-              size="medium"
-              onChange={setName}
-              message="Select a name for your workspace"
-            />
-          </div>
-          <FormFooter>
-            <button onClick={() => onWorkspaceCreation(name)}>Create</button>
-          </FormFooter>
-        </Modal>
-      </FormContainer>
-    </FormWrapper>
+    <Modal onClose={onClose ?? onDone} easyClose={true}>
+      <Wrapper>
+        <InputContainer>
+          <span>Pick a name for your workspace</span>
+          <TextInput
+            value={name}
+            placeholder="Workspace Name"
+            size="medium"
+            onChange={setName}
+          />
+        </InputContainer>
+        <CreateWorkspaceButton onClick={() => onWorkspaceCreation(name)}>
+          Create
+        </CreateWorkspaceButton>
+      </Wrapper>
+    </Modal>
   );
 };
 
-const FormFooter = styled.div`
+const Wrapper = styled.div`
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
+  gap: 2em;
+  justify-content: center;
+  width: 15vw;
 `;
 
-const FormContainer = styled.div`
-  width: 20vw;
-  height: 10vw;
-  position: fixed;
+const InputContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  justify-content: flex-start;
+  gap: 1vh;
+  font-weight: 600;
+`;
+
+const CreateWorkspaceButton = styled.button`
+  font-size: 0.8em;
+  width: 50%;
+  font-weight: 500;
+  background-color: #646cff;
 `;

@@ -8,7 +8,7 @@ export const Workspaces = () => {
   const [showSelectDialog, setSelectDialog] = useState(false);
   const [showCreateDialog, setCreateDialog] = useState(false);
 
-  const { workspaces } = useWorkspace();
+  const { workspaces, currentWorkspace } = useWorkspace();
 
   const onWorkspaceCreate = useCallback(() => {
     setSelectDialog(false);
@@ -17,7 +17,7 @@ export const Workspaces = () => {
 
   return (
     <>
-      {showSelectDialog && (
+      {showSelectDialog && currentWorkspace?.uid && (
         <WorkspaceSelection
           workspaces={workspaces}
           setVisibility={setSelectDialog}

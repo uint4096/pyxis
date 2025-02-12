@@ -107,10 +107,9 @@ const InputWrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: 2em;
-  align-items: center;
   position: relative;
-  width: 100%;
   font-size: 1.1rem;
+  width: 100%;
 `;
 
 const InputMessage = styled.span`
@@ -137,8 +136,6 @@ const Input = styled.input<{
     font-size: 1rem;
   }
 
-  width: ${(props) =>
-    ({ small: "60%", medium: "80%", large: "90%" })[props.variation]};
   height: ${(props) =>
     ({ small: "2.7vh", medium: "2.9vh", large: "3.2vh" })[props.variation]};
   type: ${(props) => props.type ?? "text"};

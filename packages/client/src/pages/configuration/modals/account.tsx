@@ -52,13 +52,13 @@ export const AccountForm = ({ onDone }: { onDone: () => void }) => {
             <TextInput
               value={username}
               placeholder="Username"
-              size="medium"
+              size="large"
               onChange={setUsername}
             />
             <TextInput
               value={password}
               placeholder="Password"
-              size="medium"
+              size="large"
               onChange={setPassword}
               type="password"
             />
@@ -92,7 +92,7 @@ const FormContainer = styled.div`
   gap: 1em;
   justify-content: center;
   align-items: center;
-  width: 100%;
+  width: 80%;
 `;
 
 const Rule = styled.hr`

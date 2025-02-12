@@ -56,7 +56,7 @@ export const Explorer = () => {
       setWorkspaceForm(false);
     }
 
-    if (workspaces?.length && !currentWorkspace.uid) {
+    if (workspaces?.length && !currentWorkspace?.uid) {
       setWorkspaceSelectionForm(true);
     } else {
       setWorkspaceSelectionForm(false);

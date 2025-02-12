@@ -434,31 +434,37 @@ const TextEditor = styled.div`
   & h1 {
     font-size: 1em;
     line-height: 1.1;
+    margin-left: 0;
   }
 
   & h2 {
     font-size: 2.7em;
     line-height: 0.9;
+    margin-left: 0;
   }
 
   & h3 {
     font-size: 2em;
     line-height: 0.7;
+    margin-left: 0;
   }
 
   & h4 {
     font-size: 1.8em;
     line-height: 0.5;
+    margin-left: 0;
   }
 
   & h5 {
     font-size: 1.4em;
     line-height: 0.3;
+    margin-left: 0;
   }
 
   & h6 {
     font-size: 1.2em;
     line-height: 0.1;
+    margin-left: 0;
   }
 `;
 

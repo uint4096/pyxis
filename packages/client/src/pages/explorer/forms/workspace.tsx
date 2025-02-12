@@ -18,7 +18,12 @@ export const CreateWorkspace = ({ setVisibility }: WorkspaceSelectionProps) => {
           <button onClick={() => setForm(true)}>Create a Workspace</button>
         </MessageWrapper>
       )}
-      {showForm && <CreateWorkspaceForm onDone={() => setVisibility(false)} />}
+      {showForm && (
+        <CreateWorkspaceForm
+          onDone={() => setVisibility(false)}
+          onClose={() => setForm(false)}
+        />
+      )}
     </>
   );
 };

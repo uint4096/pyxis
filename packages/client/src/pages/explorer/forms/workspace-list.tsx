@@ -1,7 +1,6 @@
 import { styled } from "@linaria/react";
 import { useCallback, useEffect } from "react";
 import { Modal } from "../../../components";
-import { FormWrapper } from "./common";
 import { Workspace } from "../../../ffi";
 import { useTreeStore, useWorkspace } from "../../../store";
 import { noop } from "../../../utils";
@@ -50,11 +49,11 @@ export const WorkspaceSelection = ({
   );
 
   return (
-    <FormWrapper>
-      <Modal
-        onClose={allowClosing ? () => setVisibility(false) : noop}
-        easyClose={!!allowClosing}
-      >
+    <Modal
+      onClose={allowClosing ? () => setVisibility(false) : noop}
+      easyClose={!!allowClosing}
+    >
+      <Wrapper>
         <Header>
           <WorkspaceSelectionMessage>
             Select a workspace
@@ -79,31 +78,38 @@ export const WorkspaceSelection = ({
             );
           })}
         </WorkspaceList>
-      </Modal>
-    </FormWrapper>
+      </Wrapper>
+    </Modal>
   );
 };
 
 const WorkspaceName = styled.span`
   flex-grow: 1;
+  align-self: center;
+`;
+
+const Wrapper = styled.div`
+  width: 20vw;
+  padding: 1vh 0;
 `;
 
 const WorkspaceSelectionMessage = styled.div`
   text-align: left;
-  font-size: 1.5em;
+  font-size: 1.1rem;
   font-weight: 600;
-  padding-left: 0.5vw;
+  align-self: center;
 `;
 
 const Header = styled.div`
   display: flex;
   justify-content: space-between;
-  width: 80%;
+  padding: 2vh 0.9vw;
 `;
 
 const AddWorkspaceButton = styled.button`
   font-size: 1em;
   padding: 0.5em 1em;
+  border-color: #646cff;
 `;
 
 const WorkspaceList = styled.div`
@@ -124,4 +130,5 @@ const WorkspaceListElement = styled.div`
   border-radius: 10px;
   display: flex;
   justify-content: space-between;
+  vertical-align: middle;
 `;

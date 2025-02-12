@@ -1,13 +1,14 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { FaUser } from "react-icons/fa";
 import { Option } from "./wrappers";
 import { useConfig } from "../../store";
 import { Features } from "../../ffi";
 import { toast } from "react-toastify";
-import { useAuthRequests } from "../../hooks";
+import { useAuthRequests, useOutsideEvent } from "../../hooks";
 import { styled } from "@linaria/react";
 import { BiSolidUser } from "react-icons/bi";
 import Switch from "react-switch";
+import { noop } from "../../utils";
 
 export const Account = () => {
   const [showOverflow, setOverflow] = useState(false);
@@ -16,6 +17,11 @@ export const Account = () => {
   const { logout, requestFeatureAccess } = useAuthRequests();
   const { delete: removeTokenFromStore, create: modifyConfig } = useConfig();
   const [syncStatus, setSyncStatus] = useState(config.features?.["sync"]?.[0]);
+  const optionsRef = useRef<HTMLDivElement>(null);
+
+  useOutsideEvent(optionsRef, () => {
+    setOverflow(false);
+  });
 
   const signout = useCallback(async () => {
     if (!config?.userToken) {
@@ -100,7 +106,11 @@ export const Account = () => {
   );
 
   return (
-    <Wrapper>
+    <Wrapper
+      ref={optionsRef}
+      tabIndex={0}
+      onKeyDown={(e) => (e.key === "Escape" ? setOverflow(false) : noop())}
+    >
       <Option
         icon={<FaUser size={18} />}
         onClick={() => setOverflow((overflow) => !overflow)}
@@ -162,6 +172,9 @@ const SyncFeatureWrapper = styled.div`
 
 const Wrapper = styled.div`
   position: relative;
+  &:focus {
+    outline: none;
+  }
 `;
 
 const UserContainer = styled.div`
