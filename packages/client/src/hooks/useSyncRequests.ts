@@ -1,8 +1,8 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { DeviceIds, Sources } from "../ffi";
 import { Document } from "./useSync";
 import { useConfig, useDevices, useOffline } from "../store";
-import { ky } from "../utils";
+import { request } from "../utils";
 
 type Update = {
   pk: string;
@@ -17,23 +17,21 @@ export const useSyncRequests = () => {
     config: { userToken: token },
   } = useConfig();
 
+  const http = useMemo(
+    () => request({ headers: { authorization: `Bearer ${token}` } }),
+    [token],
+  );
+
   const initDevices = useCallback(
     async () =>
       await networkCall(
-        () =>
-          ky
-            .get<{ devices: DeviceIds }>("/auth/devices", {
-              headers: {
-                authorization: `Bearer ${token}`,
-              },
-            })
-            .json(),
+        () => http.get<{ devices: DeviceIds }>("/auth/devices"),
         {
           onError: async () => ({ devices: await listDevices() }),
           onOffline: async () => ({ devices: await listDevices() }),
         },
       ),
-    [token, listDevices, networkCall],
+    [networkCall, http, listDevices],
   );
 
   const getDocuments = useCallback(
@@ -44,48 +42,38 @@ export const useSyncRequests = () => {
     ) =>
       await networkCall(
         () =>
-          ky
-            .get<{ documents: Array<Document> }>("/sync/document/list", {
-              headers: {
-                authorization: `Bearer ${token}`,
-              },
-              searchParams: {
-                record_id: lastSyncedRecordId,
-                is_snapshot: sources.includes("snapshots"),
-                device_id: deviceId,
-              },
-            })
-            .json(),
+          http.get<{ documents: Array<Document> }>("/sync/document/list", {
+            queryParams: {
+              record_id: lastSyncedRecordId,
+              is_snapshot: sources.includes("snapshots"),
+              device_id: deviceId,
+            },
+          }),
         {
           onError: async () => ({ documents: [] as Array<Document> }),
           onOffline: async () => ({ documents: [] as Array<Document> }),
         },
       ),
-    [networkCall, token],
+    [http, networkCall],
   );
 
   const getUpdates = useCallback(
     async (deviceId: string, fileUid: string, snapshotId: number) =>
       await networkCall(
         () =>
-          ky
-            .get<{ updates: Array<Update> }>("/sync/update/list", {
-              headers: {
-                authorization: `Bearer ${token}`,
-              },
-              searchParams: {
-                file_uid: fileUid,
-                snapshot_id: snapshotId,
-                device_id: deviceId,
-              },
-            })
-            .json(),
+          http.get<{ updates: Array<Update> }>("/sync/update/list", {
+            queryParams: {
+              file_uid: fileUid,
+              snapshot_id: snapshotId,
+              device_id: deviceId,
+            },
+          }),
         {
           onError: async () => ({ updates: [] as Array<Update> }),
           onOffline: async () => ({ updates: [] as Array<Update> }),
         },
       ),
-    [networkCall, token],
+    [http, networkCall],
   );
 
   return {

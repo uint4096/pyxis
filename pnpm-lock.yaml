@@ -26,15 +26,15 @@ importers:
       '@tauri-apps/plugin-dialog':
         specifier: 2.0.0-rc.1
         version: 2.0.0-rc.1
+      '@tauri-apps/plugin-http':
+        specifier: ^2.3.0
+        version: 2.3.0
       fast-diff:
         specifier: ^1.3.0
         version: 1.3.0
       jwt-decode:
         specifier: ^4.0.0
         version: 4.0.0
-      ky:
-        specifier: ^1.7.3
-        version: 1.7.3
       loro-crdt:
         specifier: ^1.2.2
         version: 1.2.2
@@ -1538,6 +1538,10 @@ packages:
     resolution: {integrity: sha512-UNiIhhKG08j4ooss2oEEVexffmWkgkYlC2M3GcX3VPtNsqFgVNL8Mcw/4Y7rO9M9S+ffAMnLOF5ypzyuyb8tyg==}
     dev: false
 
+  /@tauri-apps/api@2.2.0:
+    resolution: {integrity: sha512-R8epOeZl1eJEl603aUMIGb4RXlhPjpgxbGVEaqY+0G5JG9vzV/clNlzTeqc+NLYXVqXcn8mb4c5b9pJIUDEyAg==}
+    dev: false
+
   /@tauri-apps/cli-darwin-arm64@2.1.0:
     resolution: {integrity: sha512-ESc6J6CE8hl1yKH2vJ+ALF+thq4Be+DM1mvmTyUCQObvezNCNhzfS6abIUd3ou4x5RGH51ouiANeT3wekU6dCw==}
     engines: {node: '>= 10'}
@@ -1649,6 +1653,12 @@ packages:
     resolution: {integrity: sha512-H28gh6BfZtjflHQ+HrmWwunDriBI3AQLAKnMs50GA6zeNUULqbQr7VXbAAKeJL/0CmWcecID4PKXVoSlaWRhEg==}
     dependencies:
       '@tauri-apps/api': 2.0.0-rc.4
+    dev: false
+
+  /@tauri-apps/plugin-http@2.3.0:
+    resolution: {integrity: sha512-pigTvz+zzAqbIhCzRiR1GE98Jw7A03j2V+Eiexr9thBI8VfMiwFQMcbgON51xlwnVaI72LdbYKNajU84im8tlg==}
+    dependencies:
+      '@tauri-apps/api': 2.2.0
     dev: false
 
   /@types/babel__core@7.20.5:
@@ -3333,11 +3343,6 @@ packages:
     dependencies:
       json-buffer: 3.0.1
     dev: true
-
-  /ky@1.7.3:
-    resolution: {integrity: sha512-Sz49ZWR/BjNOq+2UK1k9ONZUVq8eyuCj30Zgc8VrRNtFlTBZduzuvehUd5kjQF6/Fms3Ir3EYqzJryw9tRvsSw==}
-    engines: {node: '>=18'}
-    dev: false
 
   /levn@0.4.1:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}

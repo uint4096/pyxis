@@ -1,7 +1,7 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { ConfigResponse } from "../ffi";
 import { useConfig, useOffline } from "../store";
-import { ky } from "../utils";
+import { request } from "../utils";
 
 type SigninPayload = {
   username: string;
@@ -21,63 +21,46 @@ export const useAuthRequests = () => {
     get: getConfig,
   } = useConfig();
 
+  const http = useMemo(
+    () => request({ headers: { authorization: `Bearer ${token}` } }),
+    [token],
+  );
+
   const registerOrLogin = useCallback(
     async (type: "signin" | "signup", body: SigninPayload) =>
       await networkCall(() =>
-        ky
-          .post<Required<ConfigResponse>>(
-            type === "signin" ? "/auth/signin" : "/auth/signup",
-            {
-              json: body,
-            },
-          )
-          .json(),
+        http.post<Required<ConfigResponse>>(
+          type === "signin" ? "/auth/signin" : "/auth/signup",
+          {
+            json: body,
+          },
+        ),
       ),
-    [networkCall],
+    [http, networkCall],
   );
 
   const logout = useCallback(
-    async () =>
-      await networkCall(() =>
-        ky
-          .post<void>("/auth/signout", {
-            headers: {
-              authorization: `Bearer ${token}`,
-            },
-          })
-          .json(),
-      ),
-    [networkCall, token],
+    async () => await networkCall(() => http.post<void>("/auth/signout")),
+    [http, networkCall],
   );
 
   const requestFeatureAccess = useCallback(
     async (key: string) =>
       await networkCall(() =>
-        ky
-          .post<Required<ConfigResponse>>("/auth/features", {
-            json: { key, value: "requested" },
-            headers: {
-              authorization: `Bearer ${token}`,
-            },
-          })
-          .json(),
+        http.post<Required<ConfigResponse>>("/auth/features", {
+          json: { key, value: "requested" },
+        }),
       ),
-    [networkCall, token],
+    [http, networkCall],
   );
 
   const getFeatures = useCallback(
     async (userId: string) =>
       await networkCall(
         () =>
-          ky
-            .get<{
-              features: FeatureRecord;
-            }>("/auth/features", {
-              headers: {
-                authorization: `Bearer ${token}`,
-              },
-            })
-            .json(),
+          http.get<{
+            features: FeatureRecord;
+          }>("/auth/features"),
         {
           onError: async () => ({
             features: (await getConfig(userId)) as FeatureRecord,
@@ -87,7 +70,7 @@ export const useAuthRequests = () => {
           }),
         },
       ),
-    [networkCall, token, getConfig],
+    [networkCall, http, getConfig],
   );
 
   return {

@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { useConfig, useDevices, useOffline } from "./store";
 import { useAuthRequests, useSync, useSyncRequests } from "./hooks";
 import { ConfigResponse, getLoggedInUser } from "./ffi";
-import { ky } from "./utils";
+import { request } from "./utils";
 import { jwtDecode } from "jwt-decode";
 import { AccountForm } from "./pages/configuration/modals";
 import { styled } from "@linaria/react";
@@ -60,9 +60,10 @@ function App() {
   useEffect(() => {
     const ping = async () => {
       try {
-        await ky.get("/sync/ping");
+        await request().get("sync/ping");
         setStatus("online");
-      } catch {
+      } catch (e) {
+        console.error("Error", e);
         setStatus("offline");
       }
     };

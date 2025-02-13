@@ -2,9 +2,8 @@ import { styled } from "@linaria/react";
 import { useCallback, useState } from "react";
 
 import { TextInput, Modal } from "../../../components";
-import { toast } from "../../../utils";
+import { toast, HTTPError } from "../../../utils";
 import { useConfig } from "../../../store";
-import { HTTPError } from "ky";
 import { useAuthRequests } from "../../../hooks";
 
 export const AccountForm = ({ onDone }: { onDone: () => void }) => {

@@ -33,7 +33,7 @@ export const Account = () => {
 
       if (status === "offline") {
         toast(
-          "You seem to be offline. Signing out requires network connection!",
+          "We can't reach our servers. Signing out requires network connection!",
         );
         return;
       }
