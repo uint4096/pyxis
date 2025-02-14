@@ -7,7 +7,7 @@ use pyxis_shared::{
     },
     payload::UpdateWritePayload,
 };
-use reqwest::{Client, Error};
+use tauri_plugin_http::reqwest::{Client, Error};
 
 use super::sync_writer::SyncWriter;
 use rusqlite::Connection;
@@ -33,7 +33,7 @@ impl SyncWriter for UpdateWriter {
                 .expect("No snapshot id associated with the update"),
         };
 
-        let base_url = env::var("APP_BASE_URL").unwrap();
+        let base_url = env!("APP_BASE_URL");
 
         let response = client
             .post(format!("{}/sync/update/write", base_url))

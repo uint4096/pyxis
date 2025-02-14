@@ -1,4 +1,5 @@
 use std::{cmp::min, str::FromStr, thread::sleep, time::Duration};
+use tauri_plugin_http::reqwest;
 
 use pyxis_shared::entities::{
     config::{ConfigEntry, Features},

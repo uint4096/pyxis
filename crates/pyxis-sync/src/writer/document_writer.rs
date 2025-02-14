@@ -7,7 +7,7 @@ use pyxis_shared::{
     },
     payload::DocumentWritePayload,
 };
-use reqwest::{Client, Error};
+use tauri_plugin_http::reqwest::{Client, Error};
 use rusqlite::Connection;
 use uuid::Uuid;
 
@@ -63,7 +63,7 @@ impl<'a> SyncWriter for DocumentWriter<'a> {
             file_uid: queue_element.file_uid.clone(),
         };
 
-        let base_url = env::var("APP_BASE_URL").unwrap();
+        let base_url = env!("APP_BASE_URL");
 
         let response = client
             .post(format!("{}/sync/document/write", base_url))

@@ -1,5 +1,5 @@
 use pyxis_shared::entities::queue::{ListenerQueue, Source};
-use reqwest::{Client, Error};
+use tauri_plugin_http::reqwest::{Client, Error};
 use rusqlite::Connection;
 use uuid::Uuid;
 
