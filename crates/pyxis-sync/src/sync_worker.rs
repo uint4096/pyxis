@@ -1,5 +1,6 @@
 use std::{cmp::min, str::FromStr, thread::sleep, time::Duration};
 use tauri_plugin_http::reqwest;
+use procfs::process::Process;
 
 use pyxis_shared::entities::{
     config::{ConfigEntry, Features},
@@ -13,13 +14,18 @@ use crate::writer::{
     document_writer::DocumentWriter, sync_writer::SyncWriter, update_writer::UpdateWriter,
 };
 
-const MAX_SLEEP_DURATION: u64 = 300;
+const MAX_SLEEP_DURATION: u64 = 100;
 
-pub async fn sync_worker(conn: &Connection) -> Result<(), Error> {
+pub async fn sync_worker(conn: &Connection, pid: Option<i32>) -> Result<(), Error> {
     let client = reqwest::Client::new();
-    let mut sleep_duration = 30;
+    let mut sleep_duration = 10;
 
     loop {
+        if !pid.is_none() && Process::new(pid.unwrap()).is_err() {
+            println!("Main process no longer exists! Process Id: {}", pid.unwrap());
+            std::process::exit(0);
+        }
+
         sleep_duration = min(sleep_duration, MAX_SLEEP_DURATION);
 
         let (user_token, device_id, user_id, features) = match get_valid_configuration(conn)? {

@@ -48,6 +48,7 @@ fn main() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_http::init())
+        .plugin(tauri_plugin_process::init())
         .manage(database)
         .manage(sync_db)
         .invoke_handler(tauri::generate_handler![
@@ -86,8 +87,8 @@ fn main() {
                 .expect("Failed to get main window!");
             // Doing this in tauri config does not allow super + arrow keys to work
             let _ = window.maximize();
+            window.open_devtools();
             start_sync_worker(app, window);
-            // window.open_devtools();
             Ok(())
         })
         .run(tauri::generate_context!())
