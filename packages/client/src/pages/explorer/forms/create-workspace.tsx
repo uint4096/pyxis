@@ -2,6 +2,7 @@ import { styled } from "@linaria/react";
 import { Modal, TextInput } from "../../../components";
 import { useCallback, useState } from "react";
 import { useWorkspace } from "../../../store";
+import { useValidation } from "../../../hooks";
 
 type CreateWorkspaceProps = {
   onDone: () => void;
@@ -14,9 +15,14 @@ export const CreateWorkspaceForm = ({
 }: CreateWorkspaceProps) => {
   const [name, setName] = useState("");
   const { create } = useWorkspace();
+  const { failValidation, validationFailed } = useValidation(name);
 
   const onWorkspaceCreation = useCallback(
     async (name: string) => {
+      if (!name) {
+        failValidation();
+      }
+
       const workspace = await create(name);
 
       if (!workspace) {
@@ -25,7 +31,7 @@ export const CreateWorkspaceForm = ({
 
       onDone?.();
     },
-    [create, onDone],
+    [create, failValidation, onDone],
   );
 
   return (
@@ -38,6 +44,7 @@ export const CreateWorkspaceForm = ({
             placeholder="Workspace Name"
             size="medium"
             onChange={setName}
+            validationFailed={validationFailed}
           />
         </InputContainer>
         <CreateWorkspaceButton onClick={() => onWorkspaceCreation(name)}>

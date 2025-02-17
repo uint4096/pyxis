@@ -1,10 +1,10 @@
 import { styled } from "@linaria/react";
-import { useCallback, useState } from "react";
+import { useCallback, useDebugValue, useState } from "react";
 
 import { TextInput, Modal } from "../../../components";
 import { toast, HTTPError } from "../../../utils";
 import { useConfig } from "../../../store";
-import { useAuthRequests } from "../../../hooks";
+import { useAuthRequests, useValidation } from "../../../hooks";
 
 export const AccountForm = ({ onDone }: { onDone: () => void }) => {
   const [username, setUsername] = useState("");
@@ -12,11 +12,26 @@ export const AccountForm = ({ onDone }: { onDone: () => void }) => {
 
   const { create, getDeviceId } = useConfig();
   const { registerOrLogin } = useAuthRequests();
+  const {
+    failValidation: failUsernameValidation,
+    validationFailed: usernameValidationFailed,
+  } = useValidation(username);
+
+  const {
+    failValidation: failPasswordValidation,
+    validationFailed: passwordValidationFailed,
+  } = useValidation(password);
 
   const [type, setType] = useState<"signin" | "signup">("signin");
 
   const action = useCallback(async () => {
     try {
+      if (!username || !password) {
+        if (!username) failUsernameValidation();
+        if (!password) failPasswordValidation();
+        return;
+      }
+
       const { response, status } = await registerOrLogin(type, {
         username,
         password,
@@ -41,7 +56,17 @@ export const AccountForm = ({ onDone }: { onDone: () => void }) => {
       const message = type === "signin" ? "Signin failed!" : "Signup failed!";
       toast(message);
     }
-  }, [registerOrLogin, type, username, password, getDeviceId, create, onDone]);
+  }, [
+    username,
+    password,
+    registerOrLogin,
+    type,
+    getDeviceId,
+    failUsernameValidation,
+    failPasswordValidation,
+    create,
+    onDone,
+  ]);
 
   return (
     <>
@@ -53,6 +78,7 @@ export const AccountForm = ({ onDone }: { onDone: () => void }) => {
               placeholder="Username"
               size="large"
               onChange={setUsername}
+              validationFailed={usernameValidationFailed}
             />
             <TextInput
               value={password}
@@ -60,6 +86,7 @@ export const AccountForm = ({ onDone }: { onDone: () => void }) => {
               size="large"
               onChange={setPassword}
               type="password"
+              validationFailed={passwordValidationFailed}
             />
           </FormContainer>
           <LoginButton onClick={action}>

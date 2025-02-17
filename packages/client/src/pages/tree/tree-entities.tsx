@@ -6,6 +6,7 @@ import { FileContainer } from "./containers/file";
 import { DirContainer, TreeDirectory } from "./containers/dir";
 import { DirWithChildren, isFile, Node, useTreeStore } from "../../store";
 import { File } from "../../ffi";
+import { useValidation } from "../../hooks";
 
 type EntityProps = {
   node: TreeDirectory | Node;
@@ -29,6 +30,8 @@ export const Entities = ({
     uid: string;
   }>();
   const [documentName, setDocumentName] = useState("");
+
+  const { validationFailed, failValidation } = useValidation(documentName);
 
   const {
     findNode,
@@ -58,6 +61,19 @@ export const Entities = ({
       const parent = parentUid ? findNode(parentUid) : undefined;
       const entityPath = `${parent?.path ?? ""}/${documentName}`;
 
+      if (
+        !documentName ||
+        ((parent as DirWithChildren)?.children ?? []).find(
+          (child) => child.path === entityPath,
+        ) ||
+        ((node as DirWithChildren)?.children ?? []).find(
+          (child) => child.path === entityPath,
+        )
+      ) {
+        failValidation();
+        return;
+      }
+
       if (newDocument === "file") {
         const file = await createFile(
           documentName,
@@ -78,9 +94,10 @@ export const Entities = ({
       setNewDocument(undefined);
     },
     [
-      findNode,
       documentName,
+      findNode,
       newDocument,
+      failValidation,
       createFile,
       workspaceUid,
       selectFile,
@@ -100,6 +117,11 @@ export const Entities = ({
         return;
       }
 
+      if (!documentName) {
+        failValidation();
+        return;
+      }
+
       const node = uid ? findNode(uid) : undefined;
       if (!node) {
         setDocumentName("");
@@ -116,7 +138,14 @@ export const Entities = ({
       setDocumentName("");
       setRenameDocument(undefined);
     },
-    [documentName, findNode, renameDocument?.type, updateDir, updateFile],
+    [
+      documentName,
+      failValidation,
+      findNode,
+      renameDocument?.type,
+      updateDir,
+      updateFile,
+    ],
   );
 
   const initDocRename = useCallback(
@@ -139,6 +168,7 @@ export const Entities = ({
           value={documentName}
           onKeyDown={(e) => renameKeydown(e, node.uid)}
           onChange={setDocumentName}
+          validationFailed={validationFailed}
         />
       )}
 
@@ -159,6 +189,7 @@ export const Entities = ({
               value={documentName}
               onKeyDown={(e) => renameKeydown(e, node.uid)}
               onChange={setDocumentName}
+              validationFailed={validationFailed}
             />
           )}
 
@@ -183,6 +214,7 @@ export const Entities = ({
                   value={documentName}
                   onKeyDown={(e) => createKeydown(e, node.uid)}
                   onChange={setDocumentName}
+                  validationFailed={validationFailed}
                 />
               )}
 

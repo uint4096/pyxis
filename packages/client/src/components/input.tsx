@@ -14,6 +14,7 @@ export type InputProps = {
   ref?: Ref<HTMLInputElement>;
   onKeyDown?: KeyboardEventHandler<HTMLInputElement>;
   type?: InputType;
+  validationFailed?: boolean;
 };
 
 export const InputInPlace = ({
@@ -24,59 +25,21 @@ export const InputInPlace = ({
   readonly,
   onKeyDown,
   type,
-}: InputProps & { readonly?: boolean }) => (
-  <Input
-    value={value}
-    placeholder={placeholder ?? ""}
-    onChange={(e) => onChange(e.currentTarget.value)}
-    variation={size}
-    readOnly={readonly ?? false}
-    autoFocus={true}
-    onKeyDown={onKeyDown}
-    type={type}
-  />
-);
-
-export const DirSelection = ({
-  size,
-  value,
-  placeholder,
-  validationMessage,
-  message,
-  onChange,
-}: InputProps) => {
-  const [inputVal, setVal] = useState(value);
-  const [validationMsg, setValidationMsg] = useState(validationMessage);
-
-  const onOpen = useCallback(async () => {
-    const selected = await open({
-      directory: true,
-    });
-
-    if (!selected) {
-      setValidationMsg("You must select a directory");
-      return;
-    }
-
-    setVal(selected as string);
-    onChange(selected as string);
-  }, [onChange]);
-
+  validationFailed,
+}: InputProps & { readonly?: boolean }) => {
+  console.log("Failed Validation", validationFailed);
   return (
-    <InputWrapper>
-      <InputMessage>{message}</InputMessage>
-      <InputSelection>
-        <InputInPlace
-          value={inputVal}
-          placeholder={placeholder ?? ""}
-          readonly={true}
-          size={size}
-          onChange={onChange}
-        />
-        <DirSelectButton onClick={onOpen}>...</DirSelectButton>
-      </InputSelection>
-      {validationMessage && <span>{validationMsg}</span>}
-    </InputWrapper>
+    <Input
+      value={value}
+      placeholder={placeholder ?? ""}
+      onChange={(e) => onChange(e.currentTarget.value)}
+      variation={size}
+      readOnly={readonly ?? false}
+      autoFocus={true}
+      onKeyDown={onKeyDown}
+      type={type}
+      validationFailed={validationFailed}
+    />
   );
 };
 
@@ -88,6 +51,7 @@ export const TextInput = ({
   message,
   onChange,
   type,
+  validationFailed,
 }: InputProps) => (
   <InputWrapper>
     {message && <InputMessage>{message}</InputMessage>}
@@ -98,6 +62,7 @@ export const TextInput = ({
       size={size}
       onChange={onChange}
       type={type}
+      validationFailed={validationFailed}
     />
     {validationMessage && <span>{validationMessage}</span>}
   </InputWrapper>
@@ -119,6 +84,7 @@ const InputMessage = styled.span`
 const Input = styled.input<{
   variation: InputProps["size"];
   type?: InputType;
+  validationFailed?: boolean;
 }>`
   border: 1px solid grey;
   background-color: inherit;
@@ -126,9 +92,11 @@ const Input = styled.input<{
   font-size: inherit;
   padding: 0 0.5vw;
   outline: none;
+  border-color: ${(props) => (props.validationFailed ? "#c6011f" : "#8f94f3")};
 
   &:focus {
-    border: 1px solid #8f94f3;
+    border: 1px solid
+      ${(props) => (props.validationFailed ? "#c6011f" : "#8f94f3")};
   }
 
   &::placeholder {
@@ -139,19 +107,4 @@ const Input = styled.input<{
   height: ${(props) =>
     ({ small: "2.7vh", medium: "2.9vh", large: "3.2vh" })[props.variation]};
   type: ${(props) => props.type ?? "text"};
-`;
-
-const InputSelection = styled.div`
-  display: flex;
-  width: 100%;
-  justify-content: center;
-`;
-
-const DirSelectButton = styled.button`
-  height: 2.7vh;
-  padding: 10px 10px;
-
-  &:focus {
-    outline: none;
-  }
 `;
