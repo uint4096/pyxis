@@ -406,7 +406,7 @@ const Editor = ({
 
 const TextEditor = styled.div`
   flex-grow: 1;
-  padding: 4vh 20vw;
+  padding: 6vh 20vw;
   white-space: pre-wrap;
   font-family: "Lato";
   text-align: left;

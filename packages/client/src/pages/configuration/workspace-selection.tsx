@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Option } from "./wrappers";
 import { useWorkspace } from "../../store";
 import { CreateWorkspaceForm, WorkspaceSelection } from "../explorer/forms";
@@ -14,6 +14,12 @@ export const Workspaces = () => {
     setSelectDialog(false);
     setCreateDialog(true);
   }, []);
+
+  useEffect(() => {
+    if (!workspaces.length) {
+      setSelectDialog(false);
+    }
+  }, [workspaces.length]);
 
   return (
     <>
@@ -35,7 +41,7 @@ export const Workspaces = () => {
       )}
       <Option
         icon={<FaFolderTree size={18} />}
-        onClick={() => setSelectDialog(true)}
+        onClick={() => workspaces.length && setSelectDialog(true)}
       />
     </>
   );
