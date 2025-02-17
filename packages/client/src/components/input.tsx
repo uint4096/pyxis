@@ -27,7 +27,6 @@ export const InputInPlace = ({
   type,
   validationFailed,
 }: InputProps & { readonly?: boolean }) => {
-  console.log("Failed Validation", validationFailed);
   return (
     <Input
       value={value}

@@ -110,7 +110,10 @@ function App() {
         await Promise.all([getFeatures(config.userId!), initDevices()]);
 
       const featureSet = featuresResponse?.features?.features ?? {};
-      const localFeatures = createLocalFeatureSet(featureSet);
+      const localFeatures = await createLocalFeatureSet(
+        config.userId!,
+        featureSet,
+      );
 
       await modifyConfig(
         config.username!,

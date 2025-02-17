@@ -16,7 +16,6 @@ export const Account = () => {
 
   const { logout, requestFeatureAccess } = useAuthRequests();
   const { delete: removeTokenFromStore, create: modifyConfig } = useConfig();
-  const [syncStatus, setSyncStatus] = useState(config.features?.["sync"]?.[0]);
   const optionsRef = useRef<HTMLDivElement>(null);
 
   useOutsideEvent(optionsRef, () => {
@@ -92,8 +91,6 @@ export const Account = () => {
           ],
         },
       );
-
-      setSyncStatus(status);
     },
     [
       config.deviceId,
@@ -144,9 +141,8 @@ export const Account = () => {
                 onColor="#646cff"
                 checkedIcon={false}
                 uncheckedIcon={false}
-                checked={!!syncStatus}
+                checked={!!config.features?.["sync"]?.[0]}
                 onChange={(status) => handleSyncToggle(status)}
-                defaultChecked={false}
               />
             )}
           </SyncFeatureWrapper>

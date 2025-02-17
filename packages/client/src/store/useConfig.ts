@@ -23,20 +23,29 @@ interface ConfigState {
   setConfig: (config: Config) => Promise<void>;
   getLoggedInUser: () => Promise<Config | undefined>;
   getDeviceId: () => Promise<string>;
-  createLocalFeatureSet: (remoteSet: Record<string, string>) => Features;
+  createLocalFeatureSet: (
+    userId: string,
+    remoteSet: Record<string, string>,
+  ) => Promise<Features>;
 }
 
 export const useConfig = create<ConfigState>((set, get) => ({
   config: {},
 
-  createLocalFeatureSet: (featureSet: Record<string, string>) =>
-    Object.keys(featureSet ?? {}).reduce<Features>((acc, f) => {
+  createLocalFeatureSet: async (
+    userId: string,
+    featureSet: Record<string, string>,
+  ) => {
+    const localFeatures = (await get().get(userId))?.features;
+
+    return Object.keys(featureSet ?? {}).reduce<Features>((acc, f) => {
       acc[f] = [
-        !!get().config?.features?.[f]?.[0],
+        !!localFeatures?.[f]?.[0],
         featureSet[f] as Features[keyof Features][1],
       ];
       return acc;
-    }, {}),
+    }, {});
+  },
 
   create: async (username, userId, token, deviceId, features) => {
     const config = {
