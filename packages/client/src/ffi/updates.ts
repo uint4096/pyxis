@@ -1,4 +1,3 @@
-import { toast } from "../utils";
 import { invoke } from "./invoke";
 
 export type Updates = {
@@ -27,11 +26,11 @@ export const insertUpdates = async (
         snapshotId,
       }))
     ) {
-      toast("Failed to save! Your changes might be lost.");
+      throw new Error("Empty Response!");
     }
   } catch (e) {
     console.error("[Updates] Failed to update! Error: ", e);
-    toast("Failed to save! Your changes might be lost.");
+    throw e;
   }
 };
 
@@ -45,6 +44,6 @@ export const getUpdates = async (fileUid: string, snapshotId: number) => {
     );
   } catch (e) {
     console.error("[Updates] Failed to get content. Error: ", e);
-    toast("Failed to get content!");
+    throw e;
   }
 };

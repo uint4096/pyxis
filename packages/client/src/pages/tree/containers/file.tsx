@@ -4,7 +4,7 @@ import { useCallback, useRef } from "react";
 import { useWorkspace, useTreeStore } from "../../../store";
 import type { File } from "../../../ffi";
 import { getOverflowMenu, type MenuOption } from "../../../components";
-import { noop } from "../../../utils";
+import { noop, toast } from "../../../utils";
 import { useOutsideEvent } from "../../../hooks";
 import {
   backgroundHover,
@@ -54,7 +54,11 @@ export const FileContainer = ({
           selectFile(undefined);
         }
 
-        deleteFile(file as File);
+        try {
+          await deleteFile(file as File);
+        } catch {
+          toast("Failed to delete file!");
+        }
       }, [deleteFile, file, selectFile, selectedFile?.uid]),
       id: "delete",
       name: "Delete",

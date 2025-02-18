@@ -3,6 +3,7 @@ import { Modal, TextInput } from "../../../components";
 import { useCallback, useState } from "react";
 import { useWorkspace } from "../../../store";
 import { useValidation } from "../../../hooks";
+import { toast } from "../../../utils";
 
 type CreateWorkspaceProps = {
   onDone: () => void;
@@ -23,13 +24,17 @@ export const CreateWorkspaceForm = ({
         failValidation();
       }
 
-      const workspace = await create(name);
+      try {
+        const workspace = await create(name);
 
-      if (!workspace) {
-        return;
+        if (!workspace) {
+          return;
+        }
+
+        onDone?.();
+      } catch {
+        toast("Failed to create workspace!");
       }
-
-      onDone?.();
     },
     [create, failValidation, onDone],
   );

@@ -13,7 +13,7 @@ import {
   noDisplay,
   OptionsContainer,
 } from "./styles";
-import { noop } from "../../../utils";
+import { noop, toast } from "../../../utils";
 import { useTreeStore, type DirWithChildren, type Node } from "../../../store";
 import { useOutsideEvent } from "../../../hooks";
 
@@ -79,7 +79,11 @@ export const DirContainer = ({
               selectFile(undefined);
             }
 
-            await deleteDir(dir as DirWithChildren);
+            try {
+              await deleteDir(dir as DirWithChildren);
+            } catch {
+              toast("Failed to delete directory!");
+            }
           }, [
             deleteDir,
             dir,

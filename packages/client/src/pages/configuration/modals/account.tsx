@@ -1,5 +1,5 @@
 import { styled } from "@linaria/react";
-import { useCallback, useDebugValue, useState } from "react";
+import { useCallback, useDebugValue, useEffect, useState } from "react";
 
 import { TextInput, Modal } from "../../../components";
 import { toast, HTTPError } from "../../../utils";
@@ -23,6 +23,13 @@ export const AccountForm = ({ onDone }: { onDone: () => void }) => {
   } = useValidation(password);
 
   const [type, setType] = useState<"signin" | "signup">("signin");
+
+  useEffect(() => {
+    return () => {
+      setUsername("");
+      setPassword("");
+    };
+  }, [type]);
 
   const action = useCallback(async () => {
     try {
@@ -49,6 +56,14 @@ export const AccountForm = ({ onDone }: { onDone: () => void }) => {
       }
     } catch (e) {
       if (e instanceof HTTPError && /Username taken/g.test(e.message)) {
+        toast(e.message);
+        return;
+      }
+
+      if (
+        e instanceof HTTPError &&
+        /Password verification failed/g.test(e.message)
+      ) {
         toast(e.message);
         return;
       }

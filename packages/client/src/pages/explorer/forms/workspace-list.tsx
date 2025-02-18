@@ -3,7 +3,7 @@ import { useCallback, useEffect } from "react";
 import { Modal } from "../../../components";
 import { Workspace } from "../../../ffi";
 import { useTreeStore, useWorkspace } from "../../../store";
-import { noop } from "../../../utils";
+import { noop, toast } from "../../../utils";
 import { Trash } from "../../../icons";
 import { BiPlus } from "react-icons/bi";
 
@@ -25,9 +25,13 @@ export const WorkspaceSelection = ({
 
   const selectWorkspace = useCallback(
     async (workspace: Workspace) => {
-      await updateSelection(workspace);
+      try {
+        await updateSelection(workspace);
 
-      setVisibility(false);
+        setVisibility(false);
+      } catch {
+        toast("Failed to update selection!");
+      }
     },
     [setVisibility, updateSelection],
   );
@@ -40,11 +44,15 @@ export const WorkspaceSelection = ({
 
   const workspaceDelete = useCallback(
     (workspaceUid: string) => {
-      if (workspaceUid === selectedFile?.workspace_uid) {
-        selectFile(undefined);
-      }
+      try {
+        if (workspaceUid === selectedFile?.workspace_uid) {
+          selectFile(undefined);
+        }
 
-      return deleteWorkspace(workspaceUid);
+        return deleteWorkspace(workspaceUid);
+      } catch {
+        toast("Failed to delete workspace!");
+      }
     },
     [deleteWorkspace, selectFile, selectedFile?.workspace_uid],
   );
@@ -75,7 +83,7 @@ export const WorkspaceSelection = ({
                   {workspace.name}
                 </WorkspaceName>
                 <div onClick={() => workspaceDelete(workspace.uid!)}>
-                  <Trash width={22} height={22} stroke="#C6011F" />
+                  <Trash width={22} height={22} stroke="#fd779e" />
                 </div>
               </WorkspaceListElement>
             );

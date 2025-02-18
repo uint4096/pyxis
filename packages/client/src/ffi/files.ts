@@ -1,4 +1,3 @@
-import { toast } from "../utils";
 import { invoke } from "./invoke";
 
 export type Link = {
@@ -123,13 +122,13 @@ export const deleteFile = async (uid: string) => {
         uid,
       }))
     ) {
-      toast("Failed to delete file!");
+      throw new Error("Empty Response!");
     }
 
     return;
   } catch (e) {
     console.error("[File] Failed to delete!", e);
-    toast("Failed to delete file!");
+    throw e;
   }
 };
 
@@ -156,13 +155,12 @@ export const updateFile = async (
     });
 
     if (!file) {
-      toast("Failed to update file!");
-      return;
+      throw new Error("Empty Response!");
     }
 
     return file;
   } catch (e) {
     console.error("[File] Failed to update!", e);
-    toast("Failed to update file!");
+    throw e;
   }
 };

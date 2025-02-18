@@ -1,11 +1,12 @@
 import { styled } from "@linaria/react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { WorkspaceSelection, CreateWorkspace } from "./forms";
 import { useConfig, useTreeStore, useWorkspace } from "../../store";
 import { Tree } from "../tree";
 import Editor from "../editor/editor";
 import { useContentSync } from "../../hooks";
 import { ConfigurationTray } from "../configuration";
+import { toast } from "../../utils";
 
 export const Explorer = () => {
   const { workspaces, list, currentWorkspace } = useWorkspace();
@@ -15,6 +16,7 @@ export const Explorer = () => {
     insertUpdates,
     formattedContent,
     setFormattedContent,
+    selectFile,
   } = useTreeStore();
   const { getFileContent } = useContentSync();
   const { config } = useConfig();
@@ -27,7 +29,13 @@ export const Explorer = () => {
   const [showEditor, setEditor] = useState<boolean>(false);
 
   useEffect(() => {
-    (async () => await list())();
+    (async () => {
+      try {
+        await list();
+      } catch {
+        toast("Failed to fetch workspaces!");
+      }
+    })();
   }, [list]);
 
   useEffect(() => {
@@ -62,7 +70,34 @@ export const Explorer = () => {
       setWorkspaceSelectionForm(false);
       setEditor(true);
     }
-  }, [currentWorkspace, workspaces]);
+
+    return () => {
+      setEditor(false);
+      selectFile(undefined);
+    };
+  }, [currentWorkspace, selectFile, workspaces]);
+
+  const snapshotsUpdate = useCallback(
+    async (fileUid: string, content: Uint8Array) => {
+      try {
+        return await updateSnapshots(fileUid, content);
+      } catch {
+        toast("Failed to save! Your changes might be lost.");
+      }
+    },
+    [updateSnapshots],
+  );
+
+  const updatesInsert = useCallback(
+    async (fileUid: string, snapshotId: number, content: Uint8Array) => {
+      try {
+        return await insertUpdates(fileUid, snapshotId, content);
+      } catch {
+        toast("Failed to save! Your changes might be lost.");
+      }
+    },
+    [insertUpdates],
+  );
 
   return (
     <>
@@ -85,8 +120,8 @@ export const Explorer = () => {
             key={selectedFile.uid}
             fileUid={selectedFile.uid}
             content={formattedContent}
-            updatesWriter={insertUpdates}
-            snapshotWriter={updateSnapshots}
+            updatesWriter={updatesInsert}
+            snapshotWriter={snapshotsUpdate}
           />
         )}
 

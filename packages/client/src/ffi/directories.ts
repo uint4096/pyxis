@@ -1,4 +1,3 @@
-import { toast } from "../utils";
 import { invoke } from "./invoke";
 
 export type Directory = {
@@ -60,14 +59,13 @@ export const createDir = async (
     });
 
     if (!directory) {
-      toast("Failed to create directory!");
-      return;
+      throw new Error("Empty Response!");
     }
 
     return directory;
   } catch (e) {
     console.error("[Directory] Create failed!", e);
-    toast("Failed to create directory!");
+    throw e;
   }
 };
 
@@ -95,13 +93,13 @@ export const deleteDir = async (uid: string) => {
         uid,
       }))
     ) {
-      toast("Failed to delete directory!");
+      throw new Error("Empty Response!");
     }
 
     return;
   } catch (e) {
     console.error("[Directory] Failed to delete!", e);
-    toast("Failed to delete directory!");
+    throw e;
   }
 };
 
@@ -135,13 +133,12 @@ export const updateDir = async (
     });
 
     if (!directory) {
-      toast("Failed to update directory!");
-      return;
+      throw new Error("Empty Response!");
     }
 
     return directory;
   } catch (e) {
     console.error("[Directory] Failed to update!", e);
-    toast("Failed to update directory!");
+    throw e;
   }
 };

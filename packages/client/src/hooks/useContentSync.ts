@@ -8,6 +8,7 @@ import {
 } from "../store";
 import type { Snapshot, Sources, Updates } from "../ffi";
 import { useSyncRequests } from "./useSyncRequests";
+import { toast } from "../utils";
 
 export const useContentSync = () => {
   const { config } = useConfig();
@@ -149,6 +150,7 @@ export const useContentSync = () => {
         };
       } catch (e) {
         console.error("[Content Sync] Failed operation!", e);
+        toast("Failed to get file content!");
       }
     },
     [

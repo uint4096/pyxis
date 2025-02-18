@@ -7,6 +7,7 @@ import { DirContainer, TreeDirectory } from "./containers/dir";
 import { DirWithChildren, isFile, Node, useTreeStore } from "../../store";
 import { File } from "../../ffi";
 import { useValidation } from "../../hooks";
+import { toast } from "../../utils";
 
 type EntityProps = {
   node: TreeDirectory | Node;
@@ -58,44 +59,49 @@ export const Entities = ({
         return;
       }
 
-      const parent = parentUid ? findNode(parentUid) : undefined;
-      const entityPath = `${parent?.path ?? ""}/${documentName}`;
+      try {
+        const parent = parentUid ? findNode(parentUid) : undefined;
+        const entityPath = `${parent?.path ?? ""}/${documentName}`;
 
-      if (
-        !documentName ||
-        ((parent as DirWithChildren)?.children ?? []).find(
-          (child) => child.path === entityPath,
-        ) ||
-        ((node as DirWithChildren)?.children ?? []).find(
-          (child) => child.path === entityPath,
-        )
-      ) {
-        failValidation();
-        return;
+        if (
+          !documentName ||
+          ((parent as DirWithChildren)?.children ?? []).find(
+            (child) => child.path === entityPath,
+          ) ||
+          ((node as DirWithChildren)?.children ?? []).find(
+            (child) => child.path === entityPath,
+          )
+        ) {
+          failValidation();
+          return;
+        }
+
+        if (newDocument === "file") {
+          const file = await createFile(
+            documentName,
+            workspaceUid,
+            entityPath,
+            [],
+            [],
+            parent?.uid,
+          );
+
+          selectFile(undefined);
+          selectFile(file);
+        } else {
+          await createDir(documentName, workspaceUid, entityPath, parent?.uid);
+        }
+
+        setDocumentName("");
+        setNewDocument(undefined);
+      } catch (e) {
+        toast("Document creation failed!");
       }
-
-      if (newDocument === "file") {
-        const file = await createFile(
-          documentName,
-          workspaceUid,
-          entityPath,
-          [],
-          [],
-          parent?.uid,
-        );
-
-        selectFile(undefined);
-        selectFile(file);
-      } else {
-        await createDir(documentName, workspaceUid, entityPath, parent?.uid);
-      }
-
-      setDocumentName("");
-      setNewDocument(undefined);
     },
     [
-      documentName,
       findNode,
+      documentName,
+      node,
       newDocument,
       failValidation,
       createFile,
@@ -122,21 +128,28 @@ export const Entities = ({
         return;
       }
 
-      const node = uid ? findNode(uid) : undefined;
-      if (!node) {
+      try {
+        const node = uid ? findNode(uid) : undefined;
+        if (!node) {
+          setDocumentName("");
+          setRenameDocument(undefined);
+          return;
+        }
+
+        if (renameDocument?.type === "file") {
+          await updateFile({ ...(node as File), title: documentName });
+        } else {
+          await updateDir({
+            ...(node as DirWithChildren),
+            name: documentName,
+          });
+        }
+
         setDocumentName("");
         setRenameDocument(undefined);
-        return;
+      } catch {
+        toast("Failed to rename document!");
       }
-
-      if (renameDocument?.type === "file") {
-        await updateFile({ ...(node as File), title: documentName });
-      } else {
-        await updateDir({ ...(node as DirWithChildren), name: documentName });
-      }
-
-      setDocumentName("");
-      setRenameDocument(undefined);
     },
     [
       documentName,
