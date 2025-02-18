@@ -79,6 +79,7 @@ const Option = styled.div`
   display: flex;
   opacity: 0.9;
   justify-content: flex-start;
+  text-wrap: nowrap;
   &:hover {
     background-color: #27272a;
     opacity: 0.7;

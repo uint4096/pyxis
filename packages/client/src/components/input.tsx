@@ -91,11 +91,11 @@ const Input = styled.input<{
   font-size: inherit;
   padding: 0 0.5vw;
   outline: none;
-  border-color: ${(props) => (props.validationFailed ? "#c6011f" : "#8f94f3")};
+  border-color: ${(props) => (props.validationFailed ? "#fd779e" : "#8f94f3")};
 
   &:focus {
     border: 1px solid
-      ${(props) => (props.validationFailed ? "#c6011f" : "#8f94f3")};
+      ${(props) => (props.validationFailed ? "#fd779e" : "#8f94f3")};
   }
 
   &::placeholder {

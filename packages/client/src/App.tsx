@@ -46,15 +46,33 @@ function App() {
   useEffect(() => {
     const appWindow = getCurrentWindow();
 
+    const minimizeEvent = appWindow.minimize;
+    const maximizeEvent = appWindow.toggleMaximize;
+    const closeEvent = appWindow.close;
+
     document
       .getElementById("titlebar-minimize")
-      ?.addEventListener("click", () => appWindow.minimize());
+      ?.addEventListener("click", minimizeEvent);
     document
       .getElementById("titlebar-maximize")
-      ?.addEventListener("click", () => appWindow.toggleMaximize());
+      ?.addEventListener("click", maximizeEvent);
     document
       .getElementById("titlebar-close")
-      ?.addEventListener("click", () => appWindow.close());
+      ?.addEventListener("click", closeEvent);
+
+    return () => {
+      document
+        .getElementById("titlebar-minimize")
+        ?.removeEventListener("click", minimizeEvent);
+
+      document
+        .getElementById("titlebar-maximize")
+        ?.removeEventListener("click", maximizeEvent);
+
+      document
+        .getElementById("titlebar-close")
+        ?.removeEventListener("click", closeEvent);
+    };
   }, []);
 
   useEffect(() => {

@@ -50,6 +50,6 @@ const CloseButton = styled.span`
   cursor: pointer;
 
   &:hover #icon {
-    color: #c6011f;
+    color: #fd779e;
   }
 `;

@@ -1,22 +1,32 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { FaUser } from "react-icons/fa";
 import { Option } from "./wrappers";
-import { useConfig } from "../../store";
+import { useConfig, useOffline } from "../../store";
 import { Features } from "../../ffi";
-import { toast } from "react-toastify";
 import { useAuthRequests, useOutsideEvent } from "../../hooks";
 import { styled } from "@linaria/react";
 import { BiSolidUser } from "react-icons/bi";
 import Switch from "react-switch";
-import { noop } from "../../utils";
+import { toast, noop } from "../../utils";
 
 export const Account = () => {
   const [showOverflow, setOverflow] = useState(false);
+  const [buttonStatus, setButtonStatus] = useState(true);
   const { config } = useConfig();
+
+  const { getStatus } = useOffline();
 
   const { logout, requestFeatureAccess } = useAuthRequests();
   const { delete: removeTokenFromStore, create: modifyConfig } = useConfig();
   const optionsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (getStatus() === "offline") {
+      setButtonStatus(false);
+    } else {
+      setButtonStatus(true);
+    }
+  }, [getStatus]);
 
   useOutsideEvent(optionsRef, () => {
     setOverflow(false);
@@ -66,6 +76,10 @@ export const Account = () => {
             userToken,
             deviceId,
             featuresWithAddition,
+          );
+        } else {
+          toast(
+            "We can't reach our servers. This action requires network connection!",
           );
         }
       } catch (e) {
@@ -123,7 +137,10 @@ export const Account = () => {
             <FeatureName>Sync</FeatureName>
             {config.features?.["sync"]?.[1] !== "enabled" &&
               config.features?.["sync"]?.[1] !== "requested" && (
-                <AccessRequestButton onClick={() => requestFeature("sync")}>
+                <AccessRequestButton
+                  onClick={() => requestFeature("sync")}
+                  disabled={!buttonStatus}
+                >
                   Request Access
                 </AccessRequestButton>
               )}
