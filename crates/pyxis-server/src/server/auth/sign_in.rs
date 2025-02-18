@@ -1,5 +1,5 @@
 use crate::server::router::AWSConnectionState;
-use axum::{extract::State, http::StatusCode, Json};
+use axum::{extract::State, http::StatusCode, response::{IntoResponse, Response}, Json};
 use serde::Deserialize;
 
 use crate::database::{
@@ -18,7 +18,7 @@ pub struct SignInPayload {
 pub async fn sign_in(
     State(connections): State<AWSConnectionState>,
     Json(user): Json<SignInPayload>,
-) -> Result<Json<UserToken>, StatusCode> {
+) -> Result<Json<UserToken>, Response> {
     let SignInPayload {
         password,
         username,
@@ -32,7 +32,7 @@ pub async fn sign_in(
         Ok(user) => user,
         Err(e) => {
             println!("Error while verifying password: {:?}", e);
-            return Err(StatusCode::INTERNAL_SERVER_ERROR);
+            return Err((StatusCode::UNAUTHORIZED, format!("Password verification failed!")).into_response());
         }
     };
 
@@ -42,19 +42,19 @@ pub async fn sign_in(
             .await
         {
             println!("Error while trying to delete existing tokens: {}", e);
-            return Err(StatusCode::INTERNAL_SERVER_ERROR);
+            return Err((StatusCode::INTERNAL_SERVER_ERROR, format!("Internal server error")).into_response());
         }
 
         let user_token = match token_repository.create(user).await {
             Ok(token) => token,
             Err(e) => {
                 println!("Error while trying to create token: {}", e);
-                return Err(StatusCode::INTERNAL_SERVER_ERROR);
+                return Err((StatusCode::INTERNAL_SERVER_ERROR, format!("Internal server error")).into_response());
             }
         };
 
         return Ok(Json(user_token));
     } else {
-        return Err(StatusCode::UNAUTHORIZED);
+        return Err((StatusCode::UNAUTHORIZED, format!("Password verification failed!")).into_response());
     }
 }
