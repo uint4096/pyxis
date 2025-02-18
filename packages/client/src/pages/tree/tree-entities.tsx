@@ -136,12 +136,17 @@ export const Entities = ({
           return;
         }
 
+        const pathChunks = node.path?.split("/");
+        const slices = pathChunks.slice(0, pathChunks.length - 1).join("/");
+        const path = `${slices}/${documentName}`;
+
         if (renameDocument?.type === "file") {
-          await updateFile({ ...(node as File), title: documentName });
+          await updateFile({ ...(node as File), title: documentName, path });
         } else {
           await updateDir({
             ...(node as DirWithChildren),
             name: documentName,
+            path,
           });
         }
 
