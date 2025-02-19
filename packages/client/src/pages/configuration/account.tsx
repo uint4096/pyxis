@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { FaUser } from "react-icons/fa";
+import { FaCircle, FaUser } from "react-icons/fa";
 import { Option } from "./wrappers";
 import { useConfig, useOffline } from "../../store";
 import { Features } from "../../ffi";
@@ -20,13 +20,15 @@ export const Account = () => {
   const { delete: removeTokenFromStore, create: modifyConfig } = useConfig();
   const optionsRef = useRef<HTMLDivElement>(null);
 
+  const isOffline = getStatus() === "offline";
+
   useEffect(() => {
-    if (getStatus() === "offline") {
+    if (isOffline) {
       setButtonStatus(false);
     } else {
       setButtonStatus(true);
     }
-  }, [getStatus]);
+  }, [isOffline]);
 
   useOutsideEvent(optionsRef, () => {
     setOverflow(false);
@@ -128,13 +130,23 @@ export const Account = () => {
       />
       {showOverflow && (
         <Menu>
-          <UserContainer>
-            <BiSolidUser color="#9a9999" />
-            <Username>{config.username}</Username>
-          </UserContainer>
+          <TitleContainer>
+            <UserContainer>
+              <BiSolidUser color="#9a9999" />
+              <Username>{config.username}</Username>
+            </UserContainer>
+            <FaCircle
+              fill={isOffline ? "orange" : "green"}
+              title={
+                isOffline ? "Disconnected from server" : "Connected to server"
+              }
+              style={{ alignSelf: "center" }}
+            />
+          </TitleContainer>
+
           <Rule />
           <SyncFeatureWrapper>
-            <FeatureName>Sync</FeatureName>
+            <FeatureName>Sync (beta)</FeatureName>
             {config.features?.["sync"]?.[1] !== "enabled" &&
               config.features?.["sync"]?.[1] !== "requested" && (
                 <AccessRequestButton
@@ -190,11 +202,16 @@ const Wrapper = styled.div`
   }
 `;
 
+const TitleContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  width: 100%:
+`;
+
 const UserContainer = styled.div`
   display: flex;
   padding: 0 1vw;
-  gap: 1em;
-  width: 100%;
+  gap: 0.5em;
   justify-content: center;
 
   & * {
@@ -246,7 +263,7 @@ const Menu = styled.div`
   margin-bottom: 2px;
   margin-left: 20px;
   font-size: 1em;
-  width: 10vw;
+  width: 12vw;
   align-items: center;
   z-index: 9999;
 `;
