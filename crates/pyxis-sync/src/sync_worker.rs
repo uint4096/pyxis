@@ -1,6 +1,6 @@
+use procfs::process::Process;
 use std::{cmp::min, str::FromStr, thread::sleep, time::Duration};
 use tauri_plugin_http::reqwest;
-use procfs::process::Process;
 
 use pyxis_shared::entities::{
     config::{ConfigEntry, Features},
@@ -22,7 +22,10 @@ pub async fn sync_worker(conn: &Connection, pid: Option<i32>) -> Result<(), Erro
 
     loop {
         if !pid.is_none() && Process::new(pid.unwrap()).is_err() {
-            println!("Main process no longer exists! Process Id: {}", pid.unwrap());
+            println!(
+                "Main process no longer exists! Process Id: {}",
+                pid.unwrap()
+            );
             std::process::exit(0);
         }
 
@@ -42,7 +45,7 @@ pub async fn sync_worker(conn: &Connection, pid: Option<i32>) -> Result<(), Erro
             if sync.is_none() || !sync.unwrap().0 || sync.unwrap().1 != String::from("enabled") {
                 eprintln!("Sync disabled!");
                 handle_backoff(&mut sleep_duration);
-                continue; 
+                continue;
             }
         }
 

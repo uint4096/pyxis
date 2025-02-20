@@ -12,7 +12,7 @@
         "core:window:allow-toggle-maximize",
         {
             "identifier": "http:default",
-            "allow": [{ "url": "https://pyxis.ink" }, { "url": "http://localhost:8080" }, {"url": "http://localhost:5173"}]
+            "allow": [{ "url": "https://api.pyxis.ink" }, { "url": "http://localhost:8080" }, {"url": "http://localhost:5173"}]
         },
         "process:default",
         "core:default",

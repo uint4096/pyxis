@@ -1,6 +1,6 @@
 use pyxis_shared::entities::queue::{ListenerQueue, Source};
-use tauri_plugin_http::reqwest::{Client, Error};
 use rusqlite::Connection;
+use tauri_plugin_http::reqwest::{Client, Error};
 use uuid::Uuid;
 
 pub trait SyncWriter {

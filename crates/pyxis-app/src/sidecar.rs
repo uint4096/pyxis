@@ -5,7 +5,10 @@ use tauri_plugin_shell::ShellExt;
 pub fn start_sync_worker(app: &App, window: WebviewWindow) {
     match app.shell().sidecar("pyxis-sync") {
         Ok(sidecar_command) => {
-            match sidecar_command.args(["--pid", &std::process::id().to_string()]).spawn() {
+            match sidecar_command
+                .args(["--pid", &std::process::id().to_string()])
+                .spawn()
+            {
                 Ok((mut rx, _child)) => {
                     tauri::async_runtime::spawn(async move {
                         // read events such as stdout

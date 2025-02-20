@@ -7,8 +7,8 @@ use pyxis_shared::{
     },
     payload::DocumentWritePayload,
 };
-use tauri_plugin_http::reqwest::{Client, Error};
 use rusqlite::Connection;
+use tauri_plugin_http::reqwest::{Client, Error};
 use uuid::Uuid;
 
 use super::sync_writer::SyncWriter;

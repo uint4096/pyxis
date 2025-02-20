@@ -1,5 +1,5 @@
 import { styled } from "@linaria/react";
-import { useCallback, useDebugValue, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { TextInput, Modal } from "../../../components";
 import { toast, HTTPError } from "../../../utils";
