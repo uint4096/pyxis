@@ -9,8 +9,6 @@ use uuid::Uuid;
 use super::user_repository::UserWithoutPassword;
 use serde_with::{chrono::TimeDelta, serde_as, DurationSeconds};
 
-static TABLE_NAME: &str = "tokens";
-
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Claims {
     pub user: UserWithoutPassword,
@@ -35,6 +33,10 @@ pub struct TokenRepository {
 impl TokenRepository {
     pub fn new(client: Arc<DynamoDB::Client>) -> Self {
         Self { client }
+    }
+
+    fn get_table_name() -> String {
+        env::var("TOKENS_TABLE").unwrap()
     }
 
     pub async fn create(&self, user: UserWithoutPassword) -> Result<UserToken, Box<dyn Error>> {
@@ -75,7 +77,7 @@ impl TokenRepository {
 
         self.client
             .put_item()
-            .table_name(TABLE_NAME)
+            .table_name(TokenRepository::get_table_name())
             .item("user_id", user_id_av)
             .item("device_id", device_id_av)
             .item("user_token", token_av)
@@ -89,7 +91,7 @@ impl TokenRepository {
     pub async fn delete(&self, user_id: &Uuid, device_id: &Uuid) -> Result<(), Box<dyn Error>> {
         self.client
             .delete_item()
-            .table_name(TABLE_NAME)
+            .table_name(TokenRepository::get_table_name())
             .key("user_id", AttributeValue::S(user_id.to_string()))
             .key("device_id", AttributeValue::S(device_id.to_string()))
             .send()

@@ -2,10 +2,8 @@ use aws_sdk_dynamodb::{self as DynamoDB, types::AttributeValue};
 use pwhash::bcrypt;
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
-use std::{collections::HashMap, error::Error, str::FromStr, sync::Arc};
+use std::{collections::HashMap, env, error::Error, str::FromStr, sync::Arc};
 use uuid::Uuid;
-
-static TABLE_NAME: &str = "users";
 
 #[serde_as]
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
@@ -65,6 +63,10 @@ impl UserRepository {
         Self { client }
     }
 
+    fn get_table_name() -> String {
+        env::var("USERS_TABLE").unwrap()
+    }
+
     pub async fn create(
         &self,
         user: UserWithoutPassword,
@@ -79,7 +81,7 @@ impl UserRepository {
 
         self.client
             .put_item()
-            .table_name(TABLE_NAME)
+            .table_name(UserRepository::get_table_name())
             .item("user_id", user_id_av)
             .item("device_ids", device_id_av)
             .item("username", username_av)
@@ -107,7 +109,7 @@ impl UserRepository {
 
         self.client
             .update_item()
-            .table_name(TABLE_NAME)
+            .table_name(UserRepository::get_table_name())
             .key("user_id", user_id_av.clone())
             .key("username", username_av)
             .update_expression("SET #device_ids = :device_ids")
@@ -122,7 +124,7 @@ impl UserRepository {
     pub async fn delete(&self, user_id: &Uuid) -> Result<(), Box<dyn Error>> {
         self.client
             .delete_item()
-            .table_name(TABLE_NAME)
+            .table_name(UserRepository::get_table_name())
             .key("user_id", AttributeValue::S(user_id.to_string()))
             .send()
             .await?;
@@ -134,7 +136,7 @@ impl UserRepository {
         let user_iter = self
             .client
             .query()
-            .table_name(TABLE_NAME)
+            .table_name(UserRepository::get_table_name())
             .index_name("username-gsi")
             .key_condition_expression("#username=:username")
             .expression_attribute_names("#username", "username")
@@ -156,7 +158,7 @@ impl UserRepository {
         let user_iter = self
             .client
             .query()
-            .table_name(TABLE_NAME)
+            .table_name(UserRepository::get_table_name())
             .index_name("username-gsi")
             .key_condition_expression("#username=:username")
             .expression_attribute_names("#username", "username")

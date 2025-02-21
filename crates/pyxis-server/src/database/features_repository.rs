@@ -1,9 +1,7 @@
-use std::{collections::HashMap, error::Error, sync::Arc};
+use std::{collections::HashMap, env, error::Error, sync::Arc};
 
 use aws_sdk_dynamodb::{self as DynamoDB, types::AttributeValue};
 use serde::{Deserialize, Serialize};
-
-static TABLE_NAME: &str = "user_features";
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Feature {
@@ -49,6 +47,10 @@ impl FeaturesRepository {
         Self { client }
     }
 
+    fn get_table_name() -> String {
+        env::var("USER_FEATURES_TABLE").unwrap()
+    }
+
     pub async fn upsert(&self, features: &Feature) -> Result<(), Box<dyn Error + Send + Sync>> {
         let Feature { user_id, features } = features;
 
@@ -57,7 +59,7 @@ impl FeaturesRepository {
 
         self.client
             .update_item()
-            .table_name(TABLE_NAME)
+            .table_name(FeaturesRepository::get_table_name())
             .key("user_id", user_id_av.clone())
             .update_expression("SET #features = :features")
             .expression_attribute_names("#features", "features")
@@ -76,7 +78,7 @@ impl FeaturesRepository {
         let feature = self
             .client
             .get_item()
-            .table_name(TABLE_NAME)
+            .table_name(FeaturesRepository::get_table_name())
             .key("user_id", AttributeValue::S(user_id))
             .send()
             .await?;
