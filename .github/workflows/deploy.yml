@@ -42,5 +42,13 @@ jobs:
       with:
         context: .
         push: true
-        tags: europe-west2-docker.pkg.dev/${{ vars.GCP_PROJECT }}/pyxis/server:latest
+        tags: |
+          europe-west2-docker.pkg.dev/${{ vars.GCP_PROJECT }}/pyxis/server:latest,
+          europe-west2-docker.pkg.dev/${{ vars.GCP_PROJECT }}/pyxis/server:${{ github.sha }}
         target: prod
+
+    - id: deploy
+      uses: google-github-actions/deploy-cloudrun@v2
+      with:
+        service: pyxis
+        image:  europe-west2-docker.pkg.dev/${{ vars.GCP_PROJECT }}/pyxis/server:${{ github.sha }}
