@@ -6,19 +6,23 @@ on:
       - ci
 
 permissions:
+  contents: 'read'
   id-token: write
 
 jobs:
   Get_OIDC_ID_token:
     runs-on: ubuntu-latest
     steps:
+    - uses: 'actions/checkout@v4'
+
     - id: 'auth'
       name: 'Authenticate to GCP'
-      uses: 'google-github-actions/auth@v4'
+      uses: 'google-github-actions/auth@v2'
       with:
           create_credentials_file: 'true'
           workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
     - id: 'gcloud'
       name: 'gcloud'
       run: |-
