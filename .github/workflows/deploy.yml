@@ -59,3 +59,58 @@ jobs:
           image:  europe-west2-docker.pkg.dev/${{ vars.GCP_PROJECT }}/pyxis/server:${{ github.sha }}
           env_vars_file: .env
           region: europe-west2
+
+  Build_App:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: setup-pnpm
+        name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - id: setup-rust-toolchain
+        name: Setup Rust Toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.83.0
+
+      - id: setup-env-vars
+        name: Setup Environment Variables
+        run: pnpm setup:prod
+    
+      - id: install-cargo-workspaces
+        name: Install Cargo Workspace
+        uses: baptiste0928/cargo-install@v3
+        with:
+          crate: cargo-workspaces
+
+      - id: update-crate-versions
+        name: Update Crate Versions
+        run: cargo workspaces version patch -y --no-git-commit
+
+      - id: update-package-version
+        name: Update Package Version
+        run: pnpm version patch --no-git-tag-version
+
+      - id: build-app
+        name: Build App
+        run: pnpm build:app
+
+      - id: upload-artifact
+        name: Upload Release Artefact
+        uses: Roang-zero1/github-upload-release-artifacts-action@v2
+        with:
+          args: "./target/release/bundle/deb/pyxis_$(cargo pkgid -p pyxis-app | cut -d '#' -f2)_amd64.deb"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: commit-and-push
+        name: Commit and Push
+        uses: EndBug/add-and-commit@v9
+        with:
+          default_author: github_actions
+          message: 'chore: bump package versions | [skip ci]'
+          push: true

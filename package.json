@@ -1,6 +1,6 @@
 {
   "name": "pyxis",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -13,12 +13,12 @@
     "build:app": "pnpm build:sync && pnpm tauri build",
     "setup:dev": "ENV=dev cp .env.dev .env",
     "setup:prod": "ENV=dev cp .env.prod .env",
-  	"tauri": "tauri"
+    "tauri": "tauri"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-		"@tauri-apps/cli": "^2.1.0"
-	}
+    "@tauri-apps/cli": "^2.1.0"
+  }
 }
