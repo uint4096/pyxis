@@ -87,7 +87,7 @@ fn main() {
                 .expect("Failed to get main window!");
             // Doing this in tauri config does not allow super + arrow keys to work
             let _ = window.maximize();
-            window.open_devtools();
+            // window.open_devtools();
             start_sync_worker(app, window);
             Ok(())
         })

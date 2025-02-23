@@ -65,6 +65,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - id: install-deps
+        name: Install Dependencies
+        run: sudo apt-get update && sudo apt-get install libwebkit2gtk-4.1 libsoup-3.0-dev javascriptcoregtk-4.1 -y
+
       - id: setup-pnpm
         name: Install pnpm
         uses: pnpm/action-setup@v4
