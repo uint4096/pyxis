@@ -99,6 +99,10 @@ jobs:
         name: Update Package Version
         run: pnpm version patch --no-git-tag-version
 
+      - id: install-packages
+        name: Install Packages
+        run: pnpm install --frozen-lockfile
+
       - id: build-app
         name: Build App
         run: pnpm build:app
