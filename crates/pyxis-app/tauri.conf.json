@@ -10,7 +10,7 @@
     "active": true,
     "category": "DeveloperTool",
     "copyright": "",
-    "targets": "all",
+    "targets": ["deb", "rpm"],
     "externalBin": [
       "../../target/release/pyxis-sync"
     ],
