@@ -107,11 +107,16 @@ jobs:
         name: Build App
         run: pnpm build:app
 
+      - id: get_version
+        name: Get version
+        run: |
+          VERSION=$(cargo pkgid -p pyxis-app | cut -d '#' -f2)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
       - id: upload-artifact
         name: Upload Release Artefact
-        uses: Roang-zero1/github-upload-release-artifacts-action@v2
-        with:
-          args: "./target/release/bundle/deb/pyxis_$(cargo pkgid -p pyxis-app | cut -d '#' -f2)_amd64.deb"
+        run: gh release create v${{ env.VERSION }} ./target/release/bundle/deb/pyxis_${{ env.VERSION }}_amd64.deb
+        shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
