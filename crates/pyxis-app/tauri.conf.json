@@ -39,7 +39,6 @@
     }
   },
   "productName": "pyxis",
-  "version": "0.1.0",
   "identifier": "dev.pyxis.app",
   "plugins": {},
   "app": {
