@@ -59,6 +59,12 @@ jobs:
           image:  ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT }}/pyxis/server:${{ github.sha }}
           env_vars_file: .env
           region: ${{ vars.GCP_REGION }}
+          secrets: |-
+            AUTH_SECRET=AUTH_SECRET:latest
+            AWS_ACCESS_KEY_ID=AWS_ACCESS_KEY_ID:latest
+            AWS_REGION=AWS_REGION:latest
+            AWS_SECRET_ACCESS_KEY=AWS_SECRET_ACCESS_KEY:latest
+            SUBSCRIPTION_REQUEST_SNS=SUBSCRIPTION_REQUEST_SNS:latest
 
   Build_App:
     runs-on: ubuntu-latest
