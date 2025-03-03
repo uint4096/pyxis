@@ -67,7 +67,7 @@ jobs:
             SUBSCRIPTION_REQUEST_SNS=SUBSCRIPTION_REQUEST_SNS:latest
 
   Build_App:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
