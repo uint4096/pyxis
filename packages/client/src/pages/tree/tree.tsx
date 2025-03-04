@@ -86,13 +86,12 @@ const TreeContainer = styled.div`
   width: 15vw;
   padding: 2vh 0.5vw;
   height: 100%;
-  box-shadow: 2px 0px 2px #303030;
-  background-color: #1a1a1a;
+  background-color: #040404;
   visibility: ${(props) => (props.hidden ? "hidden" : "visible")};
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   z-index: 999;
-  border-right: 1px solid gray;
+  border-right: 0.5px dotted gray;
   position: relative;
 `;

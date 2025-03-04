@@ -12,11 +12,11 @@ export const Options = ({ children }: OptionsProps) => {
 const OptionsWrapper = styled.div`
   height: 100%;
   display: flex;
-  background-color: #1a1a1a;
+  background-color: #040404;
   flex-direction: column;
   justify-content: flex-end;
   gap: 2em;
-  border-right: 1px solid gray;
+  border-right: 0.5px dotted gray;
   padding: 2vh 0.5vw;
   color: #e8e8e8;
   z-index: 1000;

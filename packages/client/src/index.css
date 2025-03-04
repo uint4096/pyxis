@@ -82,8 +82,8 @@ button:focus-visible {
   gap: 2em;
   left: 0;
   right: 0;
-  background-color: #0f0f0f;
-  box-shadow: rgba(158, 158, 158, 0.35) 0px 5px 10px;
+  background-color: #040404;
+  border-bottom: 0.5px dotted gray;
   padding: 0 10px;
 }
 
