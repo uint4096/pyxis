@@ -3,6 +3,7 @@ import { styled } from "@linaria/react";
 import { HiPlus } from "react-icons/hi";
 import { MdKeyboardArrowDown, MdKeyboardArrowRight } from "react-icons/md";
 import { useCallback, useRef } from "react";
+import { CiFolderOn } from "react-icons/ci";
 
 import { getOverflowMenu, type MenuOption } from "../../../components";
 import type { Document } from "../../../types";
@@ -105,14 +106,23 @@ export const DirContainer = ({
         <NameContainer
           className={overflowPopup === dir.uid ? backgroundHover : ""}
         >
-          <Collapsable onClick={() => setCollapsed((c) => !c)}>
-            {collapsed ? (
-              <MdKeyboardArrowRight className={verticallyMiddle} />
-            ) : (
-              <MdKeyboardArrowDown className={verticallyMiddle} />
+          <Flexbox>
+            <Collapsable onClick={() => setCollapsed((c) => !c)}>
+              {collapsed ? (
+                <MdKeyboardArrowRight className={verticallyMiddle} />
+              ) : (
+                <MdKeyboardArrowDown className={verticallyMiddle} />
+              )}
+            </Collapsable>
+            {!isWorkspace && (
+              <NameWithIcon>
+                <CiFolderOn size={15} className={verticallyMiddle} />
+                <Name>{dir.name}</Name>
+              </NameWithIcon>
             )}
-          </Collapsable>
-          <Name>{dir.name}</Name>
+            {isWorkspace && <Name>{dir.name}</Name>}
+          </Flexbox>
+
           <OptionsContainer
             className={overflowPopup === dir.uid ? flexDisplay : noDisplay}
           >
@@ -136,6 +146,17 @@ export const DirContainer = ({
   );
 };
 
+const Flexbox = styled.div`
+  display: flex;
+  gap: 0.5em;
+`;
+
+const NameWithIcon = styled.div`
+  display: flex;
+  gap: 0.3em;
+  align-items: center;
+`;
+
 const verticallyMiddle = css`
   vertical-align: middle;
   border-radius: 50%;
@@ -145,7 +166,6 @@ const verticallyMiddle = css`
 `;
 
 const Name = styled.span`
-  flex-grow: 1;
   color: #e8e8e8;
   opacity: 0.7;
 `;

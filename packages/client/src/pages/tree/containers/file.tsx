@@ -6,6 +6,7 @@ import type { File } from "../../../ffi";
 import { getOverflowMenu, type MenuOption } from "../../../components";
 import { noop, toast } from "../../../utils";
 import { useOutsideEvent } from "../../../hooks";
+import { CiFileOn } from "react-icons/ci";
 import {
   backgroundHover,
   flexDisplay,
@@ -14,6 +15,7 @@ import {
   OptionsContainer,
 } from "./styles";
 import type { Document } from "../../../types";
+import { css } from "@linaria/core";
 
 type FileContainerProps = {
   file: Partial<File>;
@@ -77,7 +79,10 @@ export const FileContainer = ({
           : ""
       }
     >
-      <FileName>{file.title}</FileName>
+      <NameWithIcon>
+        <CiFileOn className={verticallyMiddle} size={15} />
+        <FileName>{file.title}</FileName>
+      </NameWithIcon>
       <OptionsContainer
         className={overflowPopup === file.uid ? flexDisplay : noDisplay}
       >
@@ -95,7 +100,16 @@ export const FileContainer = ({
   );
 };
 
-const FileName = styled.div`
+const verticallyMiddle = css`
+  align-self: center;
+`;
+
+const NameWithIcon = styled.div`
+  display: flex;
+  gap: 0.2em;
   padding: 0.2vh 0.3vw;
+`;
+
+const FileName = styled.div`
   color: #e8e8e8;
 `;
