@@ -85,7 +85,7 @@ export const AccountForm = ({ onDone }: { onDone: () => void }) => {
 
   return (
     <>
-      <Modal onClose={onDone} easyClose={false}>
+      <Modal onClose={onDone} easyClose={false} noOverlay>
         <FormWrapper>
           <FormContainer>
             <TextInput

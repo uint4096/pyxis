@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start:auth": "cargo run -p pyxis-auth",
+    "start:server": "cargo run -p pyxis-server",
     "start:sync": "cargo run -p pyxis_sync",
     "build:sync": "cargo build -p pyxis-sync --release",
     "build:client": "pnpm --filter 'client' build",
@@ -12,7 +12,7 @@
     "start:app": "pnpm build:sync && pnpm tauri dev",
     "build:app": "pnpm build:sync && pnpm tauri build",
     "setup:dev": "ENV=dev cp .env.dev .env",
-    "setup:prod": "ENV=dev cp .env.prod .env",
+    "setup:prod": "ENV=prod cp .env.prod .env",
     "tauri": "tauri"
   },
   "keywords": [],

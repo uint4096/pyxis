@@ -14,9 +14,9 @@ const OptionElement = styled.span`
   display: flex;
   align-items: flex-end;
   padding: 0.1vh 0.1vw;
-  color: #fff000;
+  color: #bdbec2;
 
   &:hover {
-    color: #c8a6ff;
+    color: #8395dc;
   }
 `;

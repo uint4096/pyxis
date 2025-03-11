@@ -107,7 +107,7 @@ const verticallyMiddle = css`
 const NameWithIcon = styled.div`
   display: flex;
   gap: 0.2em;
-  padding: 0.2vh 0.3vw;
+  padding: 0.2vh 0.5vw;
 `;
 
 const FileName = styled.div`

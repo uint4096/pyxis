@@ -1,14 +1,21 @@
 import { styled } from "@linaria/react";
 import ReactModal from "react-modal";
 import { IoCloseSharp } from "react-icons/io5";
+import { CSSProperties } from "react";
 
 export type ModalProps = {
   children: React.ReactNode;
   onClose?: () => void;
   easyClose: boolean;
+  noOverlay?: boolean;
 };
 
-export const Modal = ({ children, onClose, easyClose }: ModalProps) => {
+export const Modal = ({
+  children,
+  onClose,
+  easyClose,
+  noOverlay,
+}: ModalProps) => {
   const customStyles = {
     content: {
       margin: "auto",
@@ -18,9 +25,12 @@ export const Modal = ({ children, onClose, easyClose }: ModalProps) => {
       maxHeight: "fit-content",
       borderRadius: "5px",
     },
-    overlay: {
-      backgroundColor: "rgba(32, 32, 32, 0.4)",
-    },
+    overlay: (noOverlay
+      ? { position: "static" }
+      : {
+          backgroundColor: "rgba(32, 32, 32, 0.4)",
+          zIndex: "1001",
+        }) as CSSProperties,
   };
 
   return (
