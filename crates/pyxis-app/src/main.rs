@@ -49,6 +49,7 @@ fn main() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_prevent_default::init())
         .manage(database)
         .manage(sync_db)
         .invoke_handler(tauri::generate_handler![
