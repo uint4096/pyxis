@@ -3747,7 +3747,7 @@ dependencies = [
 
 [[package]]
 name = "pyxis-app"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "chrono",
  "dirs",
@@ -3770,7 +3770,7 @@ dependencies = [
 
 [[package]]
 name = "pyxis-server"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "aws-config",
  "aws-sdk-dynamodb",
@@ -3792,7 +3792,7 @@ dependencies = [
 
 [[package]]
 name = "pyxis-sync"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "aws-config",
  "aws-sdk-dynamodb",
@@ -3810,7 +3810,7 @@ dependencies = [
 
 [[package]]
 name = "pyxis_shared"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "aws-config",
  "aws-sdk-dynamodb",
